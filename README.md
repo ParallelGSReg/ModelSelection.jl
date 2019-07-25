@@ -1,4 +1,4 @@
-# ModelSelection
+# ModelSelection.jl
 ## Modules
 - [Preprocessing](docs/Preprocessing.md)
 
