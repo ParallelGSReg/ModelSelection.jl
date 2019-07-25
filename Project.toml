@@ -1,7 +1,7 @@
 name = "ModelSelection"
-uuid = "5b3bc22e-96cb-5e8b-bdf1-153217652f04"
+uuid = "51b78214-913b-40cf-9250-c64eb33811f7"
 authors = ["Demian Panigo <panigo@gmail.com>", "Adán Mauri Ungaro <adan.mauri@gmail.com>", "Nicolás Monzón <nicomzn4@gmail.com>", "Valentin Mari <valentinmari@hotmail.com>"]
-version = "2.0.0"
+version = "1.0.0"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
