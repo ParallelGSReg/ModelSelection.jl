@@ -56,11 +56,11 @@ julia> Preprocessing.input("y x1 x2 x3", (data, header))
 * **`method`:** this option can be used to alternatively run estimations with Float32 of Float64 datatype. The default is `FAST` (Float32), to speed-up calculations. The available options are:
     - Float32: `:FAST`, `:fast`, `"FAST"`, `"fast"`
     - Float64: `:PRECISE`, `:precise`, `"PRECISE"`, `"precise"`
-* **`time`:** determines which variable will be used to date (and pre-sort) observations. Time variable must be included as a symbol or string (i.e. `time=:x1` or `time="x1"`). Neither, gaps nor missing observations should be allowed in this variable. Calculations will be made assuming no gaps. By using this option, additional residuals tests are enabled.
 * **`panel`:** defines which variable will be used as group/cross-section identifier (i.e. `panel=:x1`). Valid panel variables must be numeric without missing values and with the same value for each group observation.
+* **`time`:** determines which variable will be used to date (and pre-sort) observations. Time variable must be included as a symbol or string (i.e. `time=:x1` or `time="x1"`). Neither, gaps nor missing observations should be allowed in this variable. Calculations will be made assuming no gaps. By using this option, additional residuals tests are enabled.
+* **`seasonaladjustment`:** dictionary defines which kind of seasonality should be removed (i.e. `:panel=1`, `:panel=2`, `:panel=12`.
 * **`removeoutliers`:** defines if will removes extreme observations because of input error or unexpected events. The default is `false`.
 * **`removemissings`:** defines if will excluded observations/rows with missing or null values in any selected variable. The default is `false`.
-* **`seasonaladjustment`:** dictionary defines which kind of seasonality should be removed (i.e. `:panel=1`, `:panel=2`, `:panel=12`. The default is `false`.
 
 ## Full-syntax example
 
