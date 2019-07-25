@@ -1,10 +1,10 @@
 #TODO: Refactor as summary
 
-function csv(data::ModelSelection.GSRegData, filename::String; resultnum::Int64=1)
+function csv(data::ModelSelection.ModelSelectionData, filename::String; resultnum::Int64=1)
     csv(data, filename=filename, resultnum=resultnum)
 end
 
-function csv(data::ModelSelection.GSRegData; filename::Union{Nothing, String}=nothing, resultnum::Int64=1)
+function csv(data::ModelSelection.ModelSelectionData; filename::Union{Nothing, String}=nothing, resultnum::Int64=1)
     addextras(data, :csv, filename, nothing)
     if size(data.results, 1) > 0
         return csv(data, data.results[resultnum], filename=filename)
@@ -12,11 +12,11 @@ function csv(data::ModelSelection.GSRegData; filename::Union{Nothing, String}=no
     return ""
 end
 
-function csv(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, filename::String)
+function csv(data::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, filename::String)
     return csv(data, result, filename=filename)
 end
 
-function csv(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult; filename::Union{Nothing, String}=nothing)
+function csv(data::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult; filename::Union{Nothing, String}=nothing)
     header = []
     for dataname in result.datanames
         push!(header, String(dataname))
@@ -38,11 +38,11 @@ function csv(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetReg
 end
 
 
-function csv(data::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult, filename::String)
+function csv(data::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult, filename::String)
     return csv(data, result, filename=filename)
 end
 
-function csv(data::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult; filename::Union{Nothing, String}=nothing)
+function csv(data::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult; filename::Union{Nothing, String}=nothing)
     header = []
     for dataname in result.datanames
         push!(header, String(dataname))

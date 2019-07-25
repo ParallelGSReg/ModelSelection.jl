@@ -1,4 +1,4 @@
-mutable struct CrossValidationResult <: ModelSelection.GSRegResult
+mutable struct CrossValidationResult <: ModelSelection.ModelSelectionResult
 
     k::Int64
     s::Float64

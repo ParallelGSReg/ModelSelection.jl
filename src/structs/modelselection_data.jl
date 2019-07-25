@@ -1,4 +1,4 @@
-mutable struct GSRegData
+mutable struct ModelSelectionData
     equation::Array{Symbol}
     depvar::Symbol
     expvars::Array{Symbol}
@@ -17,7 +17,7 @@ mutable struct GSRegData
     previous_data::Array{Any}
     results::Array{Any}
 
-    function GSRegData(
+    function ModelSelectionData(
             equation,
             depvar::Symbol,
             expvars::Array{Symbol},

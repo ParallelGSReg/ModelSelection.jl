@@ -29,8 +29,8 @@ function split_database(database::Array{Int,1}, k::Int)
 end
 
 function kfoldcrossvalidation!(
-    previousresult::ModelSelection.GSRegData,
-    data::ModelSelection.GSRegData,
+    previousresult::ModelSelection.ModelSelectionData,
+    data::ModelSelection.ModelSelectionData,
     k::Int,
     s::Float64)
     kfoldcrossvalidation(previousresult, data, k, s)
@@ -38,8 +38,8 @@ end
 
 
 function kfoldcrossvalidation(
-    previousresult::ModelSelection.GSRegData,
-    data::ModelSelection.GSRegData,
+    previousresult::ModelSelection.ModelSelectionData,
+    data::ModelSelection.ModelSelectionData,
     k::Int,
     s::Float64)
 
@@ -122,7 +122,7 @@ function kfoldcrossvalidation(
     return previousresult
 end
 
-function to_string(data::ModelSelection.GSRegData, result::CrossValidationResult)
+function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
     out = ""

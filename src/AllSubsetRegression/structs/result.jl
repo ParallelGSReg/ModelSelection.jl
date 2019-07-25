@@ -1,4 +1,4 @@
-mutable struct AllSubsetRegressionResult <: ModelSelection.GSRegResult
+mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
 
     datanames
     modelavg_datanames

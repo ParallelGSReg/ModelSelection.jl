@@ -1,5 +1,5 @@
 function featureextraction(
-    data::ModelSelection.GSRegData;
+    data::ModelSelection.ModelSelectionData;
     fe_sqr::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_log::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_inv::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
@@ -20,7 +20,7 @@ function featureextraction(
 end
 
 function featureextraction!(
-    data::ModelSelection.GSRegData;
+    data::ModelSelection.ModelSelectionData;
     fe_sqr::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_log::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_inv::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
@@ -45,7 +45,7 @@ function featureextraction!(
 end
 
 function execute!(
-    data::ModelSelection.GSRegData;
+    data::ModelSelection.ModelSelectionData;
     fe_sqr::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_log::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,
     fe_inv::Union{Nothing, String, Symbol, Array{String}, Array{Symbol}}=nothing,

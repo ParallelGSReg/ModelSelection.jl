@@ -122,10 +122,10 @@ function convert_data(data)
 end
 
 """
-Copy GSRegData
+Copy ModelSelectionData
 """
-function copy_data(data::GSRegData)
-    new_data = GSRegData(
+function copy_data(data::ModelSelectionData)
+    new_data = ModelSelectionData(
         copy(data.equation),
         data.depvar,
         copy(data.expvars),
@@ -150,9 +150,9 @@ function copy_data(data::GSRegData)
 end
 
 """
-Copy GSRegData to another data
+Copy ModelSelectionData to another data
 """
-function copy_data!(from_data::GSRegData, to_data::GSRegData)
+function copy_data!(from_data::ModelSelectionData, to_data::ModelSelectionData)
     to_data.equation = from_data.equation
     to_data.depvar = from_data.depvar
     to_data.expvars = from_data.expvars

@@ -1,8 +1,8 @@
-function summary(data::ModelSelection.GSRegData, filename::String; resultnum::Union{Nothing, Int}=nothing)
+function summary(data::ModelSelection.ModelSelectionData, filename::String; resultnum::Union{Nothing, Int}=nothing)
     return summary(data, filename=filename, resultnum=resultnum)
 end
 
-function summary(data::ModelSelection.GSRegData; filename::Union{Nothing, String}=nothing, resultnum::Union{Nothing, Int}=nothing)
+function summary(data::ModelSelection.ModelSelectionData; filename::Union{Nothing, String}=nothing, resultnum::Union{Nothing, Int}=nothing)
     addextras(data, :summary, filename, nothing)
     if size(data.results, 1) > 0
         if resultnum != nothing
@@ -19,21 +19,21 @@ function summary(data::ModelSelection.GSRegData; filename::Union{Nothing, String
     return ""
 end
 
-function summary(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, filename::String)
+function summary(data::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, filename::String)
     return summary(data, result, filename=filename)
 end
 
-function summary(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult; filename::Union{Nothing, String}=nothing)
+function summary(data::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult; filename::Union{Nothing, String}=nothing)
     str = ModelSelection.AllSubsetRegression.to_string(data, result)
     writefile(str, filename)
     return str
 end
 
-function summary(data::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult, filename::String)
+function summary(data::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult, filename::String)
     return summary(data, result, filename=filename)
 end
 
-function summary(data::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult; filename::Union{Nothing, String}=nothing)
+function summary(data::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult; filename::Union{Nothing, String}=nothing)
     str = ModelSelection.CrossValidation.to_string(data, result)
     writefile(str, filename)
     return str

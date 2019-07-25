@@ -209,7 +209,7 @@ function input(
         end
     end
 
-    gsreg_data, method, seasonaladjustment, removeoutliers = execute(
+    modelselection_data, method, seasonaladjustment, removeoutliers = execute(
         equation,
         data,
         datanames,
@@ -222,9 +222,9 @@ function input(
         removemissings=removemissings
     )
 
-    gsreg_data = addextras(gsreg_data, method, seasonaladjustment, removeoutliers)
+    modelselection_data = addextras(modelselection_data, method, seasonaladjustment, removeoutliers)
 
-    return gsreg_data
+    return modelselection_data
 end
 
 function execute(
@@ -306,7 +306,7 @@ function execute(
 
     nobs = size(depvar_data, 1)
 
-    gsreg_data = ModelSelection.GSRegData(
+    modelselection_data = ModelSelection.ModelSelectionData(
         equation,
         depvar,
         expvars,
@@ -322,5 +322,5 @@ function execute(
         nobs
     )
 
-    return gsreg_data, method, seasonaladjustment, removeoutliers
+    return modelselection_data, method, seasonaladjustment, removeoutliers
 end

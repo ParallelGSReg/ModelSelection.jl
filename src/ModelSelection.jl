@@ -2,8 +2,8 @@ module ModelSelection
 
     using DataFrames
 
-    include("structs/gsreg_data.jl")
-    include("datatypes/gsreg_result.jl")
+    include("structs/modelselection_data.jl")
+    include("datatypes/modelselection_result.jl")
     include("const.jl")
     include("strings.jl")
     include("utils.jl")
@@ -23,7 +23,7 @@ module ModelSelection
     using ..CrossValidation
     using ..Output
 
-    export GSRegData, GSRegResult, gsr
+    export ModelSelectionData, ModelSelectionResult, gsr
 
     export Preprocessing, FeatureExtraction, PreliminarySelection, Output, CrossValidation
 

@@ -1,10 +1,10 @@
 # TODO: Merge _lasso and lasso
-function _lasso(data::ModelSelection.GSRegData)
+function _lasso(data::ModelSelection.ModelSelectionData)
     return _lasso!(data)
 end
 
 # TODO: Merge _lasso! and lasso!
-function _lasso!(data::ModelSelection.GSRegData)
+function _lasso!(data::ModelSelection.ModelSelectionData)
     res = lasso!(data)
     res[1].extras[:lasso] = Dict()
     res[1].extras[:lasso][:betas] = res[2]
@@ -12,11 +12,11 @@ function _lasso!(data::ModelSelection.GSRegData)
     return res[1]
 end
 
-function lasso(data::ModelSelection.GSRegData)
+function lasso(data::ModelSelection.ModelSelectionData)
     lasso!(ModelSelection.copy_data(data))
 end
 
-function lasso!(data::ModelSelection.GSRegData; addextrasflag=true)
+function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag=true)
     betas, lambda = lassoselection(data)
 
     if betas == nothing

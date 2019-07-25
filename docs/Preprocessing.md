@@ -84,10 +84,10 @@ julia> Preprocessing.input(
     )
 ```
 
-## Response: GSRegData
+## Response: ModelSelectionData
 
 ```julia
-# The response is a GSRegData datatype
+# The response is a ModelSelectionData datatype
 julia> response.
 datatype       equation        intercept       panel           time
 depvar         expvars         nobs            removemissings
@@ -107,4 +107,4 @@ results::Array       # for future step proposes.
 ```
 
 ## Credits
-Preprocessing module is a sub-module of ModelSelection, which perform regression analysis, was written primarily by [Demian Panigo](https://github.com/dpanigo/), [Adán Mauri Ungaro](https://github.com/adanmauri/), [Nicolás Monzón](https://github.com/nicomzn/) and [Valentín Mari](https://github.com/vmari/). The ModelSelection.jl module was inpired by GSReg for Stata, written by Pablo Gluzmann and [Demian Panigo](https://github.com/dpanigo/).
+Preprocessing module is a sub-module of ModelSelection, was written primarily by [Demian Panigo](https://github.com/dpanigo/), [Adán Mauri Ungaro](https://github.com/adanmauri/), [Nicolás Monzón](https://github.com/nicomzn) and [Valentín Mari](https://github.com/vmari/). The ModelSelection.jl module was inpired by GSReg for Stata, written by Pablo Gluzmann and [Demian Panigo](https://github.com/dpanigo/).

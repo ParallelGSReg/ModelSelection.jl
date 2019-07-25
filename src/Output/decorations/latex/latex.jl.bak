@@ -1,18 +1,18 @@
 
 """
-#function latex!(data::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, path::AbstractString)
+#function latex!(data::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, path::AbstractString)
 #    dict = ModelSelection.AllSubsetRegression.to_latex_dict(data, result)
 #    create_figures(result, path)
 #    return :allsubsetregression => dict
 #end
 
-function latex(data::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult, path::AbstractString)
+function latex(data::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult, path::AbstractString)
     dict = ModelSelection.CrossValidation.to_latex_dict(data, result)
     create_figures(result, path)
     return :kfoldcrossvalidation => dict
 end
 
-function latex(data::ModelSelection.GSRegData; path::String=DEFAULT_LATEX_DEST_FOLDER)
+function latex(data::ModelSelection.ModelSelectionData; path::String=DEFAULT_LATEX_DEST_FOLDER)
     res = Dict()
 
     res[:base] = base(data)
@@ -28,7 +28,7 @@ function latex(data::ModelSelection.GSRegData; path::String=DEFAULT_LATEX_DEST_F
     #renderizar tpl
 end
 
-function base(data::ModelSelection.GSRegData)
+function base(data::ModelSelection.ModelSelectionData)
     dict = Dict()
     equation::Array{Symbol}
     depvar::Symbol

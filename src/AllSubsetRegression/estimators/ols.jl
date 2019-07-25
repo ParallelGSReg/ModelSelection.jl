@@ -1,5 +1,5 @@
 function ols(
-        data::ModelSelection.GSRegData;
+        data::ModelSelection.ModelSelectionData;
         fixedvariables::Union{Nothing, Array}=FIXEDVARIABLES_DEFAULT,
         outsample::Union{Nothing, Int, Array}=OUTSAMPLE_DEFAULT,
         criteria::Array=CRITERIA_DEFAULT,
@@ -22,7 +22,7 @@ function ols(
 end
 
 function ols!(
-    data::ModelSelection.GSRegData;
+    data::ModelSelection.ModelSelectionData;
     fixedvariables::Union{Nothing, Array}=FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing, Int, Array}=OUTSAMPLE_DEFAULT,
     criteria::Array=CRITERIA_DEFAULT,
@@ -41,7 +41,7 @@ function ols!(
     return data
 end
 
-function execute!(data::ModelSelection.GSRegData, result::AllSubsetRegressionResult)
+function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values(data)
     end

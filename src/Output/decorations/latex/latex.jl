@@ -1,7 +1,7 @@
 const TEX_TEMPLATE_FOLDER = joinpath(dirname(@__FILE__), "tpl")
 const DEFAULT_LATEX_DEST_FOLDER = "./LaTeX"
 
-function latex(data::ModelSelection.GSRegData, originaldata::ModelSelection.GSRegData;
+function latex(data::ModelSelection.ModelSelectionData, originaldata::ModelSelection.ModelSelectionData;
      path::Union{Nothing, String}=DEFAULT_LATEX_DEST_FOLDER)
     tempfolder = tempname()
     mkdir(tempfolder)
@@ -48,7 +48,7 @@ function get_col_statistics(data)
     )
 end
 
-function latex!(dict::Dict, data::ModelSelection.GSRegData, originaldata::ModelSelection.GSRegData)
+function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldata::ModelSelection.ModelSelectionData)
     # Preprocessing    
     preprocessing_dict = process_dict(data.extras[Preprocessing.PREPROCESSING_EXTRAKEY])
     preprocessing_dict["equation"] = join(map(x -> "$x", filter(x -> x != :_cons, preprocessing_dict["datanames"])), " ")
@@ -138,7 +138,7 @@ function latex!(dict::Dict, data::ModelSelection.GSRegData, originaldata::ModelS
     return dict
 end
 
-function latex!(dict::Dict, data::ModelSelection.GSRegData, originaldata::ModelSelection.GSRegData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult)
+function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldata::ModelSelection.ModelSelectionData, result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult)
     if ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY in keys(data.extras)
         dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)] = process_dict(data.extras[ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY])
         
@@ -240,7 +240,7 @@ function latex!(dict::Dict, data::ModelSelection.GSRegData, originaldata::ModelS
     return dict
 end
 
-function latex!(dict::Dict, data::ModelSelection.GSRegData, originaldata::ModelSelection.GSRegData, result::ModelSelection.CrossValidation.CrossValidationResult)
+function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldata::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult)
     if ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY in keys(data.extras)
         dict[string(ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY)] = 
         process_dict(data.extras[ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY])

@@ -2,7 +2,7 @@
 """
 to_string
 """
-function to_string(data::ModelSelection.GSRegData, result::AllSubsetRegressionResult)
+function to_string(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
     out = ""
