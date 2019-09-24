@@ -416,8 +416,8 @@ function create_figures(data, destfolder)
     bar(labels, a[:,1], legend = false, color = :blues, orientation = :horizontal, xlabel="Average impact of each variable on the Adj. R2")
     savefig(joinpath(destfolder, "cov_relevance.png"))
 
-    positivegainsvariables = findall(x => x > 0, a[:,1])
-    negativegainsvariables = findall(x => x < 0, a[:,1])
+    positivegainsvariables = findall(x -> x > 0, a[:,1])
+    negativegainsvariables = findall(x -> x < 0, a[:,1])
 
     intelligent_text = Dict()
     intelligent_text["numofpositivegainsvariables"] = size(positivegainsvariables, 1)
