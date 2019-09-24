@@ -115,12 +115,8 @@ function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldat
         
         betas = dict[string(PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY)]["lassobetas"]
         betas_dict = []
-        @show betas
-        @show data.expvars
         for (i, beta) in enumerate(filter(j -> j != 0, betas))
             if( beta != 0)
-                @show beta
-                @show data.expvars[i]
                 push!(betas_dict, Dict("name" => replace(string(data.expvars[i]), "_" => "\\_"), "coef" => @sprintf("%.3f", beta)))
             end
         end
