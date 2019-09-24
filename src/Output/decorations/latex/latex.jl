@@ -15,7 +15,7 @@ function latex(data::ModelSelection.ModelSelectionData, originaldata::ModelSelec
         end
         create_workspace(tempfolder)
         if data.results[1].ttest
-            create_figures(data, tempfolder)
+            dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["intelligent_text"] = create_figures(data, tempfolder)
         end
         render_latex(dict, tempfolder)
         zip_folder(tempfolder, path)
@@ -434,7 +434,5 @@ function create_figures(data, destfolder)
     intelligent_text["worstvar"] = a[end,2]
     intelligent_text["worstvar_gainsinperc"] = a[end,1]
 
-    dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["intelligent_text"] = intelligent_text
-
-
+    intelligent_text
 end
