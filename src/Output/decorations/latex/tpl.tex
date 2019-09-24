@@ -181,7 +181,7 @@ It must be noticed that all predictors are standardized "on-the-fly", in order t
 Unlike other feature selection algorithms (including LASSO), All-subset-regression (ASR) approaches guarantees both in-sample and out-of-sample optimality (i.e. better information criteria results than any other method). However, it has been left aside by econometricians and machine learning practitioners because of computational concerns. Execution times for ASR algorithms in a more-than-20-covariates environement were prohibitive until now. Using existing ASR packages, a simple feature selection problem for 20 covariates usually takes more than 8000 seconds in 
 \href{https://cran.r-project.org/web/packages/MuMIn/MuMIn.pdf}{R}, and more than 500000 seconds in \href{https://ideas.repec.org/c/boc/bocode/s457737.html#download}{Stata}. Moreover, with 25 potential covariates both algorithms are unable to obtain feasible-solutions in standard personal computers.
 
-Fortunately, the \verb ModelSelection.jl package has significantly reduced execution times, running up to 3165 times faster than Stata and 197 times faster than R (see \cite{gsreg2019}). This improvement allows researchers to regain attention on ASR algorithms, looking for better feature selection results. 
+Fortunately, the \verb ModelSelection.jl package has significantly reduced execution times, running up to 3165 times faster than Stata and 197 times faster than R (see \cite{gsreg2019}). This improvement allows researchers to regain attention on ASR algorithms, looking for better feature selection results.
 
 In this Julia package, the best model among $2^{n}-1$ alternatives is selected using a potentially composite ordering variable defined as the equally-weighted average of normalized (to guarantee equal weights) and harmonized (to ensure that higher values always identify better models) user's specified criteria. For in-sample adjustment, available alternatives include: Adjusted R2 (:r2adj, the default), Bayesian information criteria (:bic), Akaike and Corrected Akaike information criteria (:aic and :aicc), Mallows's Cp statistic (:cp), Sum of squared errors (also known as Residual sum of squares, :sse) and the Root mean square error (:rmse). For out-of-sample accuracy, there is available the out-of-sample root mean square error (:rmsout). Users are free to combine in-sample and out-of-sample information criteria. In this report, selected information criteria include ({{criteria}}) as the key variable/s for feature selection.
 
@@ -230,7 +230,7 @@ The general procedure is as follows:
   \item Summarize model strengths using CV scores
 \end{enumerate}
 
-In \verb ModelSelection.jl  the K-fold cross-validation is available for both LASSO pre-selection and ASR final selection. In the latter, for each K-partition $2^{p} - 1$ alternative models are fitted (where p is the number of potential covariates included in the ASR algorithm) and the candidate ‘optimal’ model is selected using the out-of-sample Root Mean Square Error (obtained from the test set). Therefore, K-candidate models are retained (one for each K-partition). The final "best" model is obtained using either across-model averages or medians. 
+In \verb ModelSelection.jl  the K-fold cross-validation is available for both LASSO pre-selection and ASR final selection. In the latter, for each K-partition $2^{p} - 1$ alternative models are fitted (where p is the number of potential covariates included in the ASR algorithm) and the candidate ‘optimal’ model is selected using the out-of-sample Root Mean Square Error (obtained from the test set). Therefore, K-candidate models are retained (one for each K-partition). The final "best" model is obtained using either across-model averages or medians.
 
 This cross-validation specific alternative has been denominated as \textit{Averaging Cross validation (ACV)} by Jung and Hu (see, \cite{jung2015}). The authors found that:
 
@@ -343,7 +343,7 @@ Main descriptive statistics for All-subset-regression potential covariates are p
     Variable & Description & Obs. & Mean & Sd & Max & Min & \% Miss \\
     \hline
     \hline
-    {{/name}}{{#name}}{{name}} &  & {{nobs}} & {{mean}} & {{std}} & {{max}} & {{min}} & {{miss}}\% \\
+    {{/name}}{{#name}}{{name}} &  & {{nobs}} & {{mean}} & {{std}} & {{max}} & {{min}} & {{miss}}\% \\ 
     {{/name}}{{/descriptive}}\hline
     \end{tabular}
 \end{table}
@@ -417,7 +417,7 @@ Finally, we include a unique figure where covariate relative performance is comp
 
 \clearpage
 
-{{#expvars}}
+{{#expvarswithoutcons}}
 \begin{center}
     \large{\textbf{Coefficient, t-test and selection criteria gains distributions for {{name}} }}
 \end{center}
@@ -483,7 +483,7 @@ The following table shows main statistics of coefficient and t-test distribution
 \end{table}
 
 \clearpage
-{{/expvars}}
+{{/expvarswithoutcons}}
 
 \begin{figure}[!ht]
     \centering

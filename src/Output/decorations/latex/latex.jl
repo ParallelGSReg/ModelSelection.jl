@@ -25,7 +25,6 @@ end
 
 function get_col_statistics(data)
     nnan = filter(x -> !isnan(x), data)
-    poscol = filter(x -> x > 0, nnan)
     if( isempty(nnan) )
         return Dict(
             "avg"      => "",
@@ -33,8 +32,7 @@ function get_col_statistics(data)
             "mode"     => "",
             "std"      => "",
             "skew"     => "",
-            "kurt"     => "",
-            "posshare" => ""
+            "kurt"     => ""
         )
     end
     Dict(
@@ -43,8 +41,7 @@ function get_col_statistics(data)
         "mode"     => @sprintf("%.3f", mode(nnan)),
         "std"      => @sprintf("%.3f", std(nnan)),
         "skew"     => @sprintf("%.3f", skewness(nnan)),
-        "kurt"     => @sprintf("%.3f", kurtosis(nnan)),
-        "posshare" => @sprintf("%.3f", size(poscol, 1) / size(nnan, 1))
+        "kurt"     => @sprintf("%.3f", kurtosis(nnan))
     )
 end
 
@@ -55,7 +52,7 @@ function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldat
     preprocessing_dict["datanames"] = string("[:", join(preprocessing_dict["datanames"], ", :"), "]")
     preprocessing_dict["descriptive"] = []
         
-    datanames_index = ModelSelection.create_datanames_index(originaldata.expvars) 
+    datanames_index = ModelSelection.create_datanames_index(originaldata.expvars)
     
     for (i, var) in enumerate(originaldata.expvars)
         orig = originaldata.expvars_data[:, datanames_index[var]]
@@ -118,8 +115,12 @@ function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldat
         
         betas = dict[string(PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY)]["lassobetas"]
         betas_dict = []
+        @show betas
+        @show data.expvars
         for (i, beta) in enumerate(filter(j -> j != 0, betas))
             if( beta != 0)
+                @show beta
+                @show data.expvars[i]
                 push!(betas_dict, Dict("name" => replace(string(data.expvars[i]), "_" => "\\_"), "coef" => @sprintf("%.3f", beta)))
             end
         end
@@ -145,6 +146,7 @@ function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldat
         if "fixedvariables" in keys(dict) && size(dict["fixedvariables"], 1) == 0
             delete!(dict["fixedvariables"])
         end
+
         datanames_index = ModelSelection.create_datanames_index(result.datanames)
         cols = ModelSelection.get_selected_variables(Int64(result.bestresult_data[datanames_index[:index]]), data.expvars, data.intercept)
         
@@ -209,27 +211,44 @@ function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldat
                     end
                 end
             end
+
             if ("best" in keys(d) || "avg" in keys(d))
                 push!(d_bestmodel["bmexpvars"], d)
             end
         end
 
-        expvars_dict = map( var -> Dict(
-            "name" => var,
-            "t" => get_col_statistics(result.data[:,ModelSelection.get_column_index(Symbol("$(var)_t"), result.datanames)]),
-            "b" => get_col_statistics(result.data[:,ModelSelection.get_column_index(Symbol("$(var)_b"), result.datanames)])
-            ), data.expvars)
+        expvars_dict = map( var -> begin
+            t = result.data[:,ModelSelection.get_column_index(Symbol("$(var)_t"), result.datanames)]
+            b = result.data[:,ModelSelection.get_column_index(Symbol("$(var)_b"), result.datanames)]
+            
+            t_nnan = filter(x -> !isnan(x), t)
+            b_nnan = filter(x -> !isnan(x), b)
+            
+            t_poscol = filter(x -> x > 0, t_nnan)
+            b_poscol = filter(x -> x > 0, b_nnan)
+            
+            prob_t = map( it -> pdf(TDist(data.nobs - length(data.expvars) - (if data.intercept 1 else 0 end) ), it), t)
+            Dict(
+                "name" => var,
+                "posshare" => @sprintf("%.3f", size(b_poscol, 1) / size(b_nnan, 1)),
+                "sigshare" => @sprintf("%.3f", size(filter(p -> p < 0.1, prob_t), 1) / size(b_nnan, 1)),
+                "t" => get_col_statistics(t),
+                "b" => get_col_statistics(b)
+            )   
+        end, data.expvars)
         
         dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["expvars"] = expvars_dict
+        dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["expvarswithoutcons"] =
+        filter(x -> x["name"] != :_cons, expvars_dict)
         dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["bestmodel"] = d_bestmodel
 
         if dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["criteria"] != nothing
-            dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["criteria"] = 
+            dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["criteria"] =
             string("[:", join(dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["criteria"], ", :"), "]")
         end
 
         if dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["residualtest"] != false
-            if "time" in keys(dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]) && 
+            if "time" in keys(dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]) &&
                 dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["time"] != nothing
                 dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["residualtestfortex2"] = true
             else
@@ -242,10 +261,75 @@ end
 
 function latex!(dict::Dict, data::ModelSelection.ModelSelectionData, originaldata::ModelSelection.ModelSelectionData, result::ModelSelection.CrossValidation.CrossValidationResult)
     if ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY in keys(data.extras)
-        dict[string(ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY)] = 
+        dict[string(ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY)] =
         process_dict(data.extras[ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY])
 
-        #llenar
+        datanames_index = ModelSelection.create_datanames_index(result.datanames)
+        
+        d_bestmodel = []
+
+        for var in data.expvars
+            intercept = if (data.intercept) 1 else 0 end
+            d = Dict()
+            d["name"] = replace(string(var), "_" => "\\_")
+            if (!isnan(result.average_data[datanames_index[Symbol("$(var)_b")]]))
+                d["mean"] = Dict()
+                d["mean"]["b"] = @sprintf("%.6f", result.average_data[datanames_index[Symbol("$(var)_b")]])
+                if (result.ttest)
+                    d["mean"]["ttest"] = true
+                    d["mean"]["bstd"] = @sprintf("%.6f", result.average_data[datanames_index[Symbol("$(var)_bstd")]])
+                    t = result.average_data[datanames_index[Symbol("$(var)_b")]] / result.average_data[datanames_index[Symbol("$(var)_bstd")]]
+                    d["mean"]["t"] = t
+                    prob_t = pdf(TDist(data.nobs - length(data.expvars) - (if data.intercept 1 else 0 end) ), t)
+                    if (prob_t < 0.01)
+                        d["mean"]["stars"] = "***"
+                    else
+                        if (prob_t < 0.05)
+                            d["mean"]["stars"] = "**"
+                        else
+                            if (prob_t < 0.1)
+                                d["mean"]["stars"] = "*"
+                            else
+                                d["mean"]["stars"] = ""
+                            end
+                        end
+                    end
+                end
+                d["median"] = Dict()
+                d["median"]["b"] = @sprintf("%.6f", result.median_data[datanames_index[Symbol("$(var)_b")]])
+                if (result.ttest)
+                    d["median"]["ttest"] = true
+                    d["median"]["bstd"] = @sprintf("%.6f", result.median_data[datanames_index[Symbol("$(var)_bstd")]])
+                    t = result.median_data[datanames_index[Symbol("$(var)_b")]] / result.median_data[datanames_index[Symbol("$(var)_bstd")]]
+                    d["median"]["t"] = t
+                    prob_t = pdf(TDist(data.nobs - length(data.expvars) - (if data.intercept 1 else 0 end) ), t)
+                    if (prob_t < 0.01)
+                        d["median"]["stars"] = "***"
+                    else
+                        if (prob_t < 0.05)
+                            d["median"]["stars"] = "**"
+                        else
+                            if (prob_t < 0.1)
+                                d["median"]["stars"] = "*"
+                            else
+                                d["median"]["stars"] = "-"
+                            end
+                        end
+                    end
+                end
+            end
+
+            if ("mean" in keys(d) || "median" in keys(d))
+                push!(d_bestmodel, d)
+            end
+        end
+
+        dict[string(ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY)]["kfoldvars"] = d_bestmodel
+        
+        dict[string(ModelSelection.CrossValidation.CROSSVALIDATION_EXTRAKEY)]["outsample"] = Dict(
+            "median" => @sprintf("%.6f", result.median_data[datanames_index[:rmseout]]),
+            "mean" => @sprintf("%.6f", result.average_data[datanames_index[:rmseout]])
+        )
 
     end
     return dict
@@ -290,8 +374,8 @@ dropnans(res, var) = res.results[findall(x -> !isnan(x), res.results[:, res.head
 Create required figures by the template. Generate png images into the dest folder
 """
 function create_figures(data, destfolder)
-    expvars2 = data.expvars
-    deleteat!(expvars2, ModelSelection.get_column_index(:_cons, data.expvars))
+    expvars2 = filter(x -> x != :_cons, data.expvars)
+    #deleteat!(expvars2, ModelSelection.get_column_index(:_cons, data.expvars))
 
     criteria_diff = Array{Any}(undef, size(expvars2,1), 2)
 
@@ -315,7 +399,7 @@ function create_figures(data, destfolder)
         criteria_without = data.results[1].data[findall(x -> isnan(x), data.results[1].data[:, bcol]), r2col]
         
         uniden_with = kde(criteria_with)
-        uniden_without= kde(criteria_without)
+        uniden_without = kde(criteria_without)
         
         p1 = plot(range(min(criteria_with...), stop = max(criteria_with...), length = 150), z -> pdf(uniden_with, z))
         p1 = plot!(range(min(criteria_without...), stop = max(criteria_without...), length = 150), z -> pdf(uniden_without,z))
@@ -335,4 +419,26 @@ function create_figures(data, destfolder)
     labels = convert(Array{String}, a[:,2])
     bar(labels, a[:,1], legend = false, color = :blues, orientation = :horizontal, xlabel="Average impact of each variable on the Adj. R2")
     savefig(joinpath(destfolder, "cov_relevance.png"))
+
+    positivegainsvariables = findall(x => x > 0, a[:,1])
+    negativegainsvariables = findall(x => x < 0, a[:,1])
+
+    intelligent_text = Dict()
+    intelligent_text["numofpositivegainsvariables"] = size(positivegainsvariables, 1)
+    intelligent_text["numofnegativegainsvariables"] = size(negativegainsvariables, 1)
+
+    intelligent_text["multiple_positive_variables"] = intelligent_text["numofpositivegainsvariables"] > 1
+    intelligent_text["multiple_negative_variables"] = intelligent_text["numofpositivegainsvariables"] > 1
+    intelligent_text["no_negative_variables"] = intelligent_text["numofnegativegainsvariables"] == 0
+
+    
+    intelligent_text["bestvar"] = a[1,2]
+    intelligent_text["bestvar_gainsinperc"] = a[1,1]
+
+    intelligent_text["worstvar"] = a[end,2]
+    intelligent_text["worstvar_gainsinperc"] = a[end,1]
+
+    dict[string(ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)]["intelligent_text"] = intelligent_text
+
+
 end

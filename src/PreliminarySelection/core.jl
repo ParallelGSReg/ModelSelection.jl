@@ -53,7 +53,7 @@ function lassoselection(data)
     nvars = computablevars(size(data.expvars,1))
 
     if nvars >= size(data.expvars,1)
-        return data.expvars, nothing
+        return nothing, nothing
     end
 
     path = glmnet(data.expvars_data, data.depvar_data; nlambda=1000)
