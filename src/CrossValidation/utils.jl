@@ -9,8 +9,8 @@ function addextras(data, result)
         :tsetsize => result.s,
         :panel => data.panel,
         :time => data.time,
-        :median => result.median_data, #TODO: Add expvars
-        :average => result.average_data #TODO: Add expvars
+        :median => result.median_data,
+        :average => result.average_data
     )
     return data
 end
