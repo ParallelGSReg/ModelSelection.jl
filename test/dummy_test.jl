@@ -1,6 +1,6 @@
 using CSV, ModelSelection
 
-data = CSV.read("visitors.csv")
+data = CSV.read("test/visitors.csv")
 
 data = ModelSelection.gsr(
     "australia china japan uk", 

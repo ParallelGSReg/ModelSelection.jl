@@ -10,5 +10,5 @@ module CrossValidation
     include("structs/result.jl")
     include("core.jl")
 
-    export kfoldcrossvalidation, CROSSVALIDATION_EXTRAKEY
+    export kfoldcrossvalidation, CROSSVALIDATION_EXTRAKEY, CrossValidationResult
 end
