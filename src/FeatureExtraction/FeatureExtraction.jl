@@ -1,12 +1,15 @@
 module FeatureExtraction
-    using Statistics
-    using ShiftedArrays
-    using ..ModelSelection
 
-    export featureextraction!, featureextraction, FEATUREEXTRACTION_EXTRAKEY
+using
+    ShiftedArrays,
+    Statistics
+using ..ModelSelection
 
-    include("const.jl")
-    include("strings.jl")
-    include("utils.jl")
-    include("core.jl")
+export featureextraction!, featureextraction, FEATUREEXTRACTION_EXTRAKEY
+
+include("const.jl")
+include("strings.jl")
+include("utils.jl")
+include("core.jl")
+
 end

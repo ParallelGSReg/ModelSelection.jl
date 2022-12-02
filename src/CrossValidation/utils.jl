@@ -1,5 +1,8 @@
 """
-Add values to extras
+Add extra data to data
+# Arguments
+- `data::ModelSelection.ModelSelectionData`: the model selection data.
+- `result::ModelSelectionResult`: the model selection result.
 """
 function addextras(data, result)
     data.extras[ModelSelection.generate_extra_key(CROSSVALIDATION_EXTRAKEY, data.extras)] = Dict(

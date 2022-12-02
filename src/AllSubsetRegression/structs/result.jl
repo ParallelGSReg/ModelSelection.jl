@@ -1,33 +1,31 @@
 mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
+	datanames::Vector{Symbol}
+	modelavg_datanames::Any
 
-    datanames
-    modelavg_datanames
-    
-    data
-    bestresult_data
-    modelavg_data
+	data::Any
+	bestresult_data::Any
+	modelavg_data::Any
 
-    fixedvariables
-    outsample
-    criteria
-    modelavg
-    ttest
-    residualtest
-    orderresults
-    nobs
+	fixedvariables::Any
+	outsample::Any
+	criteria::Any
+	modelavg::Any
+	ttest::Any
+	residualtest::Any
+	orderresults::Any
+	nobs::Any
 
-    function AllSubsetRegressionResult(
-            datanames,
-            modelavg_datanames,
-            fixedvariables,
-            outsample,
-            criteria,
-            modelavg,
-            ttest,
-            residualtest,
-            orderresults
-        )
-
-        new(datanames, modelavg_datanames, nothing, nothing, nothing, fixedvariables, outsample, criteria, modelavg, ttest, residualtest, orderresults, 0)
-    end
+	function AllSubsetRegressionResult(
+		datanames,
+		modelavg_datanames,
+		fixedvariables,
+		outsample,
+		criteria,
+		modelavg,
+		ttest,
+		residualtest,
+		orderresults,
+	)
+		new(datanames, modelavg_datanames, nothing, nothing, nothing, fixedvariables, outsample, criteria, modelavg, ttest, residualtest, orderresults, 0)
+	end
 end
