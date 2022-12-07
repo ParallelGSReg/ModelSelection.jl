@@ -176,7 +176,7 @@ function latex!(
 		end
 	end
 
-	if "seasonaladjustment" in keys(preprocessing_dict) && preprocessing_dict["seasonaladjustment"] != nothing
+	if "seasonaladjustment" in keys(preprocessing_dict) && preprocessing_dict["seasonaladjustment"] !== nothing
 		preprocessing_dict["seasonaladjustment"] = get_array_details(preprocessing_dict["seasonaladjustment"])
 	end
 	dict[string(Preprocessing.PREPROCESSING_EXTRAKEY)] = preprocessing_dict
@@ -186,8 +186,7 @@ function latex!(
 		data.extras[FeatureExtraction.FEATUREEXTRACTION_EXTRAKEY]
 		featureextraction_dict = process_dict(data.extras[FeatureExtraction.FEATUREEXTRACTION_EXTRAKEY])
 		if "fe_lag" in keys(featureextraction_dict)
-			featureextraction_dict["fe_lag"] =
-				get_array_details(featureextraction_dict["fe_lag"])
+			featureextraction_dict["fe_lag"] = get_array_details(featureextraction_dict["fe_lag"])
 		end
 		if "fe_log" in keys(featureextraction_dict)
 			featureextraction_dict["fe_log"] = replace(string(featureextraction_dict["fe_log"]), "Symbol" => "")

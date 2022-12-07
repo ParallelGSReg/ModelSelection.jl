@@ -1,5 +1,4 @@
 mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
-
 	datanames::Vector{Symbol}
 	modelavg_datanames::Any
 
@@ -27,7 +26,6 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
 		residualtest,
 		orderresults,
 	)
-
 		new(datanames, modelavg_datanames, nothing, nothing, nothing, fixedvariables, outsample, criteria, modelavg, ttest, residualtest, orderresults, 0)
 	end
 end

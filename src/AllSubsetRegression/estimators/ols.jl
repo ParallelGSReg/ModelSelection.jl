@@ -326,7 +326,7 @@ function execute_row!(
 
 		result_data[order, datanames_index[:wtest]] = wtest
 		result_data[order, datanames_index[:jbtest]] = jbtest
-		if time != nothing
+		if time !== nothing
 			e = er
 			lag = 1
 			xmat = expvars_subset
@@ -348,5 +348,4 @@ function execute_row!(
 			result_data[order, datanames_index[:bgtest]] = bgtest
 		end
 	end
-
 end

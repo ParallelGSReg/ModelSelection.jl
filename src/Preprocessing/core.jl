@@ -1,8 +1,21 @@
-# TODO: Add description to every parameter
+"""
+Processes the input data based in a multiformat string equation and optional data and returns processed data.
+# Arguments
+ - `equation::String`: the multiformat string equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
 	equation::String;
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing} = nothing,
-	datanames::Union{Vector{String}, Vector{Symbol}, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
 	method::Union{Symbol, String} = METHOD_DEFAULT,
 	intercept::Bool = INTERCEPT_DEFAULT,
 	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
@@ -25,10 +38,62 @@ function input(
 	)
 end
 
+"""
+Processes the input data based in a the string array equation and optional data and returns processed data.
+ - `equation::Array{String}`: the string array equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
+function input(
+	equation::Array{String};
+	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
+	method::Union{Symbol, String} = METHOD_DEFAULT,
+	intercept::Bool = INTERCEPT_DEFAULT,
+	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
+	time::Union{Symbol, String, Nothing} = TIME_DEFAULT,
+	seasonaladjustment::Union{Dict, Array, Nothing} = SEASONALADJUSTMENT_DEFAULT,
+	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+)
+	return input(
+		equation,
+		data,
+		datanames = datanames,
+		method = method,
+		intercept = intercept,
+		panel = panel,
+		time = time,
+		removeoutliers = removeoutliers,
+		seasonaladjustment = seasonaladjustment,
+		removemissings = removemissings,
+	)
+end
+
+"""
+Processes the input data based in a the string vector equation and optional data and returns processed data.
+ - `equation::Vector{String}`: the string vector equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
 	equation::Vector{String};
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing} = nothing,
-	datanames::Union{Vector{String}, Vector{Symbol}, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
 	method::Union{Symbol, String} = METHOD_DEFAULT,
 	intercept::Bool = INTERCEPT_DEFAULT,
 	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
@@ -51,10 +116,64 @@ function input(
 	)
 end
 
+"""
+Processes the input data based in a symbol array equation and optional data and returns processed data.
+# Arguments
+ - `equation::Array{Symbol}`: the symbol array equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
+function input(
+	equation::Array{Symbol};
+	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
+	method::Union{Symbol, String} = METHOD_DEFAULT,
+	intercept::Bool = INTERCEPT_DEFAULT,
+	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
+	time::Union{Symbol, String, Nothing} = TIME_DEFAULT,
+	seasonaladjustment::Union{Dict, Array, Nothing} = SEASONALADJUSTMENT_DEFAULT,
+	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+)
+	return input(
+		equation,
+		data,
+		datanames = datanames,
+		method = method,
+		intercept = intercept,
+		panel = panel,
+		time = time,
+		seasonaladjustment = seasonaladjustment,
+		removeoutliers = removeoutliers,
+		removemissings = removemissings,
+	)
+end
+
+"""
+Processes the input data based in a symbol vector equation and optional data and returns processed data.
+# Arguments
+ - `equation::Vector{Symbol}`: the vector symbol equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
 	equation::Vector{Symbol};
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing} = nothing,
-	datanames::Union{Vector{String}, Vector{Symbol}, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
 	method::Union{Symbol, String} = METHOD_DEFAULT,
 	intercept::Bool = INTERCEPT_DEFAULT,
 	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
@@ -77,10 +196,24 @@ function input(
 	)
 end
 
+"""
+Processes the input data based in a multiformat string equation and returns processed data.
+# Arguments
+ - `equation::String`: the multiformat string equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
 	equation::String,
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
-	datanames::Union{Vector{String}, Vector{Symbol}, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
 	method::Union{Symbol, String} = METHOD_DEFAULT,
 	intercept::Bool = INTERCEPT_DEFAULT,
 	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
@@ -103,10 +236,24 @@ function input(
 	)
 end
 
+"""
+Processes the input data based in a multiformat string array equation and returns processed data.
+# Arguments
+ - `equation::Array{String}`: the multiformat string array equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
-	equation::Vector{String},
+	equation::Array{String},
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
-	datanames::Union{Vector{String}, Vector{Symbol}, Nothing} = nothing,
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
 	method::Union{Symbol, String} = METHOD_DEFAULT,
 	intercept::Bool = INTERCEPT_DEFAULT,
 	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
@@ -115,6 +262,51 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	equation = vec(equation)
+	equation = Vector{String}(equation)
+	return input(
+		equation,
+		data,
+		datanames = datanames,
+		intercept = intercept,
+		method = method,
+		panel = panel,
+		time = time,
+		seasonaladjustment = seasonaladjustment,
+		removeoutliers = removeoutliers,
+		removemissings = removemissings,
+	)
+end
+
+"""
+Processes the input data based in a multiformat string vector equation and returns processed data.
+# Arguments
+ - `equation::Vector{String}`: the multiformat vector string equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
+function input(
+	equation::Vector{String},
+	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
+	method::Union{Symbol, String} = METHOD_DEFAULT,
+	intercept::Bool = INTERCEPT_DEFAULT,
+	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
+	time::Union{Symbol, String, Nothing} = TIME_DEFAULT,
+	seasonaladjustment::Union{Dict, Array, Nothing} = SEASONALADJUSTMENT_DEFAULT,
+	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+)
+	if datanames !== nothing
+		datanames = Vector{String}(vec(datanames))
+	end
 	datanames = get_datanames_from_data(data, datanames)
 	equation = equation_converts_wildcards!(equation, datanames)
 	equation = strarr_to_symarr!(equation)
@@ -135,6 +327,62 @@ function input(
 	)
 end
 
+"""
+Processes the input data based in a symbol array equation and returns processed data.
+# Arguments
+ - `equation::Array{symbol}`: the symbol equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
+function input(
+	equation::Array{Symbol},
+	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
+	datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing} = nothing,
+	method::Union{Symbol, String} = METHOD_DEFAULT,
+	intercept::Bool = INTERCEPT_DEFAULT,
+	panel::Union{Symbol, String, Nothing} = PANEL_DEFAULT,
+	time::Union{Symbol, String, Nothing} = TIME_DEFAULT,
+	seasonaladjustment::Union{Dict, Array, Nothing} = SEASONALADJUSTMENT_DEFAULT,
+	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+)
+	equation = vec(equation)
+	equation = Vector{Symbol}(equation)
+	return input(
+		equation,
+		data,
+		datanames = datanames,
+		intercept = intercept,
+		method = method,
+		panel = panel,
+		time = time,
+		seasonaladjustment = seasonaladjustment,
+		removeoutliers = removeoutliers,
+		removemissings = removemissings,
+	)
+end
+
+"""
+Processes the input data based in a symbol vector equation and returns processed data.
+# Arguments
+ - `equation::Vector{Symbol}`: the symbol vector equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function input(
 	equation::Vector{Symbol},
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
@@ -158,10 +406,12 @@ function input(
 
 	if datanames === nothing
 		datanames = get_datanames_from_data(data, datanames)
+	else
+		datanames = Vector{Symbol}(vec(datanames))
 	end
 
 	if length(datanames) != size(datanames, 1)
-		datanames = convert(Vector{Symbol}, datanames[1, :])
+		datanames = Vector{Symbol}(datanames[1, :])
 	end
 
 	data = get_data_from_data(data)
@@ -211,6 +461,20 @@ function input(
 	return modelselection_data
 end
 
+"""
+Processes all the inputs parameters and returns processed data.
+# Arguments
+ - `equation::Vector{Symbol}`: the symbol vector equation.
+ - `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing}`: the input data.
+ - `datanames::Vector{Symbol}`: the column names of input data.
+ - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
+ - `intercept::Bool`: include intercept as a fixed covariate.
+ - `panel::Union{Symbol, String, Nothing}`: panel variable name.
+ - `time::Union{Symbol, String, Nothing}`: panel variable name.
+ - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
+ - `removeoutliers::Bool`: TODO add description.
+ - `removemissings::Bool`: TODO add description.
+"""
 function execute(
 	equation::Vector{Symbol},
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}},
@@ -223,7 +487,6 @@ function execute(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
-
 	datatype = method == :precise ? Float64 : Float32
 	temp_equation = equation
 

@@ -144,11 +144,10 @@ function gsr(
 		CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
 	end
 	"""
-
 	if exportcsv !== nothing
 		ModelSelection.Output.csv(data, filename = exportcsv)
 	end
-
+	
 	if exportlatex !== nothing
 		ModelSelection.Output.latex(data, original_data, path = exportlatex)
 	end

@@ -1,8 +1,26 @@
 """
-Initialize options
+Creates ModelSelection result
+# Arguments
+ - `data::ModelSelection.ModelSelectionData`: the model selection data.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add definition.
+ - `outsample::Union{Nothing, Int, Array}`: TODO add definition.
+ - `criteria::Array`: TODO add definition.
+ - `ttest::Bool`: TODO add definition.
+ - `modelavg::Bool`: TODO add definition.
+ - `residualtest::Bool`: TODO add definition.
+ - `orderresults::Bool`: TODO add definition.
 """
-function create_result(data, fixedvariables, outsample, criteria, ttest, modelavg, residualtest, orderresults)
-	if outsample == nothing
+function create_result(
+	data::ModelSelection.ModelSelectionData,
+	fixedvariables::Union{Nothing, Array},
+	outsample::Union{Nothing, Int, Array},
+	criteria::Array,
+	ttest::Bool,
+	modelavg::Bool,
+	residualtest::Bool,
+	orderresults::Bool,
+)
+	if outsample === nothing
 		outsample = 0
 	end
 
@@ -44,22 +62,25 @@ function create_result(data, fixedvariables, outsample, criteria, ttest, modelav
 end
 
 """
-Constructs the datanames array for results based on this structure.
-	- Index
-	- Covariates
-		* b
-		* bstd
-		* T-test
-	- Equation general information merged with criteria user-defined options
-	- Order index from user combined criteria
-	- Weight
+Constructs the datanames array for results based on this structure:
+Index,Covariates,b,bstd,T-test,Equation general information merged with criteria user-defined options,Order index from user combined criteria,Weight
+# Arguments
+ - `data::ModelSelection.ModelSelectionData`: the model selection data.
+ - `criteria::Array`: TODO add definition.
+ - `ttest::Bool`: TODO add definition.
+ - `modelavg::Bool`: TODO add definition.
+ - `residualtest::Bool`: TODO add definition.
+ - `orderresults::Bool`: TODO add definition.
 """
-function create_datanames(data, criteria, ttest, modelavg, residualtest)
-
+function create_datanames(
+	data::ModelSelection.ModelSelectionData,
+	criteria::Array,
+	ttest::Bool,
+	modelavg::Bool,
+	residualtest::Bool,
+)
 	datanames = []
-
 	push!(datanames, INDEX)
-
 	for expvar in data.expvars
 		push!(datanames, Symbol(string(expvar, "_b")))
 		if ttest
@@ -67,23 +88,31 @@ function create_datanames(data, criteria, ttest, modelavg, residualtest)
 			push!(datanames, Symbol(string(expvar, "_t")))
 		end
 	end
-
-	testfields = (residualtest != nothing && residualtest) ? ((data.time != nothing) ? RESIDUAL_TESTS_TIME : RESIDUAL_TESTS_CROSS) : []
+	testfields = (residualtest !== nothing && residualtest) ? ((data.time !== nothing) ? RESIDUAL_TESTS_TIME : RESIDUAL_TESTS_CROSS) : []
 	general_information_criteria = unique([EQUATION_GENERAL_INFORMATION; criteria; testfields])
 	datanames = vcat(datanames, general_information_criteria)
-
 	push!(datanames, ORDER)
 	if modelavg
 		push!(datanames, WEIGHT)
 	end
-
 	return datanames
 end
 
 """
-Get insample data view
+Gets in-sample data view.
+# Arguments
+ - `depvar_data::Array`: TODO add definition.
+ - `expvars_data::Array`: TODO add definition.
+ - `outsample::Array`: TODO add definition.
+ - `criteria::Array`: TODO add definition.
+ - `selected_variables_index::Array`: TODO add definition.
 """
-function get_insample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
+function get_insample_subset(
+	depvar_data::Array,
+	expvars_data::Array,
+	outsample::Array,
+	selected_variables_index::Array,
+)
 	depvar_view = nothing
 	expvars_view = nothing
 	if isa(outsample, Array)
@@ -98,9 +127,20 @@ function get_insample_subset(depvar_data, expvars_data, outsample, selected_vari
 end
 
 """
-Get outsample data view
+Gets out-sample data view.
+# Arguments
+ - `depvar_data::Array`: TODO add definition.
+ - `expvars_data::Array`: TODO add definition.
+ - `outsample::Array`: TODO add definition.
+ - `criteria::Array`: TODO add definition.
+ - `selected_variables_index::Array`: TODO add definition.
 """
-function get_outsample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
+function get_outsample_subset(
+	depvar_data::Array,
+	expvars_data::Array,
+	outsample::Array,
+	selected_variables_index::Array,
+)
 	depvar_view = nothing
 	expvars_view = nothing
 	if isa(outsample, Array)
@@ -114,7 +154,11 @@ function get_outsample_subset(depvar_data, expvars_data, outsample, selected_var
 end
 
 """
-Sort rows
+Sorts rows.
+# Arguments
+ - `B::AbstractMatrix`: TODO add definition.
+ - `cols::Array`: TODO add definition.
+ - `kws...`: TODO add definition.
 """
 function sortrows(B::AbstractMatrix, cols::Array; kws...)
 	for i in 1:length(cols)
@@ -146,14 +190,20 @@ function sortrows(B::AbstractMatrix, cols::Array; kws...)
 	return B
 end
 
+"""
+TODO: Not being used
+"""
 function get_varnames(datanames)
 	map(h -> chop("$h", tail = 2), filter(s -> endswith("$s", "_b"), datanames))
 end
 
 """
-Add values to extras
+Add extra data to data
+# Arguments
+- `data::ModelSelection.ModelSelectionData`: the model selection data.
+- `result::ModelSelectionResult`: the model selection result.
 """
-function addextras(data, result)
+function addextras(data::ModelSelection.ModelSelectionData, result::ModelSelection.ModelSelectionResult)
 	data.extras[ModelSelection.generate_extra_key(ALLSUBSETREGRESSION_EXTRAKEY, data.extras)] = Dict(
 		:datanames => result.datanames,
 		:depvar => data.depvar,

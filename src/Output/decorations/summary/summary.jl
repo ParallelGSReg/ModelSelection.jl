@@ -33,7 +33,7 @@ function summary(
 		return summary(data, data.results[resultnum], filename = filename)
 	end
 	outputstr = ""
-	for i in axes(data, 1)
+	for i in axes(data.results, 1)
 		outputstr = string(outputstr, summary(data, data.results[i]))
 	end
 	if filename !== nothing

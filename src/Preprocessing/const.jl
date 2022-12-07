@@ -1,4 +1,5 @@
-const DEFAULT_DATANAME = "dataname"
+const DATANAME = "dataname"
+const DEFAULT_DATANAME = DATANAME
 const FAST = :fast
 const FIXED_EFFECT_DEFAULT = false
 const INTERACTION_DEFAULT = nothing

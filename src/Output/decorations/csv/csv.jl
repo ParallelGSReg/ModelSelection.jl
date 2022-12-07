@@ -5,7 +5,11 @@ Generates csv with file export.
 - `filename::String``: output filename.
 - `resultnum::Int64`: TODO add description.
 """
-function csv(data::ModelSelection.ModelSelectionData, filename::String; resultnum::Int64 = 1)
+function csv(
+	data::ModelSelection.ModelSelectionData,
+	filename::String;
+	resultnum::Int64 = 1,
+)
 	csv(data, filename = filename, resultnum = resultnum)
 end
 
@@ -18,7 +22,7 @@ Exports to csv adding extras.
 """
 function csv(
 	data::ModelSelection.ModelSelectionData;
-	filename::Union{Nothing, String} = nothing,
+	filename::Union{String, Nothing} = nothing,
 	resultnum::Int64 = 1,
 )
 	addextras(data, :csv, filename, nothing)

@@ -96,7 +96,7 @@ function get_data_from_data(
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame},
 )
 	if isa(data, DataFrames.DataFrame)
-		data = convert(Matrix{Union{Missing, Float64}}, data)
+		data = Array{Union{Float64, Missing}}(data)
 	elseif isa(data, Tuple)
 		data = data[1]
 	end
@@ -245,9 +245,9 @@ end
 """
 Converts string and/or symbol datanames vector to symbol datanames vector and returns it.
 # Arguments
-- `arr::Union{Vector{String}, Vector{Symbol}}`: an array of stings and/or symbols.
+- `arr::Union{Vector{AbstractString}, Vector{String}, Vector{Symbol}}`: an array of stings and/or symbols.
 """
-function strarr_to_symarr!(arr::Union{Vector{String}, Vector{Symbol}})
+function strarr_to_symarr!(arr::Union{Vector{AbstractString}, Vector{String}, Vector{Symbol}})
 	return arr = [Symbol(str) for str in arr]
 end
 

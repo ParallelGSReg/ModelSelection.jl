@@ -1,8 +1,11 @@
 module AllSubsetRegression
 
-using Printf
-
-using Distributed, Distributions, SharedArrays, LinearAlgebra
+using
+    Distributed,
+    Distributions,
+    LinearAlgebra,
+    Printf,
+    SharedArrays
 using ..ModelSelection
 
 export to_string, AllSubsetRegressionResult, ALLSUBSETREGRESSION_EXTRAKEY
@@ -14,4 +17,5 @@ include("utils.jl")
 include("structs/result.jl")
 include("core.jl")
 include("estimators/ols.jl")
+
 end

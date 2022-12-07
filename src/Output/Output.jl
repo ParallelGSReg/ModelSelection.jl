@@ -1,17 +1,18 @@
 module Output
-using DelimitedFiles,
-	Printf,
-	Mustache,
-	KernelDensity,
-	StatsPlots,
-	ZipFile,
+
+using
+	DataFrames,
+	DelimitedFiles,
+	Distributed,
+	Distributions,
 	InfoZIP,
+	KernelDensity,
+	Mustache,
+	Plots,
+	Printf,
 	Statistics,
 	StatsPlots,
-	DataFrames,
-	Distributions,
-	Distributed
-using Plots, StatsPlots
+	ZipFile
 using ..ModelSelection
 
 export csv, summary, latex
@@ -23,4 +24,5 @@ include("decorations/csv/csv.jl")
 include("decorations/summary/summary.jl")
 include("decorations/latex/latex.jl")
 include("core.jl")
+
 end
