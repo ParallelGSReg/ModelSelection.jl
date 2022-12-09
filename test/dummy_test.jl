@@ -1,6 +1,6 @@
-using CSV, ModelSelection
+using CSV, ModelSelection, DataFrames
 
-data = CSV.read("visitors.csv")
+data = CSV.read("data/visitors.csv", DataFrame)
 
 data = ModelSelection.gsr(
     "australia china japan uk", 
@@ -19,6 +19,6 @@ data = ModelSelection.gsr(
     orderresults=true,
     kfoldcrossvalidation=true,
     numfolds=10,
-    exportcsv="visitors_output.csv",
-    exportlatex="latex.zip"
+    # TODO exportcsv="visitors_output.csv",
+    # TODO exportlatex="latex.zip"
 )

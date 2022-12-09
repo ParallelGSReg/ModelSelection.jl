@@ -4,7 +4,7 @@ Parse fe variables
 function parse_fe_variables(fe_vars, expvars; depvar=nothing, is_pair=false)
     valid_vars = copy(expvars)
 
-    if depvar != nothing
+    if depvar !== nothing
         append!(valid_vars, [depvar])
     end
 
@@ -124,8 +124,7 @@ Adds lag feature extraction to data
 function data_add_fe_lag(data, fe_vars)
     nobs = size(data.expvars_data, 1)
     postfix = "_l"
-    csis = (data.panel != nothing) ? unique(data.panel_data) : [nothing]
-    depvar_enabled = false
+    csis = (data.panel !== nothing) ? unique(data.panel_data) : [nothing]
 
     for var in fe_vars
         if var[1] in data.expvars
@@ -143,7 +142,7 @@ function data_add_fe_lag(data, fe_vars)
                 
                 col_added = false
                 for csi in csis
-                    rows = (csi != nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
+                    rows = (csi !== nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
                     num_rows = size(rows, 1)
                     if !(expvar in data.expvars)
                         var_data[rows[1]:rows[1]+num_rows-1, m] .= lag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
@@ -175,7 +174,7 @@ function data_add_fe_lag(data, fe_vars)
                 
                 col_added = false
                 for csi in csis
-                    rows = (csi != nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
+                    rows = (csi !== nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
                     num_rows = size(rows, 1)
                     if !(expvar in data.expvars)
                         var_data[rows[1]:rows[1]+num_rows-1, m] .= lag(data.depvar_data[rows[1]:rows[1]+num_rows-1], i)
@@ -206,7 +205,7 @@ end
 Adds interaction between variables
 """
 function data_add_interaction(data, interaction)
-    if ModelSelection.get_column_index(data.depvar, interaction) != nothing
+    if ModelSelection.get_column_index(data.depvar, interaction) !== nothing
         error(INTERACTION_DEPVAR_ERROR)
     end
     
