@@ -2,7 +2,7 @@
 
 [![Build test](https://github.com/ParallelGSReg/ModelSelection.jl/actions/workflows/build.yaml/badge.svg)](https://github.com/ParallelGSReg/ModelSelection.jl/actions/workflows/build.yaml)
 
-*A fast, flexible delimited file reader/writer for Julia.*
+*Model Selection for Julia.*
 
 
 ## Credits
