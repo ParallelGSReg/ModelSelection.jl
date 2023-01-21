@@ -141,10 +141,6 @@ function filter_data_by_empty_values(data)
 	return data
 end
 
-
-
-
-
 """
 Convert data by data
 """

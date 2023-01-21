@@ -34,3 +34,8 @@ PreliminarySelection:
 Tests:
  - [ ] Update Project.toml and Manifest.toml
  - [ ] Should data be included in the repo or downloaded?
+
+Workflows:
+ - [ ] Add more oses
+ - [ ] Add tests
+ - [ ] Add coverage
