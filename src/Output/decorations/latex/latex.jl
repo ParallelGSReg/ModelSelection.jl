@@ -47,7 +47,7 @@ function create_figures(data::ModelSelection.ModelSelectionData, destfolder::Str
 	end
 	a = sortslices(criteria_diff, dims = 1)
 	labels = convert(Array{String}, a[:, 2])
-	bar(labels, a[:, 1], legend = false, color = :blues, orientation = :horizontal, xlabel = "Average impact of each variable on the Adj. R2")
+	bar(a[:, 1], orientation=:h, yticks=(1:size(a,1),labels), legend = false, color = :blues, xlabel = "Average impact of each variable on the Adj. R2")
 	savefig(joinpath(destfolder, "cov_relevance.png"))
 
 	numofpositivegainsvariables = size(findall(x -> x > 0, a[:, 1]), 1)
