@@ -1,7 +1,21 @@
 name = "ModelSelection"
 uuid = "51b78214-913b-40cf-9250-c64eb33811f7"
 authors = ["Demian Panigo <panigo@gmail.com>", "Adán Mauri Ungaro <adan.mauri@gmail.com>", "Nicolás Monzón <nicomzn4@gmail.com>", "Valentin Mari <valentinmari@hotmail.com>"]
-version = "1.6.7"
+version = "1.1.0"
+
+[compat]
+julia = "1.6.7"
+CSV = "0.10.9"
+DataFrames = "1.4.4"
+Distributions = "0.25.80"
+GLMNet = "0.7.1"
+KernelDensity = "0.6.5"
+Mustache = "1.0.14"
+Plots = "1.38.2"
+ShiftedArrays = "2.0.0"
+SingularSpectrumAnalysis = "0.5.1"
+StatsPlots = "0.15.4"
+ZipFile = "0.10.1"
 
 [deps]
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
