@@ -13,7 +13,7 @@ AllSubsetRegression:
  - [ ] Add typing in estimators.ols
 
 Output:
- - [ ] Output.latex
+ - [ ] Allow to generate latex report if ttest is false
  - [ ] Docstrings in Output.utils.js
  - [ ] Add many parameters types
  - [ ] Tests

@@ -5,7 +5,7 @@ using
 	DelimitedFiles,
 	Distributed,
 	Distributions,
-	InfoZIP,
+	# InfoZIP,
 	KernelDensity,
 	Mustache,
 	Plots,

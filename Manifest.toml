@@ -361,12 +361,6 @@ git-tree-sha1 = "709d864e3ed6e3545230601f94e11ebc65994641"
 uuid = "34004b35-14d8-5ef3-9330-4cdb6864b03a"
 version = "0.3.11"
 
-[[deps.InfoZIP]]
-deps = ["Test"]
-git-tree-sha1 = "087ad2b31892c028b7a56e0a502b13d91faa4b96"
-uuid = "f4508453-b816-52ab-a864-26fc7f6211fc"
-version = "0.2.0"
-
 [[deps.IniFile]]
 git-tree-sha1 = "f550e6e32074c939295eb5ea6de31849ac2c9625"
 uuid = "83e8ac13-25f8-5344-8a64-a9f2b223428f"

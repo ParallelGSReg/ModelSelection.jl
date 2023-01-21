@@ -14,16 +14,17 @@ function create_figures(data::ModelSelection.ModelSelectionData, destfolder::Str
 	for (i, expvar) in enumerate(expvars2)
 		bcol = ModelSelection.get_column_index(Symbol("$(expvar)_b"), data.results[1].datanames)
 		tcol = ModelSelection.get_column_index(Symbol("$(expvar)_t"), data.results[1].datanames)
+
 		r2col = ModelSelection.get_column_index(:r2adj, data.results[1].datanames)
 		x = data.results[1].data[findall(x -> !isnan(x), data.results[1].data[:, bcol]), bcol]
-		y = data.results[1].data[findall(x -> !isnan(x), data.results[1].data[:, tcol]), tcol]
-		biden = kde((x, y), npoints = (100, 100))
-
-		contour(biden.x, biden.y, biden.density; xlabel = "Coef. $expvar", ylabel = "t-test $expvar")
-		savefig(joinpath(destfolder, "contour_$(expvar)_b_t.png"))
-
-		wireframe(biden.x, biden.y, biden.density; xlabel = "Coef. $expvar", ylabel = "t-test $expvar", camera = (45, 45))
-		savefig(joinpath(destfolder, "wireframe_$(expvar)_b_t.png"))
+		if tcol !== nothing
+			y = data.results[1].data[findall(x -> !isnan(x), data.results[1].data[:, tcol]), tcol]
+			biden = kde((x, y), npoints = (100, 100))
+			contour(biden.x, biden.y, biden.density; xlabel = "Coef. $expvar", ylabel = "t-test $expvar")
+			savefig(joinpath(destfolder, "contour_$(expvar)_b_t.png"))
+			wireframe(biden.x, biden.y, biden.density; xlabel = "Coef. $expvar", ylabel = "t-test $expvar", camera = (45, 45))
+			savefig(joinpath(destfolder, "wireframe_$(expvar)_b_t.png"))
+		end
 
 		criteria_with = data.results[1].data[findall(x -> !isnan(x), data.results[1].data[:, bcol]), r2col]
 		criteria_without = data.results[1].data[findall(x -> isnan(x), data.results[1].data[:, bcol]), r2col]
@@ -346,7 +347,6 @@ function latex!(
 
 		expvars_dict = map(
 			var -> begin
-
 				t = result.data[:, ModelSelection.get_column_index(Symbol("$(var)_t"), result.datanames)]
 				b = result.data[:, ModelSelection.get_column_index(Symbol("$(var)_b"), result.datanames)]
 
@@ -530,8 +530,22 @@ Zip latex files
 - `destfolder::AbstractString`: destination directory.
 """
 function zip_folder(sourcefolder::AbstractString, destfolder::AbstractString)
-	filenamesforzip = map(x -> joinpath(sourcefolder, x), readdir(sourcefolder))
-	create_zip(destfolder, filenamesforzip)
+	path_separator = Sys.iswindows() ? "\\" : "/"
+	compress = true # or false, like you wish
+	zdir = ZipFile.Writer(destfolder) 
+	for (root, dirs, files) in walkdir(sourcefolder)
+    	for file in files
+        	filepath = joinpath(root, file)
+        	f = open(filepath, "r")
+	        content = read(f, String)
+        	close(f)
+			remdir = sourcefolder * path_separator
+        	zippath = replace(filepath, remdir => "")
+			zf = ZipFile.addfile(zdir, zippath; method=(compress ? ZipFile.Deflate : ZipFile.Store));
+			write(zf, content)
+		end
+	end
+	close(zdir)			
 end
 
 # TODO add description

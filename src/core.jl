@@ -142,7 +142,11 @@ function gsr(
 	end
 
 	if exportlatex !== nothing
-		ModelSelection.Output.latex(data, original_data, path = exportlatex)
+		if ttest
+			ModelSelection.Output.latex(data, original_data, path = exportlatex)
+		else
+			error(LATEX_WITHOUT_TTEST)
+		end
 	end
 
 	println(ModelSelection.Output.summary(data, filename = exportsummary))
