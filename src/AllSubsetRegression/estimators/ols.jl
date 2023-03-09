@@ -53,7 +53,7 @@ function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegr
 	datanames_index = ModelSelection.create_datanames_index(result.datanames)
 	if nprocs() == nworkers()
 		for order in 1:num_operations
-			execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
+			ols_execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
 		end
 	else
 		ops_per_worker = div(num_operations, nworkers())
@@ -66,7 +66,7 @@ function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegr
 		for num_job in 1:num_jobs
 			push!(
 				jobs,
-				@spawnat num_job + 1 execute_job!(
+				@spawnat num_job + 1 ols_execute_job!(
 					num_job,
 					num_jobs,
 					ops_per_worker,
@@ -95,7 +95,7 @@ function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegr
 		if remainder > 0
 			for j in 1:remainder
 				order = j + ops_per_worker * num_jobs
-				execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
+				ols_execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
 			end
 		end
 	end
@@ -163,7 +163,7 @@ function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegr
 	return result
 end
 
-function execute_job!(
+function ols_execute_job!(
 	num_job,
 	num_jobs,
 	ops_per_worker,
@@ -184,7 +184,7 @@ function execute_job!(
 )
 	for j in 1:ops_per_worker
 		order = (j - 1) * num_jobs + num_job
-		execute_row!(
+		ols_execute_row!(
 			order,
 			depvar,
 			expvars,
@@ -207,7 +207,7 @@ function execute_job!(
 	end
 end
 
-function execute_row!(
+function ols_execute_row!(
 	order,
 	depvar,
 	expvars,

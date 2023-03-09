@@ -5,7 +5,9 @@ using
     Distributions,
     LinearAlgebra,
     Printf,
-    SharedArrays
+    SharedArrays,
+    GLM
+
 using ..ModelSelection
 
 export to_string, AllSubsetRegressionResult, ALLSUBSETREGRESSION_EXTRAKEY

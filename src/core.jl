@@ -149,7 +149,7 @@ function gsr(
 			residualtest = residualtest,
 			orderresults = orderresults,
 		)
-
+	end
 
 	original_data.extras = data.extras
 
