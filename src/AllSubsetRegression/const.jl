@@ -7,6 +7,7 @@ const ORDERRESULTS_DEFAULT = false
 const OUTSAMPLE_DEFAULT = 20
 const RESIDUALTEST_DEFAULT = false
 const TTEST_DEFAULT = false
+const ZTEST_DEFAULT = false
 
 const EQUATION_GENERAL_INFORMATION = [:nobs, :ncoef, :sse, :r2, :F, :rmse, :r2adj]
 const INDEX = :index

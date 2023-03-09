@@ -19,7 +19,7 @@ function gsr(
 	outsample::Union{Nothing, Int, Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
 	criteria::Array = AllSubsetRegression.CRITERIA_DEFAULT,
 	ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
-	ztest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
+	ztest::Bool = AllSubsetRegression.ZTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
 	modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
 	residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
 	orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
@@ -85,7 +85,7 @@ function gsr(
 	outsample::Union{Nothing, Int, Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
 	criteria::Array = AllSubsetRegression.CRITERIA_DEFAULT,
 	ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,
-	ztest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
+	ztest::Bool = AllSubsetRegression.ZTEST_DEFAULT,  # TODO: validation that both ztest and ttest are mutex
 	modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
 	residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
 	orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
@@ -139,14 +139,6 @@ function gsr(
 			orderresults = orderresults,
 		)
 	elseif estimator == :logit
-		h1=fit(GeneralizedLinearModel, x_nofe_f32_sp, y_f32_sp, Binomial(), LogitLink(), start=zeros(size(x_nofe_f32_sp,2)));
-		coef0=coeftable(h1).cols[1];
-		z0=coeftable(h1).cols[3];
-		aic0=aic(h1);
-		ll0=loglikelihood(h1);
-		k0=size(x_nofe_f32_sp,2);
-		n0=size(y_f32_sp,1);
-
 		AllSubsetRegression.logit!(
 			data,
 			fixedvariables = fixedvariables,
@@ -158,17 +150,6 @@ function gsr(
 			orderresults = orderresults,
 		)
 
-	elseif estimator == :probit
-		AllSubsetRegression.glm!(
-			# data,
-			# fixedvariables = fixedvariables,
-			# outsample = outsample,
-			# criteria = criteria,
-			# ttest = ttest,
-			# modelavg = modelavg,
-			# residualtest = residualtest,
-			# orderresults = orderresults,
-		)
 
 	original_data.extras = data.extras
 

@@ -3,7 +3,7 @@ function logit(
 	fixedvariables::Union{Nothing, Array} = FIXEDVARIABLES_DEFAULT,
 	outsample::Union{Nothing, Int, Array} = OUTSAMPLE_DEFAULT,
 	criteria::Array = CRITERIA_DEFAULT,
-	ttest::Bool = TTEST_DEFAULT,
+	ztest::Bool = ZTEST_DEFAULT,
 	modelavg::Bool = MODELAVG_DEFAULT,
 	residualtest::Bool = RESIDUALTEST_DEFAULT,
 	orderresults::Bool = ORDERRESULTS_DEFAULT,
@@ -13,7 +13,7 @@ function logit(
 		fixedvariables = fixedvariables,
 		outsample = outsample,
 		criteria = criteria,
-		ttest = ttest,
+		ztest = ztest,
 		modelavg = modelavg,
 		residualtest = residualtest,
 		orderresults = orderresults,
@@ -25,11 +25,12 @@ function logit!(
 	fixedvariables::Union{Nothing, Array} = FIXEDVARIABLES_DEFAULT,
 	outsample::Union{Nothing, Int, Array} = OUTSAMPLE_DEFAULT,
 	criteria::Array = CRITERIA_DEFAULT,
-	ttest::Bool = TTEST_DEFAULT,
+	ztest::Bool = ZTEST_DEFAULT,
 	modelavg::Bool = MODELAVG_DEFAULT,
 	residualtest::Bool = RESIDUALTEST_DEFAULT,
 	orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
+	ttest = ztest # FIXME
 	result = create_result(data, fixedvariables, outsample, criteria, ttest, modelavg, residualtest, orderresults)
 	execute!(data, result)
 	ModelSelection.addresult!(data, result)
@@ -51,8 +52,10 @@ function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegr
 	expvars_data = convert(SharedArray, data.expvars_data)
 	result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
 	datanames_index = ModelSelection.create_datanames_index(result.datanames)
+
 	if nprocs() == nworkers()
 		for order in 1:num_operations
+			# TODO: Split in multiple lines
 			execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
 		end
 	else
