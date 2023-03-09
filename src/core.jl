@@ -1,4 +1,5 @@
 function gsr(
+	estimator::Symbol,
 	equation::Union{String, Array{String}, Array{Symbol}},
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing};
 	datanames::Union{Array, Array{Symbol, 1}, Nothing} = nothing,
@@ -17,7 +18,8 @@ function gsr(
 	fixedvariables::Union{Nothing, Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
 	outsample::Union{Nothing, Int, Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
 	criteria::Array = AllSubsetRegression.CRITERIA_DEFAULT,
-	ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,
+	ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
+	ztest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
 	modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
 	residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
 	orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
@@ -29,6 +31,7 @@ function gsr(
 	exportlatex::Union{Nothing, String} = EXPORTLATEX_DEFAULT,
 )
 	gsr(
+		estimator,
 		equation,
 		data = data,
 		datanames = datanames,
@@ -48,6 +51,7 @@ function gsr(
 		outsample = outsample,
 		criteria = criteria,
 		ttest = ttest,
+		ztest = ztest,
 		modelavg = modelavg,
 		residualtest = residualtest,
 		orderresults = orderresults,
@@ -61,6 +65,7 @@ function gsr(
 end
 
 function gsr(
+	estimator::Symbol,
 	equation::Union{String, Array{String}, Array{Symbol}};
 	data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Tuple, DataFrame, Nothing},
 	datanames::Union{Array, Array{Symbol, 1}, Nothing} = nothing,
@@ -80,6 +85,7 @@ function gsr(
 	outsample::Union{Nothing, Int, Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
 	criteria::Array = AllSubsetRegression.CRITERIA_DEFAULT,
 	ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,
+	ztest::Bool = AllSubsetRegression.TTEST_DEFAULT,  # TODO: validation that both ztest ans ttest are mutex
 	modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
 	residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
 	orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
@@ -120,16 +126,49 @@ function gsr(
 		original_data.extras = data.extras
 	end
 
-	AllSubsetRegression.ols!(
-		data,
-		fixedvariables = fixedvariables,
-		outsample = outsample,
-		criteria = criteria,
-		ttest = ttest,
-		modelavg = modelavg,
-		residualtest = residualtest,
-		orderresults = orderresults,
-	)
+	if estimator == :ols
+		# TODO: Add estimator here
+		AllSubsetRegression.ols!(
+			data,
+			fixedvariables = fixedvariables,
+			outsample = outsample,
+			criteria = criteria,
+			ttest = ttest,
+			modelavg = modelavg,
+			residualtest = residualtest,
+			orderresults = orderresults,
+		)
+	elseif estimator == :logit
+		h1=fit(GeneralizedLinearModel, x_nofe_f32_sp, y_f32_sp, Binomial(), LogitLink(), start=zeros(size(x_nofe_f32_sp,2)));
+		coef0=coeftable(h1).cols[1];
+		z0=coeftable(h1).cols[3];
+		aic0=aic(h1);
+		ll0=loglikelihood(h1);
+		k0=size(x_nofe_f32_sp,2);
+		n0=size(y_f32_sp,1);
+
+		AllSubsetRegression.logit!(
+			data,
+			fixedvariables = fixedvariables,
+			outsample = outsample,
+			criteria = criteria,  # TODO: Restricted: without r2, r2adj, rmse: add loglikelihood, roc
+			ztest = ztest,
+			modelavg = modelavg,
+			residualtest = residualtest,
+			orderresults = orderresults,
+		)
+
+	elseif estimator == :probit
+		AllSubsetRegression.glm!(
+			# data,
+			# fixedvariables = fixedvariables,
+			# outsample = outsample,
+			# criteria = criteria,
+			# ttest = ttest,
+			# modelavg = modelavg,
+			# residualtest = residualtest,
+			# orderresults = orderresults,
+		)
 
 	original_data.extras = data.extras
 
