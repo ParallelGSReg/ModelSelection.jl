@@ -31,13 +31,13 @@ function ols!(
 	orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
 	result = create_result(data, fixedvariables, outsample, criteria, ttest, modelavg, residualtest, orderresults)
-	execute!(data, result)
+	ols_execute!(data, result)
 	ModelSelection.addresult!(data, result)
 	data = addextras(data, result)
 	return data
 end
 
-function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
+function ols_execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
 	if !data.removemissings
 		data = ModelSelection.filter_data_by_empty_values(data)
 	end

@@ -32,13 +32,13 @@ function logit!(
 )
 	ttest = ztest  # FIXME
 	result = create_result(data, fixedvariables, outsample, criteria, ttest, modelavg, residualtest, orderresults)
-	execute!(data, result)
+	logit_execute!(data, result)
 	ModelSelection.addresult!(data, result)
 	data = addextras(data, result)
 	return data
 end
 
-function execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
+function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubsetRegressionResult)
 	if !data.removemissings
 		data = ModelSelection.filter_data_by_empty_values(data)
 	end
