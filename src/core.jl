@@ -97,8 +97,8 @@ function gsr(
 	exportlatex::Union{Nothing, String} = EXPORTLATEX_DEFAULT,
 )
 	removemissings = fe_lag === nothing
-
-	data = Preprocessing.input(
+	println("Preprocessing")
+	@time data = Preprocessing.input(
 		equation,
 		data = data,
 		datanames = datanames,
@@ -112,23 +112,26 @@ function gsr(
 	)
 
 	if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
-		data = FeatureExtraction.featureextraction!(data, fe_sqr = fe_sqr, fe_lag = fe_lag, fe_log = fe_log, fe_inv = fe_inv, interaction = interaction, removemissings = true)
+		println("FeatureExtraction")
+		@time data = FeatureExtraction.featureextraction!(data, fe_sqr = fe_sqr, fe_lag = fe_lag, fe_log = fe_log, fe_inv = fe_inv, interaction = interaction, removemissings = true)
 	end
 
 	original_data = copy_data(data)
 
 	if preliminaryselection_enabled(preliminaryselection)
+		println("PreliminarySelection")
 		preliminaryselection = Symbol(preliminaryselection)
 		if !validate_preliminaryselection(preliminaryselection)
 			error(INVALID_PRELIMINARYSELECTION)
 		end
-		data = PreliminarySelection._lasso!(data)
+		@time data = PreliminarySelection._lasso!(data)
 		original_data.extras = data.extras
 	end
 
 	if estimator == :ols
 		# TODO: Add estimator here
-		AllSubsetRegression.ols!(
+		println("AllSubsetRegression.ols")
+		@time AllSubsetRegression.ols!(
 			data,
 			fixedvariables = fixedvariables,
 			outsample = outsample,
@@ -139,7 +142,8 @@ function gsr(
 			orderresults = orderresults,
 		)
 	elseif estimator == :logit
-		AllSubsetRegression.logit!(
+		println("AllSubsetRegression.logit!")
+		@time AllSubsetRegression.logit!(
 			data,
 			fixedvariables = fixedvariables,
 			outsample = outsample,
@@ -154,11 +158,13 @@ function gsr(
 	original_data.extras = data.extras
 
 	if kfoldcrossvalidation
-		CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
+		println("CrossValidation")
+		@time CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
 	end
 
 	if exportcsv !== nothing
-		ModelSelection.Output.csv(data, filename = exportcsv)
+		println("Output")
+		@time ModelSelection.Output.csv(data, filename = exportcsv)
 	end
 
 	if exportlatex !== nothing

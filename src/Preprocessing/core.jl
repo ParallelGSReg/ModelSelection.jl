@@ -24,6 +24,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	return input(
 		equation,
 		data,
@@ -63,6 +65,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	return input(
 		equation,
 		data,
@@ -102,6 +106,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+	# println(typeof(equation), " ", equation)
 	return input(
 		equation,
 		data,
@@ -142,6 +148,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	return input(
 		equation,
 		data,
@@ -182,6 +190,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	return input(
 		equation,
 		data,
@@ -222,6 +232,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	return input(
 		equation_str_to_strarr!(equation),
 		data,
@@ -262,6 +274,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	equation = vec(equation)
 	equation = Vector{String}(equation)
 	return input(
@@ -304,6 +318,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	if datanames !== nothing
 		datanames = Vector{String}(vec(datanames))
 	end
@@ -353,6 +369,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	equation = vec(equation)
 	equation = Vector{Symbol}(equation)
 	return input(
@@ -395,6 +413,8 @@ function input(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	method = Symbol(lowercase(string(method)))
 	if method == :precise
 		datatype = Float64
@@ -417,7 +437,8 @@ function input(
 	data = get_data_from_data(data)
 
 	if !ModelSelection.in_vector(equation, datanames)
-		error(SELECTED_VARIABLES_DOES_NOT_EXISTS)
+		msg = string(SELECTED_VARIABLES_DOES_NOT_EXISTS, ": ", equation[(!in).(equation, Ref(datanames))])
+		error(msg)
 	end
 
 	if !isa(data, Array{Union{Missing, datatype}}) || !isa(data, Array{Union{datatype}})
@@ -487,6 +508,8 @@ function execute(
 	removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
 	removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
+	# println()
+    # println(typeof(equation), " ", equation)
 	datatype = method == :precise ? Float64 : Float32
 	temp_equation = equation
 

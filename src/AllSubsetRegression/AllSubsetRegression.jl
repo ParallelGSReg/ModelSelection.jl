@@ -6,7 +6,8 @@ using
     LinearAlgebra,
     Printf,
     SharedArrays,
-    GLM
+    GLM,
+    SparseArrays # POC: Sparse
 
 using ..ModelSelection
 

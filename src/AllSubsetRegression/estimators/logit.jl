@@ -48,15 +48,26 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 		expvars_num = expvars_num - 1
 	end
 	num_operations = 2^expvars_num - 1
-	depvar_data = convert(SharedArray, data.depvar_data)
-	expvars_data = convert(SharedArray, data.expvars_data)
+
+	depvar_data = sparse(data.depvar_data)
+	expvars_data = sparse(data.expvars_data)
+	println(typeof(depvar_data))
+	depvar_data = convert(SharedArray, depvar_data)
+	expvars_data = convert(SharedArray, expvars_data)
+	println(typeof(depvar_data))
+
 	result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
 	datanames_index = ModelSelection.create_datanames_index(result.datanames)
+
+	ncoef_gum = size(expvars_data, 2)
+	depvar_wo_outsample, expvars_wo_outsample = get_insample_subset(depvar_data, expvars_data, result.outsample, collect(1:ncoef_gum))
+	gum_model = GLM.fit(GeneralizedLinearModel, expvars_wo_outsample, depvar_wo_outsample, Binomial(), LogitLink(), start=zeros(ncoef_gum))
+	start_coef = coeftable(gum_model).cols[1]
 
 	if nprocs() == nworkers()
 		for order in 1:num_operations
 			# TODO: Split in multiple lines
-			logit_execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
+			logit_execute_row!(order, data.depvar, data.expvars, start_coef, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
 		end
 	else
 		ops_per_worker = div(num_operations, nworkers())
@@ -75,6 +86,7 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 					ops_per_worker,
 					data.depvar,
 					data.expvars,
+					start_coef,
 					datanames_index,
 					depvar_data,
 					expvars_data,
@@ -98,7 +110,7 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 		if remainder > 0
 			for j in 1:remainder
 				order = j + ops_per_worker * num_jobs
-				logit_execute_row!(order, data.depvar, data.expvars, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
+				logit_execute_row!(order, data.depvar, data.expvars, start_coef, datanames_index, depvar_data, expvars_data, result_data, data.intercept, data.time, data.datatype, result.outsample, result.criteria, result.ttest, result.residualtest, result.fixedvariables)
 			end
 		end
 	end
@@ -167,6 +179,7 @@ function logit_execute_job!(
 	ops_per_worker,
 	depvar,
 	expvars,
+	start_coef,
 	datanames_index,
 	depvar_data,
 	expvars_data,
@@ -186,6 +199,7 @@ function logit_execute_job!(
 			order,
 			depvar,
 			expvars,
+			start_coef,
 			datanames_index,
 			depvar_data,
 			expvars_data,
@@ -209,6 +223,7 @@ function logit_execute_row!(
 	order,
 	depvar,
 	expvars,
+	start_coef,
 	datanames_index,
 	depvar_data,
 	expvars_data,
@@ -231,7 +246,9 @@ function logit_execute_row!(
 
 	nobs = size(depvar_subset, 1)
 	ncoef = size(expvars_subset, 2)
-	model = GLM.fit(GeneralizedLinearModel, expvars_subset, depvar_subset, Binomial(), LogitLink(), start=zeros(ncoef))
+	start_coef_subset = start_coef[selected_variables_index]
+
+	model = GLM.fit(GeneralizedLinearModel, expvars_subset, depvar_subset, Binomial(), LogitLink(), start=start_coef_subset)
 	b = coef(model)
 	ŷ = predict(model)
 	er2 = model.rr.devresid			      # squared errors
