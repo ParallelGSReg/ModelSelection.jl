@@ -1,8 +1,6 @@
 module FeatureExtraction
 
-using
-    ShiftedArrays,
-    Statistics
+using ShiftedArrays, Statistics
 using ..ModelSelection
 
 export featureextraction!, featureextraction, FEATUREEXTRACTION_EXTRAKEY

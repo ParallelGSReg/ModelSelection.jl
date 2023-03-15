@@ -1,18 +1,17 @@
 module Output
 
-using
-	DataFrames,
-	DelimitedFiles,
-	Distributed,
-	Distributions,
-	# InfoZIP,
-	KernelDensity,
-	Mustache,
-	Plots,
-	Printf,
-	Statistics,
-	StatsPlots,
-	ZipFile
+using DataFrames,
+    DelimitedFiles,
+    Distributed,
+    Distributions,
+    # InfoZIP,
+    KernelDensity,
+    Mustache,
+    Plots,
+    Printf,
+    Statistics,
+    StatsPlots,
+    ZipFile
 using ..ModelSelection
 
 export csv, summary, latex

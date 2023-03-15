@@ -1,10 +1,7 @@
 module CrossValidation
 
 using ..ModelSelection
-using
-    Printf,
-    Random,
-    Statistics
+using Printf, Random, Statistics
 import Base: iterate
 
 export kfoldcrossvalidation, CROSSVALIDATION_EXTRAKEY, CrossValidationResult

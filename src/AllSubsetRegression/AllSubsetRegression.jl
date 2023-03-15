@@ -1,12 +1,6 @@
 module AllSubsetRegression
 
-using
-    Distributed,
-    Distributions,
-    LinearAlgebra,
-    Printf,
-    SharedArrays,
-    GLM
+using Distributed, Distributions, LinearAlgebra, Printf, SharedArrays, GLM
 
 using ..ModelSelection
 
