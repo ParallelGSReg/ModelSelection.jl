@@ -49,8 +49,8 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 	end
 	
 	num_operations = 2^expvars_num - 1
-	depvar_data = convert(SharedArray, depvar_data)
-	expvars_data = convert(SharedArray, expvars_data)
+	depvar_data = convert(SharedArray, data.depvar_data)
+	expvars_data = convert(SharedArray, data.expvars_data)
 	result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
 	datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
