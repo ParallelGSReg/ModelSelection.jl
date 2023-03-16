@@ -17,6 +17,10 @@ Output:
  - [ ] Docstrings in Output.utils.js
  - [ ] Add many parameters types
  - [ ] Tests
+ - [ ] Export clean original data (after pre-processing and Feature Extraction)  
+ - [ ] Export Lasso results
+ - [ ] Export extender summary.txt
+
 
 FeatureExtraction:
  - [ ] Tests
