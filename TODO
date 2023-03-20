@@ -1,6 +1,7 @@
 General
  - [ ] Several TODOs
  - Should be change `method` parameter to `precision`?
+ - Include `estimator` in different functions as needed.
 
 Preprocessing:
  - [ ] TODOs in tests
