@@ -1,6 +1,6 @@
 module ModelSelection
 
-using DataFrames
+using DataFrames, JLD
 
 include("structs/modelselection_data.jl")
 include("datatypes/modelselection_result.jl")
