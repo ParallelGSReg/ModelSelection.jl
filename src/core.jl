@@ -1,4 +1,3 @@
-using JLD
 function gsr(
 	estimator::Symbol,
 	equation::Union{String, Array{String}, Array{Symbol}},
