@@ -1,3 +1,4 @@
+using JLD
 function gsr(
 	estimator::Symbol,
 	equation::Union{String, Array{String}, Array{Symbol}},
@@ -165,6 +166,22 @@ function gsr(
 	if exportcsv !== nothing
 		println("Output")
 		@time ModelSelection.Output.csv(data, filename = exportcsv)
+	end
+	
+	if preliminaryselection !== nothing
+		jldopen("ModelSelectionData_data.jld", "w") do file
+			addrequire(file, ModelSelection)
+			write(file, "ModelSelectionData", data)
+		end
+		jldopen("ModelSelectionData_originaldata.jld", "w") do file2
+			addrequire(file2, ModelSelection)
+			write(file2, "ModelSelectionOriginalData", original_data)
+		end
+	else
+		jldopen("ModelSelectionData_data.jld", "w") do file
+			addrequire(file, ModelSelection)
+			write(file, "ModelSelectionData", data)
+		end
 	end
 
 	if exportlatex !== nothing
