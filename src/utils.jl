@@ -193,10 +193,6 @@ function filter_data_by_empty_values(data)
     return data
 end
 
-
-
-
-
 """
 Convert data by data
 """
@@ -296,25 +292,18 @@ end
 Returns if feature extraction module was selected
 """
 function featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
-    return fe_sqr != nothing ||
-           fe_log != nothing ||
-           fe_inv != nothing ||
-           fe_lag != nothing ||
-           interaction != nothing
+    return fe_sqr !== nothing ||
+           fe_log !== nothing ||
+           fe_inv !== nothing ||
+           fe_lag !== nothing ||
+           interaction !== nothing
 end
 
 """
 Returns if preliminary selection was selected
 """
 function preliminaryselection_enabled(preliminaryselection)
-    return preliminaryselection != nothing
-end
-
-"""
-Validates if preliminary selecttion method exists
-"""
-function validate_preliminaryselection(preliminaryselection)
-    return preliminaryselection in VALID_PRELIMINARYSELECTION
+    return preliminaryselection !== nothing
 end
 
 """

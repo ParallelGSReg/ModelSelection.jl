@@ -23,10 +23,19 @@ const AVAILABLE_CRITERIA = Dict(
     :bic => Dict("verbose_title" => "BIC", "verbose_show" => true, "index" => -1),
     :cp =>
         Dict("verbose_title" => "Mallows's Cp", "verbose_show" => true, "index" => -1),
+    :loglikelihood => Dict(
+        "verbose_title" => "Log Likelihood",
+        "verbose_show" => true,
+        "index" => -1,
+    ),
     :r2adj =>
         Dict("verbose_title" => "Adjusted R²", "verbose_show" => false, "index" => 1),
     :rmse => Dict("verbose_title" => "RMSE", "verbose_show" => true, "index" => -1),
     :rmseout =>
         Dict("verbose_title" => "RMSE OUT", "verbose_show" => true, "index" => -1),
+    :roc => Dict("verbose_title" => "ROC", "verbose_show" => true, "index" => -1),
     :sse => Dict("verbose_title" => "SSE", "verbose_show" => true, "index" => -1),
 )
+
+const AVAILABLE_LOGIT_CRITERIA = [:aic, :aicc, :bic, :cp, :loglikelihood, :roc]
+const AVAILABLE_OLS_CRITERIA = [:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse]

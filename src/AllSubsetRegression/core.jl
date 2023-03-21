@@ -1,3 +1,49 @@
+include("estimators/ols.jl")
+include("estimators/logit.jl")
+
+function all_subset_regression(
+    estimator::Symbol,
+    data::ModelSelection.ModelSelectionData;
+    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
+    outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+    ttest::Bool = ZTEST_DEFAULT,
+    ztest::Bool = ZTEST_DEFAULT,
+    modelavg::Bool = MODELAVG_DEFAULT,
+    residualtest::Bool = RESIDUALTEST_DEFAULT,
+    orderresults::Bool = ORDERRESULTS_DEFAULT,
+)
+    if ttest && ztest
+        throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
+    end
+
+    if estimator == :ols
+        AllSubsetRegression.ols!(
+            data,
+            fixedvariables = fixedvariables,
+            outsample = outsample,
+            criteria = criteria,
+            ttest = ttest,
+            modelavg = modelavg,
+            residualtest = residualtest,
+            orderresults = orderresults,
+        )
+    elseif estimator == :logit
+        AllSubsetRegression.logit!(
+            data,
+            fixedvariables = fixedvariables,
+            outsample = outsample,
+            criteria = criteria,
+            ztest = ztest,
+            modelavg = modelavg,
+            residualtest = residualtest,
+            orderresults = orderresults,
+        )
+    else
+        throw(ArgumentError(INVALID_ESTIMATOR))
+    end
+end
+
 """
 to_string
 """

@@ -375,7 +375,7 @@ function input(
     equation = equation_converts_wildcards!(equation, datanames)
     equation = strarr_to_symarr!(equation)
     if isempty(equation)
-        error(VARIABLES_NOT_DEFINED)
+        throw(ArgumentError(VARIABLES_NOT_DEFINED))
     end
     return input(
         equation,
@@ -481,7 +481,7 @@ function input(
     elseif method == :fast
         datatype = Float32
     else
-        error(INVALID_METHOD)
+        throw(ArgumentError(INVALID_METHOD))
     end
 
     if datanames === nothing
@@ -497,7 +497,12 @@ function input(
     data = get_data_from_data(data)
 
     if !ModelSelection.in_vector(equation, datanames)
-        error(SELECTED_VARIABLES_DOES_NOT_EXISTS)
+        msg = string(
+            SELECTED_VARIABLES_DOES_NOT_EXISTS,
+            ": ",
+            equation[(!in).(equation, Ref(datanames))],
+        )
+        throw(ArgumentError(msg))
     end
 
     if !isa(data, Array{Union{Missing,datatype}}) || !isa(data, Array{Union{datatype}})
@@ -509,7 +514,8 @@ function input(
             time = Symbol(time)
         end
         if ModelSelection.get_column_index(time, datanames) === nothing
-            error(TIME_VARIABLE_INEXISTENT)
+            msg = string(TIME_VARIABLE_INEXISTENT, ": ", time)
+            throw(ArgumentError(msg))
         end
 
     end
@@ -518,8 +524,9 @@ function input(
         if isa(panel, String)
             panel = Symbol(panel)
         end
-        if ModelSelection.get_column_index(panel, datanames) == nothing
-            error(PANEL_VARIABLE_INEXISTENT)
+        if ModelSelection.get_column_index(panel, datanames) === nothing
+            msg = string(PANEL_VARIABLE_INEXISTENT, ": ", panel)
+            throw(ArgumentError(msg))
         end
     end
 
@@ -593,7 +600,7 @@ function execute(
         if validate_panel(data, datanames, panel = panel)
             panel_data = data[:, ModelSelection.get_column_index(panel, datanames)]
         else
-            error(PANEL_ERROR)
+            throw(ArgumentError(PANEL_ERROR))
         end
     end
 
@@ -602,14 +609,14 @@ function execute(
         if validate_time(data, datanames, time = time, panel = panel)
             time_data = data[:, ModelSelection.get_column_index(time, datanames)]
         else
-            error(TIME_ERROR)
+            throw(ArgumentError(TIME_ERROR))
         end
     end
 
     if seasonaladjustment !== nothing && time !== nothing
         seasonal_adjustments(data, seasonaladjustment, datanames)
     elseif seasonaladjustment !== nothing && time === nothing
-        error(TIME_VARIABLE_INEXISTENT)
+        throw(ArgumentError(TIME_VARIABLE_INEXISTENT))
     end
 
     (data, datanames) = filter_data_by_selected_columns(data, equation, datanames)

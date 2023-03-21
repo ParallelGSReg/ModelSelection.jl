@@ -2,7 +2,7 @@ function ols(
     data::ModelSelection.ModelSelectionData;
     fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Array = CRITERIA_DEFAULT,
+    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
@@ -24,12 +24,14 @@ function ols!(
     data::ModelSelection.ModelSelectionData;
     fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Array = CRITERIA_DEFAULT,
+    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
+    validate_criteria(criteria, AVAILABLE_OLS_CRITERIA)
+
     result = create_result(
         data,
         fixedvariables,

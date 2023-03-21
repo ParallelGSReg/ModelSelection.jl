@@ -216,13 +216,6 @@ function sortrows(B::AbstractMatrix, cols::Array; kws...)
 end
 
 """
-TODO: Not being used
-"""
-function get_varnames(datanames)
-    map(h -> chop("$h", tail = 2), filter(s -> endswith("$s", "_b"), datanames))
-end
-
-"""
 Add extra data to data
 # Arguments
 - `data::ModelSelection.ModelSelectionData`: the model selection data.
@@ -251,4 +244,19 @@ function addextras(
         :orderresults => result.orderresults,
     )
     return data
+end
+
+function valid_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
+    return ModelSelection.in_vector(criteria, available_criteria)
+end
+
+function validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
+    if !valid_criteria(criteria, available_criteria)
+        msg = string(
+            SELECTED_CRITERIA_IS_NOT_VALID,
+            ": ",
+            criteria[(!in).(criteria, Ref(available_criteria))],
+        )
+        throw(ArgumentError(msg))
+    end
 end
