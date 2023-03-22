@@ -56,33 +56,37 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 
 	ncoef_gum = size(expvars_data, 2)
 	depvar_wo_outsample, expvars_wo_outsample = get_insample_subset(depvar_data, expvars_data, result.outsample, collect(1:ncoef_gum))
-	gum_model = GLM.fit(GeneralizedLinearModel, 
-						expvars_wo_outsample, 
-						depvar_wo_outsample, 
-						Binomial(), 
-						LogitLink(), 
-						start=zeros(ncoef_gum))
+	gum_model = GLM.fit(
+			    GeneralizedLinearModel, 
+			    expvars_wo_outsample, 
+			    depvar_wo_outsample, 
+			    Binomial(), 
+			    LogitLink(), 
+			    start=zeros(ncoef_gum)
+		    )
 	start_coef = coeftable(gum_model).cols[1]
 
 	if nprocs() == nworkers()
 		for order in 1:num_operations
 			# TODO: Split in multiple lines
-			logit_execute_row!(	order, 
-								data.depvar, 
-								data.expvars, 
-								start_coef, 
-								datanames_index, 
-								depvar_data, 
-								expvars_data, 
-								result_data, 
-								data.intercept, 
-								data.time, 
-								data.datatype, 
-								result.outsample, 
-								result.criteria, 
-								result.ttest, 
-								result.residualtest, 
-								result.fixedvariables)
+			logit_execute_row!(
+					   order, 
+					   data.depvar, 
+					   data.expvars, 
+					   start_coef, 
+					   datanames_index, 
+					   depvar_data, 
+					   expvars_data, 
+					   result_data, 
+					   data.intercept, 
+					   data.time, 
+					   data.datatype, 
+					   result.outsample, 
+					   result.criteria, 
+					   result.ttest, 
+					   result.residualtest, 
+					   result.fixedvariables
+			)
 		end
 	else
 		ops_per_worker = div(num_operations, nworkers())
@@ -125,22 +129,24 @@ function logit_execute!(data::ModelSelection.ModelSelectionData, result::AllSubs
 		if remainder > 0
 			for j in 1:remainder
 				order = j + ops_per_worker * num_jobs
-				logit_execute_row!(	order, 
-									data.depvar, 
-									data.expvars, 
-									start_coef, 
-									datanames_index, 
-									depvar_data, 
-									expvars_data, 
-									result_data, 
-									data.intercept, 
-									data.time, 
-									data.datatype, 
-									result.outsample, 
-									result.criteria, 
-									result.ttest, 
-									result.residualtest, 
-									result.fixedvariables)
+				logit_execute_row!(
+						   order, 
+						   data.depvar, 
+						   data.expvars, 
+						   start_coef, 
+						   datanames_index, 
+						   depvar_data, 
+						   expvars_data, 
+						   result_data, 
+						   data.intercept, 
+						   data.time, 
+						   data.datatype, 
+						   result.outsample, 
+						   result.criteria, 
+						   result.ttest, 
+						   result.residualtest, 
+						   result.fixedvariables
+				)
 			end
 		end
 	end
@@ -273,32 +279,38 @@ function logit_execute_row!(
 	num_job = nothing,
 	iteration_num = nothing,
 )
-	selected_variables_index = ModelSelection.get_selected_variables(	order, 
-																		expvars, 
-																		intercept, 
-																		fixedvariables = fixedvariables, 
-																		num_jobs = num_jobs, 
-																		num_job = num_job, 
-																		iteration_num = iteration_num)
-	depvar_subset, expvars_subset = get_insample_subset(depvar_data, 
-														expvars_data, 
-														outsample, 
-														selected_variables_index)
+	selected_variables_index = ModelSelection.get_selected_variables(
+									 order, 
+									 expvars, 
+									 intercept, 
+									 fixedvariables = fixedvariables, 
+									 num_jobs = num_jobs, 
+									 num_job = num_job, 
+									 iteration_num = iteration_num
+				   )
+	depvar_subset, expvars_subset = get_insample_subset(
+							    depvar_data, 
+							    expvars_data, 
+							    outsample, 
+							    selected_variables_index
+					)
 	outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 
 	nobs = size(depvar_subset, 1)
 	ncoef = size(expvars_subset, 2)
 	start_coef_subset = start_coef[selected_variables_index]
 
-	model = GLM.fit(GeneralizedLinearModel, 
-					expvars_subset, 
-					depvar_subset, 
-					Binomial(), 
-					LogitLink(), 
-					start=start_coef_subset)
+	model = GLM.fit(
+			GeneralizedLinearModel, 
+			expvars_subset, 
+			depvar_subset, 
+			Binomial(), 
+			LogitLink(), 
+			start=start_coef_subset
+		)
 	b = coef(model)
 	ŷ = predict(model)
-	er2 = model.rr.devresid			      # squared errors
+	er2 = model.rr.devresid		      # squared errors
 	sse = sum(er2)                        # residual sum of squares
 	df_e = nobs - ncoef                   # degrees of freedom	
 	rmse = sqrt(sse / nobs)               # root mean squared error
