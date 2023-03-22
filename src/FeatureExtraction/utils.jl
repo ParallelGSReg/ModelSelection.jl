@@ -1,7 +1,7 @@
 """
 Parse fe variables
 """
-function parse_fe_variables(fe_vars, expvars; depvar=nothing, is_pair=false)
+function parse_fe_variables(fe_vars, expvars; depvar = nothing, is_pair = false)
     valid_vars = copy(expvars)
 
     if depvar !== nothing
@@ -16,7 +16,7 @@ function parse_fe_variables(fe_vars, expvars; depvar=nothing, is_pair=false)
             fe_vars = [fe_vars]
         end
         for var in fe_vars
-            vars = vcat(vars, [Symbol(var[1])=>var[2]])
+            vars = vcat(vars, [Symbol(var[1]) => var[2]])
             selected_vars = append!(selected_vars, [Symbol(var[1])])
         end
         fe_vars = vars
@@ -24,7 +24,7 @@ function parse_fe_variables(fe_vars, expvars; depvar=nothing, is_pair=false)
         if !isa(fe_vars, Array)
             fe_vars = [fe_vars]
         end
-        fe_vars = [Symbol(s) for s in fe_vars ]
+        fe_vars = [Symbol(s) for s in fe_vars]
         selected_vars = fe_vars
     end
 
@@ -51,12 +51,32 @@ function data_add_fe_sqr(data, fe_vars)
     end
 
     if size(new_vars, 1) > 0
-        data.expvars_data = hcat(data.expvars_data, (data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in new_vars ]]).^2)
-        data.expvars = vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars ])
+        data.expvars_data = hcat(
+            data.expvars_data,
+            (data.expvars_data[
+                :,
+                [ModelSelection.get_column_index(var, data.expvars) for var in new_vars],
+            ]) .^ 2,
+        )
+        data.expvars =
+            vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars])
     end
 
     if size(existent_vars, 1) > 0
-        data.expvars_data[:, [ ModelSelection.get_column_index(Symbol(string(var, postfix)), data.expvars) for var in existent_vars ]] = data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in existent_vars ]].^2
+        data.expvars_data[
+            :,
+            [
+                ModelSelection.get_column_index(Symbol(string(var, postfix)), data.expvars)
+                for var in existent_vars
+            ],
+        ] =
+            data.expvars_data[
+                :,
+                [
+                    ModelSelection.get_column_index(var, data.expvars) for
+                    var in existent_vars
+                ],
+            ] .^ 2
     end
 
     return data
@@ -79,12 +99,41 @@ function data_add_fe_log(data, fe_vars)
         end
 
         if size(new_vars, 1) > 0
-            data.expvars_data = hcat(data.expvars_data, log.(data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in new_vars ]]))
-            data.expvars = vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars ])
+            data.expvars_data = hcat(
+                data.expvars_data,
+                log.(
+                    data.expvars_data[
+                        :,
+                        [
+                            ModelSelection.get_column_index(var, data.expvars) for
+                            var in new_vars
+                        ],
+                    ]
+                ),
+            )
+            data.expvars =
+                vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars])
         end
 
         if size(existent_vars, 1) > 0
-            data.expvars_data[:, [ ModelSelection.get_column_index(Symbol(string(var, postfix)), data.expvars) for var in existent_vars ]] = log.(data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in existent_vars ]])
+            data.expvars_data[
+                :,
+                [
+                    ModelSelection.get_column_index(
+                        Symbol(string(var, postfix)),
+                        data.expvars,
+                    ) for var in existent_vars
+                ],
+            ] =
+                log.(
+                    data.expvars_data[
+                        :,
+                        [
+                            ModelSelection.get_column_index(var, data.expvars) for
+                            var in existent_vars
+                        ],
+                    ]
+                )
         end
         return data
     catch
@@ -108,12 +157,32 @@ function data_add_fe_inv(data, fe_vars)
     end
 
     if size(new_vars, 1) > 0
-        data.expvars_data = hcat(data.expvars_data, 1 ./ (data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in new_vars ]]))
-        data.expvars = vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars ])
+        data.expvars_data = hcat(
+            data.expvars_data,
+            1 ./ (data.expvars_data[
+                :,
+                [ModelSelection.get_column_index(var, data.expvars) for var in new_vars],
+            ]),
+        )
+        data.expvars =
+            vcat(data.expvars, [Symbol(string(var, postfix)) for var in new_vars])
     end
 
     if size(existent_vars, 1) > 0
-        data.expvars_data[:, [ ModelSelection.get_column_index(Symbol(string(var, postfix)), data.expvars) for var in existent_vars ]] = 1 ./ (data.expvars_data[:, [ ModelSelection.get_column_index(var, data.expvars) for var in existent_vars ]])
+        data.expvars_data[
+            :,
+            [
+                ModelSelection.get_column_index(Symbol(string(var, postfix)), data.expvars)
+                for var in existent_vars
+            ],
+        ] =
+            1 ./ (data.expvars_data[
+                :,
+                [
+                    ModelSelection.get_column_index(var, data.expvars) for
+                    var in existent_vars
+                ],
+            ])
     end
     return data
 end
@@ -135,21 +204,25 @@ function data_add_fe_lag(data, fe_vars)
                     num_cols = num_cols + 1
                 end
             end
-            var_data = Array{Union{Missing, data.datatype}}(missing, nobs, num_cols)
+            var_data = Array{Union{Missing,data.datatype}}(missing, nobs, num_cols)
             m = 1
             for i = 1:var[2]
                 expvar = Symbol(string(var[1], postfix, i))
-                
+
                 col_added = false
                 for csi in csis
-                    rows = (csi !== nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
+                    rows =
+                        (csi !== nothing) ? findall(x -> x == csi, data.panel_data) :
+                        collect(1:1:nobs)
                     num_rows = size(rows, 1)
                     if !(expvar in data.expvars)
-                        var_data[rows[1]:rows[1]+num_rows-1, m] .= lag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
+                        var_data[rows[1]:rows[1]+num_rows-1, m] .=
+                            lag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
                         col_added = true
                     else
                         n = ModelSelection.get_column_index(expvar, data.expvars)
-                        data.expvars_data[rows[1]:rows[1]+num_rows-1, n].= lag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
+                        data.expvars_data[rows[1]:rows[1]+num_rows-1, n] .=
+                            lag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
                     end
                 end
                 if col_added
@@ -167,21 +240,25 @@ function data_add_fe_lag(data, fe_vars)
                     num_cols = num_cols + 1
                 end
             end
-            var_data = Array{Union{Missing, data.datatype}}(missing, nobs, num_cols)
+            var_data = Array{Union{Missing,data.datatype}}(missing, nobs, num_cols)
             m = 1
             for i = 1:var[2]
                 expvar = Symbol(string(var[1], postfix, i))
-                
+
                 col_added = false
                 for csi in csis
-                    rows = (csi !== nothing) ? findall(x->x == csi, data.panel_data) : collect(1:1:nobs)
+                    rows =
+                        (csi !== nothing) ? findall(x -> x == csi, data.panel_data) :
+                        collect(1:1:nobs)
                     num_rows = size(rows, 1)
                     if !(expvar in data.expvars)
-                        var_data[rows[1]:rows[1]+num_rows-1, m] .= lag(data.depvar_data[rows[1]:rows[1]+num_rows-1], i)
+                        var_data[rows[1]:rows[1]+num_rows-1, m] .=
+                            lag(data.depvar_data[rows[1]:rows[1]+num_rows-1], i)
                         col_added = true
                     else
                         n = ModelSelection.get_column_index(expvar, data.expvars)
-                        data.expvars_data[rows[1]:rows[1]+num_rows-1, n].= lag(data.depvar_data[rows[1]:rows[1]+num_rows-1], i)
+                        data.expvars_data[rows[1]:rows[1]+num_rows-1, n] .=
+                            lag(data.depvar_data[rows[1]:rows[1]+num_rows-1], i)
                     end
                 end
                 if col_added
@@ -197,7 +274,7 @@ function data_add_fe_lag(data, fe_vars)
             data.expvars_data = hcat(data.expvars_data, var_data)
         end
     end
-    
+
     return data
 end
 
@@ -208,25 +285,35 @@ function data_add_interaction(data, interaction)
     if ModelSelection.get_column_index(data.depvar, interaction) !== nothing
         error(INTERACTION_DEPVAR_ERROR)
     end
-    
+
     if !ModelSelection.in_vector(interaction, data.expvars)
         error(INTERACTION_EQUATION_ERROR)
     end
-    
+
     num_variables = size(interaction, 1)
     infix = "_"
-    
+
     for i = 1:num_variables-1
         for j = i+1:num_variables
             col = Symbol(string(interaction[i], infix, interaction[j]))
-            var_1 = data.expvars_data[:, ModelSelection.get_column_index(interaction[i], data.expvars)]
-            var_2 = data.expvars_data[:, ModelSelection.get_column_index(interaction[j], data.expvars)]
+            var_1 = data.expvars_data[
+                :,
+                ModelSelection.get_column_index(interaction[i], data.expvars),
+            ]
+            var_2 = data.expvars_data[
+                :,
+                ModelSelection.get_column_index(interaction[j], data.expvars),
+            ]
             res = var_1 .* var_2
             if !(col in data.expvars)
                 data.expvars_data = hcat(data.expvars_data, res)
-                data.expvars = vcat(data.expvars, [Symbol(string(interaction[i], infix, interaction[j]))])
+                data.expvars = vcat(
+                    data.expvars,
+                    [Symbol(string(interaction[i], infix, interaction[j]))],
+                )
             else
-                data.expvars_data[:, ModelSelection.get_column_index(col, data.expvars)] = res
+                data.expvars_data[:, ModelSelection.get_column_index(col, data.expvars)] =
+                    res
             end
         end
     end
@@ -238,13 +325,16 @@ end
 Add values to extras
 """
 function addextras(data, fe_sqr, fe_log, fe_inv, fe_lag, interaction, removemissings)
-    data.extras[ModelSelection.generate_extra_key(FEATUREEXTRACTION_EXTRAKEY, data.extras)] = Dict(
+    data.extras[ModelSelection.generate_extra_key(
+        FEATUREEXTRACTION_EXTRAKEY,
+        data.extras,
+    )] = Dict(
         :fe_sqr => fe_sqr,
         :fe_log => fe_log,
         :fe_inv => fe_inv,
         :fe_lag => fe_lag,
         :interaction => interaction,
-        :removemissings => removemissings
+        :removemissings => removemissings,
     )
     return data
 end

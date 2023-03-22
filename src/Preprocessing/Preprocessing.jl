@@ -1,14 +1,9 @@
 module Preprocessing
 
-using
-    DataFrames,
-    SingularSpectrumAnalysis,
-    Statistics
+using DataFrames, SingularSpectrumAnalysis, Statistics
 using ..ModelSelection
 
-export
-    input,
-    PREPROCESSING_EXTRAKEY
+export input, PREPROCESSING_EXTRAKEY
 
 include("const.jl")
 include("strings.jl")
