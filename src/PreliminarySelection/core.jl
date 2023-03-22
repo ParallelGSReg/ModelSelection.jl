@@ -8,7 +8,6 @@ function preliminary_selection(
 
     if preliminaryselection == :lasso
         data = PreliminarySelection._lasso!(data)
-        original_data.extras = data.extras
     else
         throw(ArgumentError(INVALID_PRELIMINARYSELECTION))
     end

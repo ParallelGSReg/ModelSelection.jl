@@ -134,6 +134,7 @@ function gsr(
 
     if preliminaryselection_enabled(preliminaryselection)
         data = PreliminarySelection.preliminary_selection(preliminaryselection, data)
+        original_data.extras = data.extras
     end
 
     AllSubsetRegression.all_subset_regression(

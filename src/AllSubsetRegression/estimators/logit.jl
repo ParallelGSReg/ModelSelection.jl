@@ -68,13 +68,30 @@ function logit_execute!(
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
+    ncoef_gum = size(expvars_data, 2)
+    depvar_wo_outsample, expvars_wo_outsample = get_insample_subset(
+        depvar_data,
+        expvars_data,
+        result.outsample,
+        collect(1:ncoef_gum),
+    )
+    gum_model = GLM.fit(
+        GeneralizedLinearModel,
+        expvars_wo_outsample,
+        depvar_wo_outsample,
+        Binomial(),
+        LogitLink(),
+        start = zeros(ncoef_gum),
+    )
+    start_coef = coeftable(gum_model).cols[1]
+
     if nprocs() == nworkers()
         for order = 1:num_operations
-            # TODO: Split in multiple lines
             logit_execute_row!(
                 order,
                 data.depvar,
                 data.expvars,
+                start_coef,
                 datanames_index,
                 depvar_data,
                 expvars_data,
@@ -100,12 +117,11 @@ function logit_execute!(
         for num_job = 1:num_jobs
             push!(
                 jobs,
-                @spawnat num_job + 1 logit_execute_job!(
-                    num_job,
-                    num_jobs,
-                    ops_per_worker,
+                logit_execute_row!(
+                    order,
                     data.depvar,
                     data.expvars,
+                    start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
@@ -118,7 +134,7 @@ function logit_execute!(
                     result.ttest,
                     result.residualtest,
                     result.fixedvariables,
-                )
+                ),
             )
         end
         for job in jobs
@@ -133,6 +149,7 @@ function logit_execute!(
                     order,
                     data.depvar,
                     data.expvars,
+                    start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
@@ -221,6 +238,7 @@ function logit_execute_job!(
     ops_per_worker,
     depvar,
     expvars,
+    start_coef,
     datanames_index,
     depvar_data,
     expvars_data,
@@ -240,6 +258,7 @@ function logit_execute_job!(
             order,
             depvar,
             expvars,
+            start_coef,
             datanames_index,
             depvar_data,
             expvars_data,
@@ -263,6 +282,7 @@ function logit_execute_row!(
     order,
     depvar,
     expvars,
+    start_coef,
     datanames_index,
     depvar_data,
     expvars_data,
@@ -294,13 +314,14 @@ function logit_execute_row!(
 
     nobs = size(depvar_subset, 1)
     ncoef = size(expvars_subset, 2)
+    start_coef_subset = start_coef[selected_variables_index]
     model = GLM.fit(
         GeneralizedLinearModel,
         expvars_subset,
         depvar_subset,
         Binomial(),
         LogitLink(),
-        start = zeros(ncoef),
+        start = start_coef_subset,
     )
     b = coef(model)
     ŷ = predict(model)

@@ -21,7 +21,7 @@ using ..PreliminarySelection
 using ..AllSubsetRegression
 using ..CrossValidation
 
-export ModelSelectionData, ModelSelectionResult, gsr, save, load
+export ModelSelectionData, ModelSelectionResult, gsr, save, load, save_csv
 
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
 
