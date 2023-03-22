@@ -1,6 +1,6 @@
 module ModelSelection
 
-using DataFrames, JLD2, DelimitedFiles
+using DataFrames, JLD2
 
 include("structs/modelselection_data.jl")
 include("datatypes/modelselection_result.jl")
