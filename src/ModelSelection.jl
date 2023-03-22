@@ -22,8 +22,6 @@ using ..PreliminarySelection
 using ..AllSubsetRegression
 using ..CrossValidation
 
-Base.show(io::IO, data::ModelSelection.ModelSelectionData) = to_string(data)
-
 export ModelSelectionData, ModelSelectionResult, gsr, save, load, save_csv
 
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation

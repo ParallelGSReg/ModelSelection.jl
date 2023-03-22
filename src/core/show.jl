@@ -1,4 +1,4 @@
-function to_string(data::ModelSelectionData)
+function Base.show(io::IO, data::ModelSelectionData; kwargs...)
     outputstr = ""
     for result in data.results
         if typeof(result) == ModelSelection.CrossValidation.CrossValidationResult
@@ -9,5 +9,8 @@ function to_string(data::ModelSelectionData)
                 outputstr * ModelSelection.AllSubsetRegression.to_string(data, result)
         end
     end
-    return outputstr
+    println(io, outputstr)
+    return nothing
 end
+
+#Base.show(io::IO, data::ModelSelectionData; kwargs...) = show(io, data, kwargs)
