@@ -11,5 +11,3 @@ function to_string(data::ModelSelectionData)
     end
     return outputstr
 end
-
-Base.show(io::IO, data::ModelSelection.ModelSelectionData) = to_string(data)

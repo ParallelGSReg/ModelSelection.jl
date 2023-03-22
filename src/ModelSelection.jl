@@ -1,6 +1,6 @@
 module ModelSelection
 
-using DataFrames, JLD2
+using DataFrames, JLD2, DelimitedFiles
 
 include("structs/modelselection_data.jl")
 include("datatypes/modelselection_result.jl")
@@ -21,6 +21,8 @@ using ..FeatureExtraction
 using ..PreliminarySelection
 using ..AllSubsetRegression
 using ..CrossValidation
+
+Base.show(io::IO, data::ModelSelection.ModelSelectionData) = to_string(data)
 
 export ModelSelectionData, ModelSelectionResult, gsr, save, load, save_csv
 
