@@ -6,7 +6,6 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
     bestresult_data::Any
     modelavg_data::Any
 
-    fixedvariables::Any
     outsample::Any
     criteria::Any
     modelavg::Any
@@ -18,7 +17,6 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
     function AllSubsetRegressionResult(
         datanames,
         modelavg_datanames,
-        fixedvariables,
         outsample,
         criteria,
         modelavg,
@@ -32,7 +30,6 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
             nothing,
             nothing,
             nothing,
-            fixedvariables,
             outsample,
             criteria,
             modelavg,

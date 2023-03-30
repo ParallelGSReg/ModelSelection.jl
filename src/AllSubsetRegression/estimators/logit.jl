@@ -235,7 +235,7 @@ function logit_execute_row!(
 	num_job = nothing,
 	iteration_num = nothing,
 )
-	selected_variables_index = ModelSelection.get_selected_variables(order, expvars, intercept, fixedvariables = fixedvariables, num_jobs = num_jobs, num_job = num_job, iteration_num = iteration_num)
+	selected_variables_index = ModelSelection.get_selected_variables(order, expvars, intercept, num_jobs = num_jobs, num_job = num_job, iteration_num = iteration_num)
 	depvar_subset, expvars_subset = get_insample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
 	outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 

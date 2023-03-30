@@ -2,6 +2,7 @@ mutable struct ModelSelectionData
     equation::Array{Symbol}
     depvar::Symbol
     expvars::Array{Symbol}
+    fixedvariables::Union{Vector{Symbol},Nothing}
     time::Union{Symbol,Nothing}
     panel::Union{Symbol,Nothing}
     depvar_data::Union{
@@ -15,6 +16,13 @@ mutable struct ModelSelectionData
         Array{Float32},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+    }
+    fixedvariables_data::Union{
+        Nothing,
+        Vector{Float64},
+        Vector{Float32},
+        Vector{Union{Float64,Missing}},
+        Vector{Union{Float32,Missing}},
     }
     time_data::Union{
         Nothing,
@@ -43,6 +51,7 @@ mutable struct ModelSelectionData
         equation::Vector{Symbol},
         depvar::Symbol,
         expvars::Vector{Symbol},
+        fixedvariables::Union{Vector{Symbol},Nothing},
         time::Union{Symbol,Nothing},
         panel::Union{Symbol,Nothing},
         depvar_data::Union{
@@ -56,6 +65,13 @@ mutable struct ModelSelectionData
             Array{Float32},
             Array{Union{Float32,Missing}},
             Array{Union{Float64,Missing}},
+        },
+        fixedvariables_data::Union{
+            Nothing,
+            Vector{Float64},
+            Vector{Float32},
+            Vector{Union{Float32,Missing}},
+            Vector{Union{Float64,Missing}},
         },
         time_data::Union{
             Nothing,
@@ -84,10 +100,12 @@ mutable struct ModelSelectionData
             equation,
             depvar,
             expvars,
+            fixedvariables,
             time,
             panel,
             depvar_data,
             expvars_data,
+            fixedvariables_data,
             time_data,
             panel_data,
             intercept,

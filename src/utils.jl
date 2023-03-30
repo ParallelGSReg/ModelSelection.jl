@@ -18,10 +18,10 @@ function convert_column(
     end
     has_missings = false
     if size(column, 2) == 1
-        has_missings |= findfirst(x -> ismissing(x), column) != nothing
+        has_missings |= findfirst(x -> ismissing(x), column) !== nothing
     else
         for i in axes(column, 2)
-            has_missings |= findfirst(x -> ismissing(x), column[:, i]) != nothing
+            has_missings |= findfirst(x -> ismissing(x), column[:, i]) !== nothing
         end
     end
 
@@ -37,6 +37,7 @@ Converts rawdata by data content
 - `datatype::Type`: the datatype.
 - `depvar_data::Union{Vector{Float64}, Vector{Float32}, Vector{Union{Float32, Missing}}, Vector{Union{Float64, Missing}}}`: dependent variable data.
 - `expvars_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}}`: explanatory variables data.
+- `fixedvariables::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: fixed variables data.
 - `time_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: time variable data.
 - `panel_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: panel variable data.
 """
@@ -54,6 +55,13 @@ function convert_raw_data(
         Array{Union{Float32,Missing}},
         Array{Union{Float64,Missing}},
     },
+    fixedvariables_data::Union{
+        Vector{Float64},
+        Vector{Float32},
+        Array{Union{Float32,Missing}},
+        Vector{Union{Float64,Missing}},
+        Nothing,
+    } = nothing,
     time_data::Union{
         Vector{Float64},
         Vector{Float32},
@@ -71,13 +79,16 @@ function convert_raw_data(
 )
     depvar_data = convert_column(datatype, depvar_data)
     expvars_data = convert_column(datatype, expvars_data)
+    if fixedvariables_data !== nothing
+        fixedvariables_data = convert_column(datatype, fixedvariables_data)
+    end
     if time_data !== nothing
         time_data = convert_column(datatype, time_data)
     end
     if panel_data !== nothing
         panel_data = convert_column(datatype == Float64 ? Int64 : Int32, panel_data)
     end
-    return depvar_data, expvars_data, time_data, panel_data
+    return depvar_data, expvars_data, fixedvariables_data, time_data, panel_data
 end
 
 """
@@ -86,6 +97,7 @@ Filters rawdata by empty values
 - `datatype::Type`: the datatype.
 - `depvar_data::Union{Vector{Float64}, Vector{Float32}, Vector{Union{Float32, Missing}}, Vector{Union{Float64, Missing}}}`: dependent variable data.
 - `expvars_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}}`: explanatory variables data.
+- `fixedvariables_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: fixed variables data.
 - `time_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: time variable data.
 - `panel_data::Union{Array{Float64}, Array{Float32}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: panel variable data.
 """
@@ -103,6 +115,13 @@ function filter_raw_data_by_empty_values(
         Array{Union{Float32,Missing}},
         Array{Union{Float64,Missing}},
     },
+    fixedvariables_data::Union{
+        Vector{Float64},
+        Vector{Float32},
+        Array{Union{Float32,Missing}},
+        Vector{Union{Float64,Missing}},
+        Nothing,
+    } = nothing,
     time_data::Union{
         Vector{Float64},
         Vector{Float32},
@@ -125,6 +144,13 @@ function filter_raw_data_by_empty_values(
     for i in axes(expvars_data, 2)
         keep_rows .&= map(b -> !b, ismissing.(expvars_data[:, i]))
     end
+    
+    if fixedvariables_data !== nothing
+        for i in axes(fixedvariables_data, 2)
+            keep_rows .&= map(b -> !b, ismissing.(fixedvariables_data[:, i]))
+        end
+        fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, :])
+    end
 
     depvar_data = convert(Array{datatype}, depvar_data[keep_rows, 1])
     expvars_data = convert(Array{datatype}, expvars_data[keep_rows, :])
@@ -132,12 +158,12 @@ function filter_raw_data_by_empty_values(
     if panel_data !== nothing
         panel_data = panel_data[keep_rows, 1]
     end
-
+    
     if time_data !== nothing
         time_data = time_data[keep_rows, 1]
     end
 
-    return depvar_data, expvars_data, time_data, panel_data
+    return depvar_data, expvars_data, fixedvariables_data, time_data, panel_data
 end
 
 """
@@ -175,16 +201,18 @@ end
 Filter data by empty values
 """
 function filter_data_by_empty_values(data)
-    depvar_data, expvars_data, time_data, panel_data = filter_raw_data_by_empty_values(
+    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data = filter_raw_data_by_empty_values(
         data.datatype,
         data.depvar_data,
         data.expvars_data,
+        data.fixedvariables_data,
         data.time_data,
         data.panel_data,
     )
 
     data.depvar_data = depvar_data
     data.expvars_data = expvars_data
+    data.fixedvariables_data = fixedvariables_data
     data.panel_data = panel_data
     data.time_data = time_data
     data.nobs = size(data.depvar_data, 1)
@@ -334,7 +362,6 @@ function get_selected_variables(
     order,
     datanames,
     intercept;
-    fixedvariables = nothing,
     num_jobs = nothing,
     num_job = nothing,
     iteration_num = nothing,
@@ -342,7 +369,6 @@ function get_selected_variables(
     cols = zeros(Int64, 0)
     binary = string(order, base = 2)
     k = 1
-
     for order = 1:length(binary)
         if binary[length(binary)-order+1] == '1'
             push!(cols, k)
@@ -352,6 +378,7 @@ function get_selected_variables(
     if intercept
         push!(cols, ModelSelection.get_column_index(:_cons, datanames))
     end
+
     return cols
 end
 
@@ -368,7 +395,6 @@ Remove intercept
 """
 function remove_intercept!(data)
     cons_index = get_column_index(:_cons, data.expvars)
-    data.expvars_data =
-        hcat(data.expvars_data[:, 1:cons_index-1], data.expvars_data[:, cons_index+1:end])
+    data.expvars_data = hcat(data.expvars_data[:, 1:cons_index-1], data.expvars_data[:, cons_index+1:end])
     data.expvars = vcat(data.expvars[1:cons_index-1], data.expvars[cons_index+1:end])
 end

@@ -4,7 +4,6 @@ include("estimators/logit.jl")
 function all_subset_regression(
     estimator::Symbol,
     data::ModelSelection.ModelSelectionData;
-    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = ZTEST_DEFAULT,
@@ -20,7 +19,6 @@ function all_subset_regression(
     if estimator == :ols
         AllSubsetRegression.ols!(
             data,
-            fixedvariables = fixedvariables,
             outsample = outsample,
             criteria = criteria,
             ttest = ttest,
@@ -31,7 +29,7 @@ function all_subset_regression(
     elseif estimator == :logit
         AllSubsetRegression.logit!(
             data,
-            fixedvariables = fixedvariables,
+            fixedvariables = data.fixedvariables,
             outsample = outsample,
             criteria = criteria,
             ztest = ztest,

@@ -140,7 +140,6 @@ function gsr(
     AllSubsetRegression.all_subset_regression(
         estimator,
         data,
-        fixedvariables = fixedvariables,
         outsample = outsample,
         criteria = criteria,
         ttest = ttest,

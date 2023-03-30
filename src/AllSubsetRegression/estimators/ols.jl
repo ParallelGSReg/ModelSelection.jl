@@ -1,6 +1,5 @@
 function ols(
     data::ModelSelection.ModelSelectionData;
-    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
@@ -10,7 +9,6 @@ function ols(
 )
     return ols!(
         ModelSelection.copy_data(data),
-        fixedvariables = fixedvariables,
         outsample = outsample,
         criteria = criteria,
         ttest = ttest,
@@ -22,7 +20,6 @@ end
 
 function ols!(
     data::ModelSelection.ModelSelectionData;
-    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
@@ -34,7 +31,6 @@ function ols!(
 
     result = create_result(
         data,
-        fixedvariables,
         outsample,
         criteria,
         ttest,
@@ -63,8 +59,8 @@ function ols_execute!(
     num_operations = 2^expvars_num - 1
     depvar_data = convert(SharedArray, data.depvar_data)
     expvars_data = convert(SharedArray, data.expvars_data)
-    result_data =
-        fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
+    fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
+    result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     if nprocs() == nworkers()
         for order = 1:num_operations
@@ -72,9 +68,11 @@ function ols_execute!(
                 order,
                 data.depvar,
                 data.expvars,
+                data.fixedvariables,
                 datanames_index,
                 depvar_data,
                 expvars_data,
+                fixedvariables_data,
                 result_data,
                 data.intercept,
                 data.time,
@@ -83,7 +81,6 @@ function ols_execute!(
                 result.criteria,
                 result.ttest,
                 result.residualtest,
-                result.fixedvariables,
             )
         end
     else
@@ -103,9 +100,11 @@ function ols_execute!(
                     ops_per_worker,
                     data.depvar,
                     data.expvars,
+                    data.fixedvariables,
                     datanames_index,
                     depvar_data,
                     expvars_data,
+                    fixedvariables_data,
                     result_data,
                     data.intercept,
                     data.time,
@@ -114,7 +113,6 @@ function ols_execute!(
                     result.criteria,
                     result.ttest,
                     result.residualtest,
-                    result.fixedvariables,
                 )
             )
         end
@@ -130,9 +128,11 @@ function ols_execute!(
                     order,
                     data.depvar,
                     data.expvars,
+                    data.fixedvariables,
                     datanames_index,
                     depvar_data,
                     expvars_data,
+                    fixedvariables_data,
                     result_data,
                     data.intercept,
                     data.time,
@@ -141,7 +141,6 @@ function ols_execute!(
                     result.criteria,
                     result.ttest,
                     result.residualtest,
-                    result.fixedvariables,
                 )
             end
         end
@@ -243,9 +242,11 @@ function ols_execute_job!(
     ops_per_worker,
     depvar,
     expvars,
+    fixedvariables,
     datanames_index,
     depvar_data,
     expvars_data,
+    fixedvariables_data,
     result_data,
     intercept,
     time,
@@ -254,7 +255,6 @@ function ols_execute_job!(
     criteria,
     ttest,
     residualtest,
-    fixedvariables,
 )
     for j = 1:ops_per_worker
         order = (j - 1) * num_jobs + num_job
@@ -262,9 +262,11 @@ function ols_execute_job!(
             order,
             depvar,
             expvars,
+            fixedvariables,
             datanames_index,
             depvar_data,
             expvars_data,
+            fixedvariables_data,
             result_data,
             intercept,
             time,
@@ -273,7 +275,6 @@ function ols_execute_job!(
             criteria,
             ttest,
             residualtest,
-            fixedvariables,
             num_jobs = num_jobs,
             num_job = num_job,
             iteration_num = j,
@@ -285,9 +286,11 @@ function ols_execute_row!(
     order,
     depvar,
     expvars,
+    fixedvariables,
     datanames_index,
     depvar_data,
     expvars_data,
+    fixedvariables_data,
     result_data,
     intercept,
     time,
@@ -295,31 +298,32 @@ function ols_execute_row!(
     outsample,
     criteria,
     ttest,
-    residualtest,
-    fixedvariables;
+    residualtest;
     num_jobs = nothing,
     num_job = nothing,
     iteration_num = nothing,
 )
-
     selected_variables_index = ModelSelection.get_selected_variables(
         order,
         expvars,
         intercept,
-        fixedvariables = fixedvariables,
         num_jobs = num_jobs,
         num_job = num_job,
         iteration_num = iteration_num,
     )
-    depvar_subset, expvars_subset =
-        get_insample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
+    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(depvar_data, expvars_data, fixedvariables_data, outsample, selected_variables_index)
     outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 
+    fullexpvars_subset = expvars_subset
+    if fixedvariables_subset !== nothing
+        fullexpvars_subset = hcat(fullexpvars_subset, fixedvariables_subset)
+    end
+
     nobs = size(depvar_subset, 1)
-    ncoef = size(expvars_subset, 2)
-    qrf = qr(expvars_subset)
+    ncoef = size(fullexpvars_subset, 2)
+    qrf = qr(fullexpvars_subset)
     b = qrf \ depvar_subset               # estimate
-    ŷ = expvars_subset * b                # predicted values
+    ŷ = fullexpvars_subset * b                # predicted values
     er = depvar_subset - ŷ                # in-sample residuals
     er2 = er .^ 2                         # squared errors
     sse = sum(er2)                        # residual sum of squares
@@ -339,13 +343,19 @@ function ols_execute_row!(
     end
 
     if outsample_enabled > 0
-        depvar_outsample_subset, expvars_outsample_subset = get_outsample_subset(
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset = get_outsample_subset(
             depvar_data,
             expvars_data,
+            fixedvariables_data,
             outsample,
             selected_variables_index,
         )
-        erout = depvar_outsample_subset - expvars_outsample_subset * b  # out-of-sample residuals
+        fullexpvars_outsample_subset = expvars_outsample_subset
+        if fixedvariables_outsample_subset !== nothing
+            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+        end
+
+        erout = depvar_outsample_subset - fullexpvars_outsample_subset * b  # out-of-sample residuals
         sseout = sum(erout .^ 2)                                        # residual sum of squares
         outsample_count = outsample
         if (isa(outsample, Array))
@@ -379,6 +389,36 @@ function ols_execute_row!(
                         string(expvars[selected_variable_index], "_bstd"),
                     )],
                 ]
+        end
+    end
+
+    if fixedvariables !== nothing
+        expvars_length = length(expvars)
+        for (index, fixedvariable) in enumerate(fixedvariables)
+            actual_index = expvars_length + index
+            result_data[
+                order,
+                datanames_index[Symbol(string(fixedvariable, "_b"))],
+            ] = datatype(b[actual_index])
+            if ttest
+                result_data[
+                    order,
+                    datanames_index[Symbol(string(fixedvariable, "_bstd"))],
+                ] = datatype(bstd[actual_index])
+                result_data[
+                    order,
+                    datanames_index[Symbol(string(fixedvariable, "_t"))],
+                ] =
+                    result_data[
+                        order,
+                        datanames_index[Symbol(string(fixedvariable, "_b"))],
+                    ] / result_data[
+                        order,
+                        datanames_index[Symbol(
+                            string(fixedvariable, "_bstd"),
+                        )],
+                    ]
+            end
         end
     end
 

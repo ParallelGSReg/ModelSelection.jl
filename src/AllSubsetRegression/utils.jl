@@ -12,7 +12,6 @@ Creates ModelSelection result
 """
 function create_result(
     data::ModelSelection.ModelSelectionData,
-    fixedvariables::Union{Nothing,Array},
     outsample::Union{Nothing,Int,Array},
     criteria::Array,
     ttest::Bool,
@@ -53,7 +52,6 @@ function create_result(
     return AllSubsetRegressionResult(
         datanames,
         modelavg_datanames,
-        fixedvariables,
         outsample,
         criteria,
         modelavg,
@@ -84,10 +82,29 @@ function create_datanames(
     datanames = []
     push!(datanames, INDEX)
     for expvar in data.expvars
+        if expvar == :_cons
+            continue
+        end
         push!(datanames, Symbol(string(expvar, "_b")))
         if ttest
             push!(datanames, Symbol(string(expvar, "_bstd")))
             push!(datanames, Symbol(string(expvar, "_t")))
+        end
+    end
+    if data.fixedvariables
+        for fixedvar in data.fixedvariables
+            push!(datanames, Symbol(string(fixedvar, "_b")))
+            if ttest
+                push!(datanames, Symbol(string(fixedvar, "_bstd")))
+                push!(datanames, Symbol(string(fixedvar, "_t")))
+            end
+        end
+    end
+    if data.intercept
+        push!(datanames, Symbol(string(:_cons, "_b")))
+        if ttest
+            push!(datanames, Symbol(string(:_cons, "_bstd")))
+            push!(datanames, Symbol(string(:_cons, "_t")))
         end
     end
     testfields =
@@ -124,6 +141,13 @@ function get_insample_subset(
         SharedArrays.SharedMatrix{Union{Float32,Nothing}},
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
     },
+    fixedvariables_data::Union{
+        SharedArrays.SharedMatrix{Float64},
+        SharedArrays.SharedMatrix{Float32},
+        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        Nothing
+    },
     outsample::Union{Int64,Vector{Int64}},
     selected_variables_index::Vector{Int64},
 )
@@ -133,11 +157,13 @@ function get_insample_subset(
         insample = setdiff(1:size(depvar_data, 1), outsample)
         depvar_view = depvar_data[insample, 1]
         expvars_view = expvars_data[insample, selected_variables_index]
+        fixedvariables_view = fixedvariables_data[insample, :]
     else
         depvar_view = depvar_data[1:end-outsample, 1]
         expvars_view = expvars_data[1:end-outsample, selected_variables_index]
+        fixedvariables_view = fixedvariables_data[1:end-outsample, :]
     end
-    return depvar_view, expvars_view
+    return depvar_view, expvars_view, fixedvariables_view
 end
 
 """
@@ -161,6 +187,13 @@ function get_outsample_subset(
         SharedArrays.SharedMatrix{Union{Float32,Nothing}},
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
     },
+    fixedvariables_data::Union{
+        SharedArrays.SharedMatrix{Float64},
+        SharedArrays.SharedMatrix{Float32},
+        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        Nothing,
+    },
     outsample::Union{Int64,Vector{Int64}},
     selected_variables_index::Vector{Int64},
 )
@@ -169,11 +202,13 @@ function get_outsample_subset(
     if isa(outsample, Array)
         depvar_view = depvar_data[outsample, 1]
         expvars_view = expvars_data[outsample, selected_variables_index]
+        fixedvariables_view = fixedvariables_data[outsample, :]
     else
         depvar_view = depvar_data[end-outsample+1:end, 1]
         expvars_view = expvars_data[end-outsample+1:end, selected_variables_index]
+        fixedvariables_view = fixedvariables_data[end-outsample+1:end, :]
     end
-    return depvar_view, expvars_view
+    return depvar_view, expvars_view, fixedvariables_view
 end
 
 """

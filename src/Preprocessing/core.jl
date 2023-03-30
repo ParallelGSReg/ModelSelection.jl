@@ -6,6 +6,7 @@ Processes the input data based in a multiformat string equation and optional dat
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -26,6 +27,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -38,6 +40,7 @@ function input(
         datanames = datanames,
         method = method,
         intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -53,6 +56,7 @@ Processes the input data based in a the string array equation and optional data 
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -73,6 +77,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -85,6 +90,7 @@ function input(
         datanames = datanames,
         method = method,
         intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         removeoutliers = removeoutliers,
@@ -100,6 +106,7 @@ Processes the input data based in a the string vector equation and optional data
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -120,6 +127,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -132,6 +140,7 @@ function input(
         datanames = datanames,
         method = method,
         intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         removeoutliers = removeoutliers,
@@ -148,6 +157,7 @@ Processes the input data based in a symbol array equation and optional data and 
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -168,6 +178,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -180,6 +191,7 @@ function input(
         datanames = datanames,
         method = method,
         intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -196,6 +208,7 @@ Processes the input data based in a symbol vector equation and optional data and
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -216,6 +229,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -228,6 +242,7 @@ function input(
         datanames = datanames,
         method = method,
         intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -244,6 +259,7 @@ Processes the input data based in a multiformat string equation and returns proc
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -264,6 +280,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -274,8 +291,9 @@ function input(
         equation_str_to_strarr!(equation),
         data,
         datanames = datanames,
-        intercept = intercept,
         method = method,
+        intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -292,6 +310,7 @@ Processes the input data based in a multiformat string array equation and return
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -312,6 +331,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -324,8 +344,9 @@ function input(
         equation,
         data,
         datanames = datanames,
-        intercept = intercept,
         method = method,
+        intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -342,6 +363,7 @@ Processes the input data based in a multiformat string vector equation and retur
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -362,6 +384,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -381,8 +404,9 @@ function input(
         equation,
         data,
         datanames = datanames,
-        intercept = intercept,
         method = method,
+        intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -399,6 +423,7 @@ Processes the input data based in a symbol array equation and returns processed 
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -419,6 +444,7 @@ function input(
     datanames::Union{Vector{String},Vector{Symbol},Matrix{AbstractString},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -431,8 +457,9 @@ function input(
         equation,
         data,
         datanames = datanames,
-        intercept = intercept,
         method = method,
+        intercept = intercept,
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -449,6 +476,7 @@ Processes the input data based in a symbol vector equation and returns processed
  - `datanames::Union{Vector{String}, Vector{Symbol}, Matrix{AbstractString}, Nothing}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Array}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -469,6 +497,7 @@ function input(
     datanames::Union{Array,Vector{Symbol},Nothing} = nothing,
     method::Union{Symbol,String} = METHOD_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Nothing,Array} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,String,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,String,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -505,6 +534,27 @@ function input(
         throw(ArgumentError(msg))
     end
 
+    if fixedvariables !== nothing
+        fixedvariables = Vector{Symbol}(fixedvariables)
+        if !ModelSelection.in_vector(fixedvariables, datanames)
+            msg = string(
+                SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS,
+                ": ",
+                fixedvariables[(!in).(fixedvariables, Ref(datanames))],
+            )
+            throw(ArgumentError(msg))
+        end
+
+        if ModelSelection.in_vector(fixedvariables, equation)
+            msg = string(
+                SELECTED_FIXED_VARIABLES_IN_EQUATION,
+                ": ",
+                fixedvariables[(in).(fixedvariables, Ref(equation))],
+            )
+            throw(ArgumentError(msg))
+        end
+    end
+
     if !isa(data, Array{Union{Missing,datatype}}) || !isa(data, Array{Union{datatype}})
         data = Matrix{Union{Missing,datatype}}(data)
     end
@@ -536,6 +586,7 @@ function input(
         datanames,
         method,
         intercept;
+        fixedvariables = fixedvariables,
         panel = panel,
         time = time,
         seasonaladjustment = seasonaladjustment,
@@ -557,6 +608,7 @@ Processes all the inputs parameters and returns processed data.
  - `datanames::Vector{Symbol}`: the column names of input data.
  - `method::Union{Symbol, String}`: the data representation based on method fast or precise.
  - `intercept::Bool`: include intercept as a fixed covariate.
+ - `fixedvariables::Union{Nothing, Vector{Symbol}}`: TODO add description.
  - `panel::Union{Symbol, String, Nothing}`: panel variable name.
  - `time::Union{Symbol, String, Nothing}`: panel variable name.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
@@ -574,6 +626,7 @@ function execute(
     datanames::Vector{Symbol},
     method::Symbol,
     intercept::Bool;
+    fixedvariables::Union{Nothing,Vector{Symbol}} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,Nothing} = TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
@@ -583,8 +636,15 @@ function execute(
     datatype = method == :precise ? Float64 : Float32
     temp_equation = equation
 
-    if panel !== nothing &&
-       ModelSelection.get_column_index(panel, temp_equation) === nothing
+    if fixedvariables !== nothing
+        for fixedvariable in fixedvariables
+            if ModelSelection.get_column_index(fixedvariable, temp_equation) === nothing
+                temp_equation = vcat(temp_equation, fixedvariable)
+            end
+        end
+    end
+
+    if panel !== nothing && ModelSelection.get_column_index(panel, temp_equation) === nothing
         temp_equation = vcat(temp_equation, panel)
     end
 
@@ -619,6 +679,15 @@ function execute(
         throw(ArgumentError(TIME_VARIABLE_INEXISTENT))
     end
 
+    fixedvariables_data = nothing
+    if fixedvariables !== nothing
+        cols = []
+        for fixedvariable in fixedvariables
+            push!(cols, ModelSelection.get_column_index(fixedvariable, datanames))
+        end
+        fixedvariables_data = data[:, cols]
+    end
+
     (data, datanames) = filter_data_by_selected_columns(data, equation, datanames)
 
     depvar = equation[1]
@@ -640,20 +709,22 @@ function execute(
     expvars_data = data[1:end, 2:end]
 
     if removemissings
-        depvar_data, expvars_data, time_data, panel_data =
+        depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
             ModelSelection.filter_raw_data_by_empty_values(
                 datatype,
                 depvar_data,
                 expvars_data,
+                fixedvariables_data,
                 time_data,
                 panel_data,
             )
     end
 
-    depvar_data, expvars_data, time_data, panel_data = ModelSelection.convert_raw_data(
+    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data = ModelSelection.convert_raw_data(
         datatype,
         depvar_data,
         expvars_data,
+        fixedvariables_data,
         time_data,
         panel_data,
     )
@@ -664,10 +735,12 @@ function execute(
         equation,
         depvar,
         expvars,
+        fixedvariables,
         time,
         panel,
         depvar_data,
         expvars_data,
+        fixedvariables_data,
         time_data,
         panel_data,
         intercept,
