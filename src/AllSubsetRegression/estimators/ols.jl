@@ -405,11 +405,11 @@ function ols_execute_row!(
     end
 
     if fixedvariables !== nothing
-        expvars_length = length(expvars)
+        selected_variables_length = length(selected_variables_index)
+
         for (index, fixedvariable) in enumerate(fixedvariables)
-            actual_index = expvars_length + index
-            result_data[order, datanames_index[Symbol(string(fixedvariable, "_b"))]] =
-                datatype(b[actual_index])
+            actual_index = selected_variables_length + index 
+            result_data[order, datanames_index[Symbol(string(fixedvariable, "_b"))]] = datatype(b[actual_index])
             if ttest
                 result_data[
                     order,

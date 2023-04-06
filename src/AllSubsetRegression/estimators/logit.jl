@@ -67,27 +67,27 @@ function logit_execute!(
     result_data =
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
+
     ncoef_gum = size(expvars_data, 2)
-    depvar_wo_outsample, expvars_wo_outsample, fixedvariables_wo_outsample = get_insample_subset(
+    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
         result.outsample,
         collect(1:ncoef_gum),
     )
-
-    fullexpvars_wo_outsample = expvars_wo_outsample
-    if fixedvariables_wo_outsample !== nothing
-        fullexpvars_wo_outsample = hcat(expvars_wo_outsample, fixedvariables_wo_outsample)
+    fullexpvars_without_outsample_subset = expvars_without_outsample_subset
+    if fixedvariables_without_outsample_subset !== nothing
+        fullexpvars_without_outsample_subset = hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
 
     gum_model = GLM.fit(
         GeneralizedLinearModel,
-        fullexpvars_wo_outsample,
-        depvar_wo_outsample,
+        fullexpvars_without_outsample_subset,
+        depvar_without_outsample_subset,
         Binomial(),
         LogitLink(),
-        start = zeros(ncoef_gum),
+        start = zeros(size(fullexpvars_without_outsample_subset, 2)),
     )
     start_coef = coeftable(gum_model).cols[1]
 
@@ -332,13 +332,20 @@ function logit_execute_row!(
     outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 
     fullexpvars_subset = expvars_subset
+    coef_index = copy(selected_variables_index)
     if fixedvariables_subset !== nothing
         fullexpvars_subset = hcat(fullexpvars_subset, fixedvariables_subset)
+        expvars_subset_size = size(expvars_subset, 2)
+        for (index, fixedvariable) in enumerate(fixedvariables)
+            append!(coef_index, expvars_subset_size + index)
+        end
     end
 
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
+
     start_coef_subset = start_coef[selected_variables_index]
+    start_coef_subset = start_coef[coef_index]
 
     model = GLM.fit(
         GeneralizedLinearModel,
