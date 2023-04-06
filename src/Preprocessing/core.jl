@@ -644,7 +644,8 @@ function execute(
         end
     end
 
-    if panel !== nothing && ModelSelection.get_column_index(panel, temp_equation) === nothing
+    if panel !== nothing &&
+       ModelSelection.get_column_index(panel, temp_equation) === nothing
         temp_equation = vcat(temp_equation, panel)
     end
 
@@ -720,14 +721,15 @@ function execute(
             )
     end
 
-    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data = ModelSelection.convert_raw_data(
-        datatype,
-        depvar_data,
-        expvars_data,
-        fixedvariables_data,
-        time_data,
-        panel_data,
-    )
+    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
+        ModelSelection.convert_raw_data(
+            datatype,
+            depvar_data,
+            expvars_data,
+            fixedvariables_data,
+            time_data,
+            panel_data,
+        )
 
     nobs = size(depvar_data, 1)
 

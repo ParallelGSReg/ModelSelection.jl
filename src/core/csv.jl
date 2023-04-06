@@ -7,10 +7,7 @@ Saves a csv file.
 - `filename::String``: output filename.
 - `resultnum::Int64`: TODO add description.
 """
-function save_csv(
-	filename::String,
-	data::ModelSelection.ModelSelectionData,
-)
+function save_csv(filename::String, data::ModelSelection.ModelSelectionData)
     for result in data.results
         save_csv(filename, result)
     end
@@ -23,8 +20,8 @@ Exports to csv with all subset regression result.
 - `result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult: all subset regression result.
 """
 function save_csv(
-	filename::String,
-	result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult,
+    filename::String,
+    result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult,
 )
     filename = replace(filename, ".csv" => "") * "_allsubsetregression.csv"
     export_csv(filename, result)
@@ -37,8 +34,8 @@ Exports to csv with cross validation result.
 - `result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult: all subset regression result.
 """
 function save_csv(
-	filename::String,
-	result::ModelSelection.CrossValidation.CrossValidationResult,
+    filename::String,
+    result::ModelSelection.CrossValidation.CrossValidationResult,
 )
     filename = replace(filename, ".csv" => "") * "_crossvalidation.csv"
     export_csv(filename, result)
@@ -51,8 +48,11 @@ Exports to csv for any result.
 - `result::ModelSelection.AllSubsetRegression.AllSubsetRegressionResult: all subset regression result.
 """
 function export_csv(
-	filename::String,
-	result::Union{ModelSelection.AllSubsetRegression.AllSubsetRegressionResult, ModelSelection.CrossValidation.CrossValidationResult},
+    filename::String,
+    result::Union{
+        ModelSelection.AllSubsetRegression.AllSubsetRegressionResult,
+        ModelSelection.CrossValidation.CrossValidationResult,
+    },
 )
     header = []
     for dataname in result.datanames

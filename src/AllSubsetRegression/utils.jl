@@ -91,7 +91,7 @@ function create_datanames(
             push!(datanames, Symbol(string(expvar, "_t")))
         end
     end
-    if data.fixedvariables
+    if data.fixedvariables !== nothing
         for fixedvar in data.fixedvariables
             push!(datanames, Symbol(string(fixedvar, "_b")))
             if ttest
@@ -100,7 +100,7 @@ function create_datanames(
             end
         end
     end
-    if data.intercept
+    if data.intercept !== nothing && data.intercept
         push!(datanames, Symbol(string(:_cons, "_b")))
         if ttest
             push!(datanames, Symbol(string(:_cons, "_bstd")))
@@ -114,7 +114,7 @@ function create_datanames(
         unique([EQUATION_GENERAL_INFORMATION; criteria; testfields])
     datanames = vcat(datanames, general_information_criteria)
     push!(datanames, ORDER)
-    if modelavg
+    if modelavg !== nothing && modelavg
         push!(datanames, WEIGHT)
     end
     return datanames
@@ -146,22 +146,27 @@ function get_insample_subset(
         SharedArrays.SharedMatrix{Float32},
         SharedArrays.SharedMatrix{Union{Float32,Nothing}},
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
-        Nothing
+        Nothing,
     },
     outsample::Union{Int64,Vector{Int64}},
     selected_variables_index::Vector{Int64},
 )
     depvar_view = nothing
     expvars_view = nothing
+    fixedvariables_view = nothing
     if isa(outsample, Array)
         insample = setdiff(1:size(depvar_data, 1), outsample)
         depvar_view = depvar_data[insample, 1]
         expvars_view = expvars_data[insample, selected_variables_index]
-        fixedvariables_view = fixedvariables_data[insample, :]
+        if fixedvariables_data !== nothing
+            fixedvariables_view = fixedvariables_data[insample, :]
+        end
     else
         depvar_view = depvar_data[1:end-outsample, 1]
         expvars_view = expvars_data[1:end-outsample, selected_variables_index]
-        fixedvariables_view = fixedvariables_data[1:end-outsample, :]
+        if fixedvariables_data !== nothing
+            fixedvariables_view = fixedvariables_data[1:end-outsample, :]
+        end
     end
     return depvar_view, expvars_view, fixedvariables_view
 end
@@ -199,14 +204,19 @@ function get_outsample_subset(
 )
     depvar_view = nothing
     expvars_view = nothing
+    fixedvariables_view = nothing
     if isa(outsample, Array)
         depvar_view = depvar_data[outsample, 1]
         expvars_view = expvars_data[outsample, selected_variables_index]
-        fixedvariables_view = fixedvariables_data[outsample, :]
+        if fixedvariables_data !== nothing
+            fixedvariables_view = fixedvariables_data[outsample, :]
+        end
     else
         depvar_view = depvar_data[end-outsample+1:end, 1]
         expvars_view = expvars_data[end-outsample+1:end, selected_variables_index]
-        fixedvariables_view = fixedvariables_data[end-outsample+1:end, :]
+        if fixedvariables_data !== nothing
+            fixedvariables_view = fixedvariables_data[end-outsample+1:end, :]
+        end
     end
     return depvar_view, expvars_view, fixedvariables_view
 end
@@ -267,15 +277,16 @@ function addextras(
         :datanames => result.datanames,
         :depvar => data.depvar,
         :expvars => data.expvars,
-        :nobs => data.nobs,
+        :fixedvariables => data.fixedvariables,
+        :panel => data.panel,
         :time => data.time,
+        :nobs => data.nobs,
         :residualtest => result.residualtest,
         :criteria => result.criteria,
         :intercept => data.intercept,
         :ttest => result.ttest,
         :outsample => result.outsample,
         :modelavg => result.modelavg,
-        :fixedvariables => result.fixedvariables,
         :orderresults => result.orderresults,
     )
     return data

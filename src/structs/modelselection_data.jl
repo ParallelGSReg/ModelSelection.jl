@@ -19,10 +19,10 @@ mutable struct ModelSelectionData
     }
     fixedvariables_data::Union{
         Nothing,
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
     }
     time_data::Union{
         Nothing,
@@ -68,10 +68,10 @@ mutable struct ModelSelectionData
         },
         fixedvariables_data::Union{
             Nothing,
-            Vector{Float64},
-            Vector{Float32},
-            Vector{Union{Float32,Missing}},
-            Vector{Union{Float64,Missing}},
+            Array{Float64},
+            Array{Float32},
+            Array{Union{Float32,Missing}},
+            Array{Union{Float64,Missing}},
         },
         time_data::Union{
             Nothing,
@@ -96,6 +96,7 @@ mutable struct ModelSelectionData
         options = Array{Any}(undef, 0)
         previous_data = Array{Any}(undef, 0)
         results = Array{Any}(undef, 0)
+
         new(
             equation,
             depvar,

@@ -56,10 +56,10 @@ function convert_raw_data(
         Array{Union{Float64,Missing}},
     },
     fixedvariables_data::Union{
-        Vector{Float64},
-        Vector{Float32},
+        Array{Float64},
+        Array{Float32},
         Array{Union{Float32,Missing}},
-        Vector{Union{Float64,Missing}},
+        Array{Union{Float64,Missing}},
         Nothing,
     } = nothing,
     time_data::Union{
@@ -144,7 +144,7 @@ function filter_raw_data_by_empty_values(
     for i in axes(expvars_data, 2)
         keep_rows .&= map(b -> !b, ismissing.(expvars_data[:, i]))
     end
-    
+
     if fixedvariables_data !== nothing
         for i in axes(fixedvariables_data, 2)
             keep_rows .&= map(b -> !b, ismissing.(fixedvariables_data[:, i]))
@@ -158,7 +158,7 @@ function filter_raw_data_by_empty_values(
     if panel_data !== nothing
         panel_data = panel_data[keep_rows, 1]
     end
-    
+
     if time_data !== nothing
         time_data = time_data[keep_rows, 1]
     end
@@ -201,14 +201,15 @@ end
 Filter data by empty values
 """
 function filter_data_by_empty_values(data)
-    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data = filter_raw_data_by_empty_values(
-        data.datatype,
-        data.depvar_data,
-        data.expvars_data,
-        data.fixedvariables_data,
-        data.time_data,
-        data.panel_data,
-    )
+    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
+        filter_raw_data_by_empty_values(
+            data.datatype,
+            data.depvar_data,
+            data.expvars_data,
+            data.fixedvariables_data,
+            data.time_data,
+            data.panel_data,
+        )
 
     data.depvar_data = depvar_data
     data.expvars_data = expvars_data
@@ -244,24 +245,38 @@ end
 Copy ModelSelectionData
 """
 function copy_data(data::ModelSelectionData)
+    fixedvariables = nothing
+    if data.fixedvariables !== nothing
+        fixedvariables = copy(data.fixedvariables)
+    end
+
+    fixedvariables_data = nothing
+    if data.fixedvariables_data !== nothing
+        fixedvariables_data = copy(data.fixedvariables_data)
+    end
+
+    time_data = nothing
+    if data.time_data !== nothing
+        time_data = copy(data.time_data)
+    end
+
+    panel_data = nothing
+    if data.panel_data !== nothing
+        panel_data = copy(data.panel_data)
+    end
+
     new_data = ModelSelectionData(
         copy(data.equation),
         data.depvar,
         copy(data.expvars),
+        fixedvariables,
         data.time,
         data.panel,
         copy(data.depvar_data),
         copy(data.expvars_data),
-        if (data.time_data !== nothing)
-            copy(data.time_data)
-        else
-            data.time_data
-        end,
-        if (data.panel_data !== nothing)
-            copy(data.panel_data)
-        else
-            data.panel_data
-        end,
+        fixedvariables_data,
+        time_data,
+        panel_data,
         data.intercept,
         data.datatype,
         data.removemissings,
@@ -280,23 +295,45 @@ end
 Copy ModelSelectionData to another data
 """
 function copy_data!(from_data::ModelSelectionData, to_data::ModelSelectionData)
-    to_data.equation = from_data.equation
+    fixedvariables = nothing
+    if from_data.fixedvariables !== nothing
+        fixedvariables = copy(from_data.fixedvariables)
+    end
+
+    fixedvariables_data = nothing
+    if from_data.fixedvariables_data !== nothing
+        fixedvariables_data = copy(from_data.fixedvariables_data)
+    end
+
+    time_data = nothing
+    if from_data.time_data !== nothing
+        time_data = copy(from_data.time_data)
+    end
+
+    panel_data = nothing
+    if from_data.panel_data !== nothing
+        panel_data = copy(from_data.panel_data)
+    end
+
+    to_data.equation = copy(from_data.equation)
     to_data.depvar = from_data.depvar
-    to_data.expvars = from_data.expvars
+    to_data.expvars = copy(from_data.expvars)
+    to_data.fixedvariables = fixedvariables
     to_data.panel = from_data.panel
     to_data.time = from_data.time
-    to_data.depvar_data = from_data.depvar_data
-    to_data.expvars_data = from_data.expvars_data
-    to_data.panel_data = from_data.panel_data
-    to_data.time_data = from_data.time_data
+    to_data.depvar_data = copy(from_data.depvar_data)
+    to_data.expvars_data = copy(from_data.expvars_data)
+    to_data.fixedvariables_data = fixedvariables_data
+    to_data.time_data = time_data
+    to_data.panel_data = panel_data
     to_data.intercept = from_data.intercept
     to_data.datatype = from_data.datatype
     to_data.removemissings = from_data.removemissings
     to_data.nobs = from_data.nobs
-    to_data.extras = from_data.extras
-    to_data.options = from_data.options
-    to_data.previous_data = from_data.previous_data
-    to_data.results = from_data.results
+    to_data.extras = copy(from_data.extras)
+    to_data.options = copy(from_data.options)
+    to_data.previous_data = copy(from_data.previous_data)
+    to_data.results = copy(from_data.results)
 
     return to_data
 end
@@ -395,6 +432,7 @@ Remove intercept
 """
 function remove_intercept!(data)
     cons_index = get_column_index(:_cons, data.expvars)
-    data.expvars_data = hcat(data.expvars_data[:, 1:cons_index-1], data.expvars_data[:, cons_index+1:end])
+    data.expvars_data =
+        hcat(data.expvars_data[:, 1:cons_index-1], data.expvars_data[:, cons_index+1:end])
     data.expvars = vcat(data.expvars[1:cons_index-1], data.expvars[cons_index+1:end])
 end

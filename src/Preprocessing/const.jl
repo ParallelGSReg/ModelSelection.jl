@@ -1,5 +1,5 @@
-const DATANAME = "dataname"
-const DEFAULT_DATANAME = DATANAME
+const DATANAME::String = "dataname"
+const DEFAULT_DATANAME::String = DATANAME
 const FAST = :fast
 const FIXED_EFFECT_DEFAULT = false
 const FIXED_VARIABLES_DEFAULT = nothing

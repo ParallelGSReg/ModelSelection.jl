@@ -26,7 +26,7 @@ function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true)
     data.extras[:lasso_betas] = betas
 
     vars = map(b -> b != 0, betas)
-    lassonumvars = size(filter(b -> b != 0, betas), 1)    
+    lassonumvars = size(filter(b -> b != 0, betas), 1)
 
     vars = vars[1:size(data.expvars, 1)]
 
@@ -60,7 +60,12 @@ function lassoselection(data)
 
     penalty_factor = vcat(ones(size(data.expvars, 1)), zeros(size(data.fixedvariables, 1)))
     expvars_data = hcat(data.expvars_data, data.fixedvariables_data)
-    path = glmnet(expvars_data, data.depvar_data; nlambda = 1000, penalty_factor=penalty_factor)
+    path = glmnet(
+        expvars_data,
+        data.depvar_data;
+        nlambda = 1000,
+        penalty_factor = penalty_factor,
+    )
 
     best = 1
     for (i, cant) in enumerate(nactive(path.betas))

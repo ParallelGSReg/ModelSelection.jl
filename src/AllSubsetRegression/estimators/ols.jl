@@ -59,8 +59,12 @@ function ols_execute!(
     num_operations = 2^expvars_num - 1
     depvar_data = convert(SharedArray, data.depvar_data)
     expvars_data = convert(SharedArray, data.expvars_data)
-    fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
-    result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
+    fixedvariables_data = nothing
+    if data.fixedvariables_data !== nothing
+        fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
+    end
+    result_data =
+        fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     if nprocs() == nworkers()
         for order = 1:num_operations
@@ -311,7 +315,13 @@ function ols_execute_row!(
         num_job = num_job,
         iteration_num = iteration_num,
     )
-    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(depvar_data, expvars_data, fixedvariables_data, outsample, selected_variables_index)
+    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
+        depvar_data,
+        expvars_data,
+        fixedvariables_data,
+        outsample,
+        selected_variables_index,
+    )
     outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 
     fullexpvars_subset = expvars_subset
@@ -343,16 +353,18 @@ function ols_execute_row!(
     end
 
     if outsample_enabled > 0
-        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset = get_outsample_subset(
-            depvar_data,
-            expvars_data,
-            fixedvariables_data,
-            outsample,
-            selected_variables_index,
-        )
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
+            get_outsample_subset(
+                depvar_data,
+                expvars_data,
+                fixedvariables_data,
+                outsample,
+                selected_variables_index,
+            )
         fullexpvars_outsample_subset = expvars_outsample_subset
         if fixedvariables_outsample_subset !== nothing
-            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+            fullexpvars_outsample_subset =
+                hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
         end
 
         erout = depvar_outsample_subset - fullexpvars_outsample_subset * b  # out-of-sample residuals
@@ -396,27 +408,20 @@ function ols_execute_row!(
         expvars_length = length(expvars)
         for (index, fixedvariable) in enumerate(fixedvariables)
             actual_index = expvars_length + index
-            result_data[
-                order,
-                datanames_index[Symbol(string(fixedvariable, "_b"))],
-            ] = datatype(b[actual_index])
+            result_data[order, datanames_index[Symbol(string(fixedvariable, "_b"))]] =
+                datatype(b[actual_index])
             if ttest
                 result_data[
                     order,
                     datanames_index[Symbol(string(fixedvariable, "_bstd"))],
                 ] = datatype(bstd[actual_index])
-                result_data[
-                    order,
-                    datanames_index[Symbol(string(fixedvariable, "_t"))],
-                ] =
+                result_data[order, datanames_index[Symbol(string(fixedvariable, "_t"))]] =
                     result_data[
                         order,
                         datanames_index[Symbol(string(fixedvariable, "_b"))],
                     ] / result_data[
                         order,
-                        datanames_index[Symbol(
-                            string(fixedvariable, "_bstd"),
-                        )],
+                        datanames_index[Symbol(string(fixedvariable, "_bstd"))],
                     ]
             end
         end
