@@ -1,8 +1,7 @@
 function logit(
     data::ModelSelection.ModelSelectionData;
-    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Array = CRITERIA_DEFAULT,
+    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
@@ -10,7 +9,6 @@ function logit(
 )
     return logit!(
         ModelSelection.copy_data(data),
-        fixedvariables = fixedvariables,
         outsample = outsample,
         criteria = criteria,
         ztest = ztest,
@@ -22,18 +20,17 @@ end
 
 function logit!(
     data::ModelSelection.ModelSelectionData;
-    fixedvariables::Union{Nothing,Array} = FIXEDVARIABLES_DEFAULT,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Array = CRITERIA_DEFAULT,
+    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
+    validate_criteria(criteria, AVAILABLE_LOGIT_CRITERIA)
     ttest = ztest  # FIXME
     result = create_result(
         data,
-        fixedvariables,
         outsample,
         criteria,
         ttest,
@@ -63,20 +60,30 @@ function logit_execute!(
     num_operations = 2^expvars_num - 1
     depvar_data = convert(SharedArray, data.depvar_data)
     expvars_data = convert(SharedArray, data.expvars_data)
+    fixedvariables_data = nothing
+    if data.fixedvariables_data !== nothing
+        fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
+    end
     result_data =
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-
     ncoef_gum = size(expvars_data, 2)
-    depvar_wo_outsample, expvars_wo_outsample = get_insample_subset(
+    depvar_wo_outsample, expvars_wo_outsample, fixedvariables_wo_outsample = get_insample_subset(
         depvar_data,
         expvars_data,
+        fixedvariables_data,
         result.outsample,
         collect(1:ncoef_gum),
     )
+
+    fullexpvars_wo_outsample = expvars_wo_outsample
+    if fixedvariables_wo_outsample !== nothing
+        fullexpvars_wo_outsample = hcat(expvars_wo_outsample, fixedvariables_wo_outsample)
+    end
+
     gum_model = GLM.fit(
         GeneralizedLinearModel,
-        expvars_wo_outsample,
+        fullexpvars_wo_outsample,
         depvar_wo_outsample,
         Binomial(),
         LogitLink(),
@@ -91,10 +98,12 @@ function logit_execute!(
                 order,
                 data.depvar,
                 data.expvars,
+                data.fixedvariables,
                 start_coef,
                 datanames_index,
                 depvar_data,
                 expvars_data,
+                fixedvariables_data,
                 result_data,
                 data.intercept,
                 data.time,
@@ -103,7 +112,6 @@ function logit_execute!(
                 result.criteria,
                 result.ttest,
                 result.residualtest,
-                result.fixedvariables,
             )
         end
     else
@@ -123,10 +131,12 @@ function logit_execute!(
                     ops_per_worker,
                     data.depvar,
                     data.expvars,
+                    data.fixedvariables,
                     start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
+                    fixedvariables_data,
                     result_data,
                     data.intercept,
                     data.time,
@@ -135,7 +145,6 @@ function logit_execute!(
                     result.criteria,
                     result.ttest,
                     result.residualtest,
-                    result.fixedvariables,
                 )
             )
         end
@@ -151,10 +160,12 @@ function logit_execute!(
                     order,
                     data.depvar,
                     data.expvars,
+                    data.fixedvariables,
                     start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
+                    fixedvariables_data,
                     result_data,
                     data.intercept,
                     data.time,
@@ -163,7 +174,6 @@ function logit_execute!(
                     result.criteria,
                     result.ttest,
                     result.residualtest,
-                    result.fixedvariables,
                 )
             end
         end
@@ -240,10 +250,12 @@ function logit_execute_job!(
     ops_per_worker,
     depvar,
     expvars,
+    fixedvariables,
     start_coef,
     datanames_index,
     depvar_data,
     expvars_data,
+    fixedvariables_data,
     result_data,
     intercept,
     time,
@@ -252,7 +264,6 @@ function logit_execute_job!(
     criteria,
     ttest,
     residualtest,
-    fixedvariables,
 )
     for j = 1:ops_per_worker
         order = (j - 1) * num_jobs + num_job
@@ -260,10 +271,12 @@ function logit_execute_job!(
             order,
             depvar,
             expvars,
+            fixedvariables,
             start_coef,
             datanames_index,
             depvar_data,
             expvars_data,
+            fixedvariables_data,
             result_data,
             intercept,
             time,
@@ -272,7 +285,6 @@ function logit_execute_job!(
             criteria,
             ttest,
             residualtest,
-            fixedvariables,
             num_jobs = num_jobs,
             num_job = num_job,
             iteration_num = j,
@@ -284,10 +296,12 @@ function logit_execute_row!(
     order,
     depvar,
     expvars,
+    fixedvariables,
     start_coef,
     datanames_index,
     depvar_data,
     expvars_data,
+    fixedvariables_data,
     result_data,
     intercept,
     time,
@@ -295,8 +309,7 @@ function logit_execute_row!(
     outsample,
     criteria,
     ttest,
-    residualtest,
-    fixedvariables;
+    residualtest;
     num_jobs = nothing,
     num_job = nothing,
     iteration_num = nothing,
@@ -309,17 +322,27 @@ function logit_execute_row!(
         num_job = num_job,
         iteration_num = iteration_num,
     )
-    depvar_subset, expvars_subset =
-        get_insample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
+    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
+        depvar_data,
+        expvars_data,
+        fixedvariables_data,
+        outsample,
+        selected_variables_index,
+    )
     outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
 
+    fullexpvars_subset = expvars_subset
+    if fixedvariables_subset !== nothing
+        fullexpvars_subset = hcat(fullexpvars_subset, fixedvariables_subset)
+    end
+
     nobs = size(depvar_subset, 1)
-    ncoef = size(expvars_subset, 2)
+    ncoef = size(fullexpvars_subset, 2)
     start_coef_subset = start_coef[selected_variables_index]
 
     model = GLM.fit(
         GeneralizedLinearModel,
-        expvars_subset,
+        fullexpvars_subset,
         depvar_subset,
         Binomial(),
         LogitLink(),

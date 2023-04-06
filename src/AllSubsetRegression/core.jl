@@ -29,7 +29,6 @@ function all_subset_regression(
     elseif estimator == :logit
         AllSubsetRegression.logit!(
             data,
-            fixedvariables = data.fixedvariables,
             outsample = outsample,
             criteria = criteria,
             ztest = ztest,
