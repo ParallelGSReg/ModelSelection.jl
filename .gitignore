@@ -1,3 +1,8 @@
 data
+!test/data/*.csv
 *.jld
 *.csv
+.vscode
+Manifest.toml
+*.xls
+*.pdf

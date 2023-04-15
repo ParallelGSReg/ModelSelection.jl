@@ -1,7 +1,7 @@
 name = "ModelSelection"
 uuid = "51b78214-913b-40cf-9250-c64eb33811f7"
 authors = ["Demian Panigo <panigo@gmail.com>", "Adán Mauri Ungaro <adan.mauri@gmail.com>", "Nicolás Monzón <nicomzn4@gmail.com>", "Valentin Mari <valentinmari@hotmail.com>"]
-version = "1.1.1"
+version = "1.2.0"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -21,3 +21,10 @@ Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
 julia = "1.6.7"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b""
+
+[targets]
+test = ["Test", "CSV"]
