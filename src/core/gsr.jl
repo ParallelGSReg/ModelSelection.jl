@@ -156,5 +156,7 @@ function gsr(
         CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
     end
 
+    data.original_data = original_data
+
     return data
 end

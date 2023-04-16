@@ -46,6 +46,7 @@ mutable struct ModelSelectionData
     extras::Dict
     previous_data::Array{Any}
     results::Array{Any}
+    original_data::Union{ModelSelectionData,Nothing}
 
     function ModelSelectionData(
         equation::Vector{Symbol},
@@ -96,7 +97,7 @@ mutable struct ModelSelectionData
         options = Array{Any}(undef, 0)
         previous_data = Array{Any}(undef, 0)
         results = Array{Any}(undef, 0)
-
+        original_data = nothing
         new(
             equation,
             depvar,
@@ -117,6 +118,7 @@ mutable struct ModelSelectionData
             extras,
             previous_data,
             results,
+            original_data,
         )
     end
 end
