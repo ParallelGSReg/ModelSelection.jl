@@ -1,0 +1,7 @@
+data
+*.jld
+*.csv
+.vscode
+Manifest.toml
+*.xls
+*.pdf

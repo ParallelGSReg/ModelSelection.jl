@@ -1,30 +1,29 @@
 module ModelSelection
 
-using DataFrames
+using DataFrames, JLD2
 
 include("structs/modelselection_data.jl")
 include("datatypes/modelselection_result.jl")
-include("const.jl")
 include("strings.jl")
+include("const.jl")
 include("utils.jl")
-include("core.jl")
 
 include("Preprocessing/Preprocessing.jl")
 include("FeatureExtraction/FeatureExtraction.jl")
 include("PreliminarySelection/PreliminarySelection.jl")
 include("AllSubsetRegression/AllSubsetRegression.jl")
 include("CrossValidation/CrossValidation.jl")
-include("Output/Output.jl")
+
+include("core.jl")
 
 using ..Preprocessing
 using ..FeatureExtraction
 using ..PreliminarySelection
 using ..AllSubsetRegression
 using ..CrossValidation
-using ..Output
 
-export ModelSelectionData, ModelSelectionResult, gsr
+export ModelSelectionData, ModelSelectionResult, gsr, save, load, save_csv
 
-export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation, Output
+export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
 
 end

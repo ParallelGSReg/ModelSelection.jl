@@ -4,12 +4,8 @@ makedocs(
     format = Documenter.HTML(),
     sitename = "Modelselection",
     modules = [GLM],
-    pages = [
-        "Home" => "index.md"
-    ],
+    pages = ["Home" => "index.md"],
     debug = true,
 )
 
-deploydocs(
-    repo   = "github.com/ParallelGSReg/ModelSelection.jl.git",
-)
+deploydocs(repo = "github.com/ParallelGSReg/ModelSelection.jl.git")

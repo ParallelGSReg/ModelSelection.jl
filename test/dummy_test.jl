@@ -1,20 +1,13 @@
-using CSV, ModelSelection, DataFrames
+using CSV, ModelSelection, DataFrames, Distributions
 
-data = CSV.read("data/visitors.csv", DataFrame)
+data = CSV.read("test/data/visitors.csv", DataFrame)
+p=0.3
+N=size(data,1)
+d=Binomial(1,p)
+data[!,:y]=rand(d,N)
 
-model = ModelSelection.gsr(
-    "australia china japan uk", 
-    data,
-    intercept=true,
-    time=:date,
-    fe_sqr=[:uk, :china],
-    fe_log=[:japan],
-    fe_inv=:uk,
-    preliminaryselection=:lasso,
-    criteria=[:aic, :aicc],
-    modelavg=true,
-    orderresults=true,
-    ttest=true,
-    exportcsv="visitors_output.csv",
-    exportlatex="latex.zip"
-)
+model =  ModelSelection.gsr(:logit, "y australia china japan", data, fixedvariables=[:uk], criteria = [:aic, :aicc])
+
+ModelSelection.save_csv("result.csv", model)
+ModelSelection.save("result.jld", model) 
+results = ModelSelection.load("result.jld")
