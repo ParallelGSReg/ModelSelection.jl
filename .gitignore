@@ -1,5 +1,4 @@
 data
-!test/data/*.csv
 *.jld
 *.csv
 .vscode
