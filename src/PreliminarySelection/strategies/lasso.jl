@@ -13,7 +13,7 @@ function _lasso!(data::ModelSelection.ModelSelectionData)
 end
 
 function lasso(data::ModelSelection.ModelSelectionData)
-    lasso!(ModelSelection.copy_data(data))
+    lasso!(ModelSelection.copy_modelselectiondata(data))
 end
 
 function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true)
@@ -50,8 +50,8 @@ function computablevars(nvars::Int)
 end
 
 function lassoselection(data)
-    data = ModelSelection.filter_data_by_empty_values(data)
-    data = ModelSelection.convert_data(data)
+    data = ModelSelection.filter_data_by_empty_values!(data)
+    data = ModelSelection.convert_data!(data)
     nvars = computablevars(size(data.expvars, 1))
 
     if nvars >= size(data.expvars, 1)

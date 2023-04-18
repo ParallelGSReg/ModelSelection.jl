@@ -8,7 +8,7 @@ function logit(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
     return logit!(
-        ModelSelection.copy_data(data),
+        ModelSelection.copy_modelselectiondata(data),
         outsample = outsample,
         criteria = criteria,
         ztest = ztest,
@@ -49,7 +49,7 @@ function logit_execute!(
     result::AllSubsetRegressionResult,
 )
     if !data.removemissings
-        data = ModelSelection.filter_data_by_empty_values(data)
+        data = ModelSelection.filter_data_by_empty_values!(data)
     end
 
     expvars_num = size(data.expvars, 1)
@@ -318,9 +318,6 @@ function logit_execute_row!(
         order,
         expvars,
         intercept,
-        num_jobs = num_jobs,
-        num_job = num_job,
-        iteration_num = iteration_num,
     )
     depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
         depvar_data,

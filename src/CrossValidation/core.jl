@@ -68,7 +68,7 @@ function kfoldcrossvalidation(
         dataset = collect(Iterators.flatten(folds[obs]))
         testset = setdiff(1:data.nobs, dataset)
 
-        reduced = ModelSelection.copy_data(data)
+        reduced = ModelSelection.copy_modelselectiondata(data)
         reduced.depvar_data = data.depvar_data[dataset]
         reduced.expvars_data = data.expvars_data[dataset, :]
 
@@ -83,7 +83,7 @@ function kfoldcrossvalidation(
         reduced.nobs = size(dataset, 1)
         _, vars = ModelSelection.PreliminarySelection.lasso!(reduced, addextrasflag = false)
 
-        backup = ModelSelection.copy_data(data)
+        backup = ModelSelection.copy_modelselectiondata(data)
         backup.expvars = data.expvars[vars]
         backup.expvars_data = data.expvars_data[:, vars]
 

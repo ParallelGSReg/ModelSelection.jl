@@ -1,17 +1,15 @@
-using DelimitedFiles
-
 """
 Saves a csv file.
 # Arguments
-- `data::ModelSelection.ModelSelectionData`: the model selection data.
 - `filename::String``: output filename.
-- `resultnum::Int64`: TODO add description.
+- `data::ModelSelection.ModelSelectionData`: the model selection data.
 """
 function save_csv(filename::String, data::ModelSelection.ModelSelectionData)
     for result in data.results
         save_csv(filename, result)
     end
 end
+
 
 """
 Exports to csv with all subset regression result.
@@ -27,6 +25,7 @@ function save_csv(
     export_csv(filename, result)
 end
 
+
 """
 Exports to csv with cross validation result.
 # Arguments
@@ -40,6 +39,7 @@ function save_csv(
     filename = replace(filename, ".csv" => "") * "_crossvalidation.csv"
     export_csv(filename, result)
 end
+
 
 """
 Exports to csv for any result.

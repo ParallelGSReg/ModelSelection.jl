@@ -8,7 +8,7 @@ function ols(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
     return ols!(
-        ModelSelection.copy_data(data),
+        ModelSelection.copy_modelselectiondata(data),
         outsample = outsample,
         criteria = criteria,
         ttest = ttest,
@@ -49,7 +49,7 @@ function ols_execute!(
     result::AllSubsetRegressionResult,
 )
     if !data.removemissings
-        data = ModelSelection.filter_data_by_empty_values(data)
+        data = ModelSelection.filter_data_by_empty_values!(data)
     end
 
     expvars_num = size(data.expvars, 1)
@@ -311,9 +311,6 @@ function ols_execute_row!(
         order,
         expvars,
         intercept,
-        num_jobs = num_jobs,
-        num_job = num_job,
-        iteration_num = iteration_num,
     )
     depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
         depvar_data,

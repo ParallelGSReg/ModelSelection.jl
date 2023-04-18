@@ -31,9 +31,9 @@ function gsr(
     modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
     residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
-    kfoldcrossvalidation::Bool = KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = TESTSETSHARE_DEFAULT,
+    kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
+    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
+    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
 )
     gsr(
         estimator,
@@ -99,9 +99,9 @@ function gsr(
     modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
     residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
-    kfoldcrossvalidation::Bool = KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = TESTSETSHARE_DEFAULT,
+    kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
+    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
+    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
 )
     removemissings = fe_lag === nothing
 
@@ -131,10 +131,10 @@ function gsr(
         )
     end
 
-    original_data = copy_data(data)
+    original_data = copy_modelselectiondata(data)
 
     if preliminaryselection_enabled(preliminaryselection)
-        data = PreliminarySelection.preliminary_selection(preliminaryselection, data)
+        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
         original_data.extras = data.extras
     end
 
@@ -152,7 +152,7 @@ function gsr(
 
     original_data.extras = data.extras
 
-    if kfoldcrossvalidation
+    if crossvalidation_enabled(kfoldcrossvalidation)
         CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
     end
 

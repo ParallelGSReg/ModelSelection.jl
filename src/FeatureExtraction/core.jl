@@ -8,7 +8,7 @@ function featureextraction(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
     return featureextraction!(
-        ModelSelection.copy_data(data),
+        ModelSelection.copy_modelselectiondata(data),
         fe_sqr = fe_sqr,
         fe_log = fe_log,
         fe_inv = fe_inv,
@@ -83,10 +83,10 @@ function execute!(
     end
 
     if removemissings
-        data = ModelSelection.filter_data_by_empty_values(data)
+        data = ModelSelection.filter_data_by_empty_values!(data)
     end
 
-    data = ModelSelection.convert_data(data)
+    data = ModelSelection.convert_data!(data)
 
     return data
 end
