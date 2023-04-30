@@ -698,8 +698,8 @@ function execute(
 
     if intercept
         data = hcat(data, ones(nobs))
-        push!(expvars, :_cons)
-        push!(datanames, :_cons)
+        push!(expvars, CONS)
+        push!(datanames, CONS)
     end
 
     if removeoutliers
@@ -732,7 +732,6 @@ function execute(
         )
 
     nobs = size(depvar_data, 1)
-
     modelselection_data = ModelSelection.ModelSelectionData(
         equation,
         depvar,

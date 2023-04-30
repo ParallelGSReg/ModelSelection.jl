@@ -2,9 +2,15 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
     datanames::Vector{Symbol}
     modelavg_datanames::Any
 
-    data::Any
-    bestresult_data::Any
-    modelavg_data::Any
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Nothing,
+    }
+    bestresult_data::Union{Vector{Union{Int32, Int64, Float32, Float64, Missing}},Nothing}
+    modelavg_data::Union{Vector{Union{Int32, Int64, Float32, Float64, Missing}},Nothing}
 
     outsample::Any
     criteria::Any

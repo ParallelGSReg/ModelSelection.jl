@@ -47,7 +47,7 @@ end
 function ols_execute!(
     data::ModelSelection.ModelSelectionData,
     result::AllSubsetRegressionResult,
-)
+    )
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
@@ -185,7 +185,7 @@ function ols_execute!(
             result.data[:, datanames_index[:order]]
         w1 = exp.(-delta / 2)
         result.data[:, datanames_index[:weight]] = w1 ./ sum(w1)
-        result.modelavg_data = Vector{Float64}(undef, size(result.datanames))
+        result.modelavg_data = Vector{Union{Int64, Float64}}(undef, size(result.datanames))
         weight_pos = (result.ttest) ? 4 : 2
         for expvar in data.expvars
             obs = result.data[:, datanames_index[Symbol(string(expvar, "_b"))]]
@@ -220,6 +220,7 @@ function ols_execute!(
                 )
             end
         end
+        result.modelavg_data[datanames_index[:nobs]] = Int64(round(result.modelavg_data[datanames_index[:nobs]]))
     end
 
     if result.orderresults
@@ -236,7 +237,7 @@ function ols_execute!(
         end
         result.bestresult_data = result.data[best_result_index, :]
     end
-
+    result.bestresult_data[datanames_index[:nobs]] = Int64(round(result.bestresult_data[datanames_index[:nobs]]))
     return result
 end
 
@@ -424,7 +425,7 @@ function ols_execute_row!(
         end
     end
 
-    result_data[order, datanames_index[:nobs]] = nobs
+    result_data[order, datanames_index[:nobs]] = Int64(trunc(nobs))
     result_data[order, datanames_index[:ncoef]] = ncoef
     result_data[order, datanames_index[:sse]] = datatype(sse)
     result_data[order, datanames_index[:r2]] = datatype(r2)

@@ -3,7 +3,7 @@ function featureextraction(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
@@ -23,7 +23,7 @@ function featureextraction!(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
@@ -47,7 +47,7 @@ function execute!(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )

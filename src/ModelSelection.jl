@@ -1,6 +1,6 @@
 module ModelSelection
 
-using DataFrames, DelimitedFiles, JLD2
+using DataFrames, DelimitedFiles, JLD2, Printf
 
 
 include("ModelSelection/types.jl")
@@ -26,5 +26,6 @@ export ModelSelectionData, ModelSelectionResult
 export gsr, save, load, save_csv
 export create_datanames_index, get_column_index, get_selected_variables
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
+export CONS
 
 end

@@ -1,19 +1,18 @@
 """
 Creates ModelSelection result
 # Arguments
- - `data::ModelSelection.ModelSelectionData`: the model selection data.
- - `fixedvariables::Union{Nothing, Array}`: TODO add definition.
- - `outsample::Union{Nothing, Int, Array}`: TODO add definition.
- - `criteria::Array`: TODO add definition.
+ - `data::ModelSelectionData`: the model selection data.
+ - `outsample::Union{Int,Vector{Int},Nothing}`: TODO add definition.
+ - `criteria::Vector{Symbol}`: TODO add definition.
  - `ttest::Bool`: TODO add definition.
  - `modelavg::Bool`: TODO add definition.
  - `residualtest::Bool`: TODO add definition.
  - `orderresults::Bool`: TODO add definition.
 """
 function create_result(
-    data::ModelSelection.ModelSelectionData,
-    outsample::Union{Nothing,Int,Array},
-    criteria::Array,
+    data::ModelSelectionData,
+    outsample::Union{Int64,Vector{Int},Nothing},
+    criteria::Vector{Symbol},
     ttest::Bool,
     modelavg::Bool,
     residualtest::Bool,
@@ -22,33 +21,17 @@ function create_result(
     if outsample === nothing
         outsample = 0
     end
-
     if (outsample isa Array && size(outsample, 1) > 0) ||
        (!(outsample isa Array) && outsample > 0)
         push!(criteria, :rmseout)
     end
-
     criteria = unique(criteria)
-
     datanames = create_datanames(data, criteria, ttest, modelavg, residualtest)
-
-    if modelavg
-        modelavg_datanames = []
-    else
-        modelavg_datanames = nothing
-    end
-
-    outsample_max =
-        data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - if (data.intercept)
-            1
-        else
-            0
-        end
-
+    modelavg_datanames = (modelavg) ? [] : nothing
+    outsample_max = data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - ((data.intercept) ? 1 : 0)
     if isa(outsample, Int) && outsample_max <= outsample
         outsample = 0
     end
-
     return AllSubsetRegressionResult(
         datanames,
         modelavg_datanames,
@@ -65,16 +48,16 @@ end
 Constructs the datanames array for results based on this structure:
 Index,Covariates,b,bstd,T-test,Equation general information merged with criteria user-defined options,Order index from user combined criteria,Weight
 # Arguments
- - `data::ModelSelection.ModelSelectionData`: the model selection data.
- - `criteria::Array`: TODO add definition.
+ - `data::ModelSelectionData`: the model selection data.
+ - `criteria::Vector{Symbol}`: TODO add definition.
  - `ttest::Bool`: TODO add definition.
  - `modelavg::Bool`: TODO add definition.
  - `residualtest::Bool`: TODO add definition.
  - `orderresults::Bool`: TODO add definition.
 """
 function create_datanames(
-    data::ModelSelection.ModelSelectionData,
-    criteria::Array,
+    data::ModelSelectionData,
+    criteria::Vector{Symbol},
     ttest::Bool,
     modelavg::Bool,
     residualtest::Bool,
@@ -82,7 +65,7 @@ function create_datanames(
     datanames = []
     push!(datanames, INDEX)
     for expvar in data.expvars
-        if expvar == :_cons
+        if expvar == CONS
             continue
         end
         push!(datanames, Symbol(string(expvar, "_b")))
@@ -101,10 +84,10 @@ function create_datanames(
         end
     end
     if data.intercept !== nothing && data.intercept
-        push!(datanames, Symbol(string(:_cons, "_b")))
+        push!(datanames, Symbol(string(CONS, "_b")))
         if ttest
-            push!(datanames, Symbol(string(:_cons, "_bstd")))
-            push!(datanames, Symbol(string(:_cons, "_t")))
+            push!(datanames, Symbol(string(CONS, "_bstd")))
+            push!(datanames, Symbol(string(CONS, "_t")))
         end
     end
     testfields =
@@ -121,10 +104,10 @@ function create_datanames(
 end
 
 """
-Gets in-sample data view.
+Gets in-sample data view TODO: Add fixed variables documentation
 # Arguments
- - `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32, Nothing}}, SharedArrays.SharedVector{Union{Float64, Nothing}}}`: TODO add definition.
- - `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32, Nothing}}, SharedArrays.SharedMatrix{Union{Float64, Nothing}}}`: TODO add definition.
+ - `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32,Nothing}}, SharedArrays.SharedVector{Union{Float64,Nothing}}}`: TODO add definition.
+ - `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32,Nothing}}, SharedArrays.SharedMatrix{Union{Float64,Nothing}}}`: TODO add definition.
  - `outsample::Union{Int64, Vector{Int64}},`: TODO add definition.
  - `selected_variables_index::Vector{Int64}`: TODO add definition.
 """
@@ -142,10 +125,10 @@ function get_insample_subset(
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
     },
     fixedvariables_data::Union{
-        SharedArrays.SharedMatrix{Float64},
-        SharedArrays.SharedMatrix{Float32},
-        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
-        SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        SharedArrays.SharedArray{Float64},
+        SharedArrays.SharedArray{Float32},
+        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Union{Float64,Nothing}},
         Nothing,
     },
     outsample::Union{Int64,Vector{Int64}},
@@ -174,8 +157,8 @@ end
 """
 Gets out-sample data view.
 # Arguments
-- `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32, Nothing}}, SharedArrays.SharedVector{Union{Float64, Nothing}}}`: TODO add definition.
-- `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32, Nothing}}, SharedArrays.SharedMatrix{Union{Float64, Nothing}}}`: TODO add definition.
+- `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32,Nothing}}, SharedArrays.SharedVector{Union{Float64,Nothing}}}`: TODO add definition.
+- `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32,Nothing}}, SharedArrays.SharedMatrix{Union{Float64,Nothing}}}`: TODO add definition.
 - `outsample::Union{Int64, Vector{Int64}},`: TODO add definition.
 - `selected_variables_index::Vector{Int64}`: TODO add definition.
 """
@@ -193,10 +176,10 @@ function get_outsample_subset(
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
     },
     fixedvariables_data::Union{
-        SharedArrays.SharedMatrix{Float64},
-        SharedArrays.SharedMatrix{Float32},
-        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
-        SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        SharedArrays.SharedArray{Float64},
+        SharedArrays.SharedArray{Float32},
+        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Union{Float64,Nothing}},
         Nothing,
     },
     outsample::Union{Int64,Vector{Int64}},
@@ -263,11 +246,11 @@ end
 """
 Add extra data to data
 # Arguments
-- `data::ModelSelection.ModelSelectionData`: the model selection data.
+- `data::ModelSelectionData`: the model selection data.
 - `result::ModelSelectionResult`: the model selection result.
 """
 function addextras(
-    data::ModelSelection.ModelSelectionData,
+    data::ModelSelectionData,
     result::ModelSelection.ModelSelectionResult,
 )
     data.extras[ModelSelection.generate_extra_key(
@@ -292,10 +275,22 @@ function addextras(
     return data
 end
 
+"""
+Validates if the selected criteria are valid
+# Arguments
+- `criteria::Vector{Symbol}: the selected criteria.
+- `available_criteria::Vector{Symbol}`: the available criteria.
+"""
 function valid_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
     return ModelSelection.in_vector(criteria, available_criteria)
 end
 
+"""
+Validates if the selected criteria are valid and throws an error if not
+# Arguments
+- `criteria::Vector{Symbol}: the selected criteria.
+- `available_criteria::Vector{Symbol}`: the available criteria.
+"""
 function validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
     if !valid_criteria(criteria, available_criteria)
         msg = string(

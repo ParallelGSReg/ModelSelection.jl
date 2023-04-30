@@ -1,8 +1,9 @@
 module AllSubsetRegression
 
-using Distributed, Distributions, LinearAlgebra, Printf, SharedArrays, GLM
+using Distributed, Distributions, LinearAlgebra, SharedArrays, GLM
 
 using ..ModelSelection
+using ModelSelection: CONS, ModelSelectionData
 
 export to_string, AllSubsetRegressionResult, ALLSUBSETREGRESSION_EXTRAKEY
 export all_subset_regression

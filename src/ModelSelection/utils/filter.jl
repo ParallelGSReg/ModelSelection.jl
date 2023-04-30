@@ -1,5 +1,5 @@
 """
-Filters raw data removing empty or missing values.
+Filters raw data removing empty or missing values. TODO: Fixed datatypes in doc
 # Arguments
 - `datatype::Type`: the datatype.
 - `depvar_data::Union{Vector{Float32}, Vector{Float64}, Vector{Union{Float32, Missing}}, Vector{Union{Float64, Missing}}}`: dependent variable data.
@@ -17,16 +17,16 @@ function filter_raw_data_by_empty_values(
         Vector{Union{Float64,Missing}},
     },
     expvars_data::Union{
-        Array{Float32},
-        Array{Float64},
-        Array{Union{Float32,Missing}},
-        Array{Union{Float64,Missing}},
+        Matrix{Float32},
+        Matrix{Float64},
+        Matrix{Union{Float32,Missing}},
+        Matrix{Union{Float64,Missing}},
     },
     fixedvariables_data::Union{
-        Array{Float32},
-        Array{Float64},
-        Array{Union{Float32,Missing}},
-        Array{Union{Float64,Missing}},
+        Matrix{Float32},
+        Matrix{Float64},
+        Matrix{Union{Float32,Missing}},
+        Matrix{Union{Float64,Missing}},
         Nothing,
     } = nothing,
     time_data::Union{
@@ -47,6 +47,7 @@ function filter_raw_data_by_empty_values(
     keep_rows = Array{Bool}(undef, size(depvar_data, 1))
     keep_rows .= true
     keep_rows .&= map(b -> !b, ismissing.(depvar_data))
+
     for i in axes(expvars_data, 2)
         keep_rows .&= map(b -> !b, ismissing.(expvars_data[:, i]))
     end
@@ -54,16 +55,16 @@ function filter_raw_data_by_empty_values(
         for i in axes(fixedvariables_data, 2)
             keep_rows .&= map(b -> !b, ismissing.(fixedvariables_data[:, i]))
         end
-        fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, :])
     end
     depvar_data = convert(Array{datatype}, depvar_data[keep_rows, 1])
     expvars_data = convert(Array{datatype}, expvars_data[keep_rows, :])
-    if time_data !== nothing
-        time_data = time_data[keep_rows, 1]
+    if fixedvariables_data !== nothing
+        fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, 1])
+        fixedvariables_data = reshape(fixedvariables_data, length(fixedvariables_data), 1)
     end
-    if panel_data !== nothing
-        panel_data = panel_data[keep_rows, 1]
-    end
+    time_data = time_data !== nothing ? time_data = time_data[keep_rows, 1] : time_data
+    panel_data = panel_data !== nothing ? panel_data = panel_data[keep_rows, 1] : panel_data
+
     return depvar_data, expvars_data, fixedvariables_data, time_data, panel_data
 end
 

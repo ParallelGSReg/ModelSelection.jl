@@ -4,34 +4,18 @@ Copies ModelSelectionData to new ModelSelectionData.
 - `data::ModelSelectionData`: the ModelSelectionData to be copied.
 """
 function copy_modelselectiondata(data::ModelSelectionData)
-    fixedvariables = nothing
-    if data.fixedvariables !== nothing
-        fixedvariables = copy(data.fixedvariables)
-    end
-    fixedvariables_data = nothing
-    if data.fixedvariables_data !== nothing
-        fixedvariables_data = copy(data.fixedvariables_data)
-    end
-    time_data = nothing
-    if data.time_data !== nothing
-        time_data = copy(data.time_data)
-    end
-    panel_data = nothing
-    if data.panel_data !== nothing
-        panel_data = copy(data.panel_data)
-    end
     new_data = ModelSelectionData(
         copy(data.equation),
         data.depvar,
         copy(data.expvars),
-        fixedvariables,
+        data.fixedvariables !== nothing ? copy(data.fixedvariables) : nothing,
         data.time,
         data.panel,
         copy(data.depvar_data),
         copy(data.expvars_data),
-        fixedvariables_data,
-        time_data,
-        panel_data,
+        data.fixedvariables_data !== nothing ? copy(data.fixedvariables_data) : nothing,
+        data.time_data !== nothing ? copy(data.time_data) : nothing,
+        data.panel_data !== nothing ? copy(data.panel_data) : nothing,
         data.intercept,
         data.datatype,
         data.removemissings,

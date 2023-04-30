@@ -72,6 +72,10 @@ function kfoldcrossvalidation(
         reduced.depvar_data = data.depvar_data[dataset]
         reduced.expvars_data = data.expvars_data[dataset, :]
 
+        if reduced.fixedvariables !== nothing
+            reduced.fixedvariables_data = data.fixedvariables_data[dataset, :]
+        end
+
         if reduced.time !== nothing
             reduced.time_data = data.time_data[dataset]
         end
@@ -81,6 +85,7 @@ function kfoldcrossvalidation(
         end
 
         reduced.nobs = size(dataset, 1)
+        
         _, vars = ModelSelection.PreliminarySelection.lasso!(reduced, addextrasflag = false)
 
         backup = ModelSelection.copy_modelselectiondata(data)
@@ -119,6 +124,8 @@ function kfoldcrossvalidation(
 
     average_data = mean(data, dims = 1)
     median_data = median(data, dims = 1)
+    
+    datanames_index = ModelSelection.create_datanames_index(datanames)
 
     result = CrossValidationResult(
         k,
@@ -130,6 +137,9 @@ function kfoldcrossvalidation(
         data,
     )
 
+    result.average_data[datanames_index[:nobs]] = Int64(round(result.average_data[datanames_index[:nobs]]))
+    result.median_data[datanames_index[:nobs]] = Int64(round(result.median_data[datanames_index[:nobs]]))
+
     previousresult = ModelSelection.addresult!(previousresult, result)
 
     addextras(previousresult, result)
@@ -139,142 +149,16 @@ end
 
 function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-
-    out = ""
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                       Cross validation average results                       \n"
-    )
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(
-        "                                     Dependent variable: %s                   \n",
-        data.depvar
-    )
-    out *= @sprintf(
-        "                                     ─────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(" Selected covariates                 Coef.")
-    if result.ttest
-        out *= @sprintf("        Std.         t-test")
-    end
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
-    for varname in data.expvars
-        if Symbol(string(varname, "_b")) in keys(datanames_index)
-            out *= @sprintf(" %-35s", varname)
-            out *= @sprintf(
-                " %-10f",
-                result.average_data[datanames_index[Symbol(string(varname, "_b"))]]
-            )
-            if result.ttest
-                out *= @sprintf(
-                    "   %-10f",
-                    result.average_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-                )
-                out *= @sprintf(
-                    "   %-10f",
-                    result.average_data[datanames_index[Symbol(string(varname, "_t"))]]
-                )
-            end
-            out *= @sprintf("\n")
-        end
-    end
-
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        " Observations                        %-10d\n",
-        result.average_data[datanames_index[:nobs]]
-    )
-    out *= @sprintf(
-        " RMSE OUT                            %-10f\n",
-        result.average_data[datanames_index[:rmseout]]
-    )
-
-    out *= @sprintf("\n")
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                       Cross validation median results                        \n"
-    )
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(
-        "                                     Dependent variable: %s                   \n",
-        data.depvar
-    )
-    out *= @sprintf(
-        "                                     ─────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(" Covariates                          Coef.")
-    if result.ttest
-        out *= @sprintf("        Std.         t-test")
-    end
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
-    for varname in data.expvars
-        if Symbol(string(varname, "_b")) in keys(datanames_index)
-            out *= @sprintf(" %-35s", varname)
-            out *= @sprintf(
-                " %-10f",
-                result.median_data[datanames_index[Symbol(string(varname, "_b"))]]
-            )
-            if result.ttest
-                out *= @sprintf(
-                    "   %-10f",
-                    result.median_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-                )
-                out *= @sprintf(
-                    "   %-10f",
-                    result.median_data[datanames_index[Symbol(string(varname, "_t"))]]
-                )
-            end
-            out *= @sprintf("\n")
-        end
-    end
-
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        " Observations                        %-10d\n",
-        result.median_data[datanames_index[:nobs]]
-    )
-    out *= @sprintf(
-        " RMSE OUT                            %-10f\n",
-        result.median_data[datanames_index[:rmseout]]
-    )
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
+    expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
+    out = ModelSelection.sprintf_header_block("Cross validation average results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block("Selected covariates", datanames_index, expvars, data, result, result.average_data)
+    out *= ModelSelection.sprintf_summary(datanames_index, result, result.average_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_newline(1)
+    out *= ModelSelection.sprintf_header_block("Cross validation median results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block("Covariates", datanames_index, data.expvars, data, result, result.median_data)
+    out *= ModelSelection.sprintf_summary(datanames_index, result, result.median_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_newline()
     return out
 end

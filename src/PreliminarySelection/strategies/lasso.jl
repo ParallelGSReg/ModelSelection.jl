@@ -31,7 +31,7 @@ function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true)
     vars = vars[1:size(data.expvars, 1)]
 
     if data.intercept
-        vars[ModelSelection.get_column_index(:_cons, data.expvars)] = true
+        vars[ModelSelection.get_column_index(CONS, data.expvars)] = true
     end
 
     data.expvars = data.expvars[vars]
