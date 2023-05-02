@@ -1,5 +1,37 @@
+"""
+    logit(
+        data::ModelSelectionData;
+        outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+        ztest::Bool = TTEST_DEFAULT,
+        modelavg::Bool = MODELAVG_DEFAULT,
+        residualtest::Bool = RESIDUALTEST_DEFAULT,
+        orderresults::Bool = ORDERRESULTS_DEFAULT,
+    ) -> ModelSelectionData
+
+Perform logistic regression model selection on the on the provided `ModelSelectionData` using the specified options and returns a new ModelSelectionData object containing the results.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+
+# Keyword Arguments
+- `outsample::Union{Nothing,Int,Array}`: The number of out-of-sample observations, an array of out-of-sample indices, or nothing. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: A vector of symbols representing the selection criteria to be used. Default: `CRITERIA_DEFAULT`.
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates. Default: `ZTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging. Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests. Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results by the specified criteria. Default: `ORDERRESULTS_DEFAULT`.
+
+# Returns
+- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the logit regression results.
+
+# Example
+```julia
+result = logit(model_selection_data)
+```
+"""
 function logit(
-    data::ModelSelection.ModelSelectionData;
+    data::ModelSelectionData;
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
@@ -18,8 +50,39 @@ function logit(
     )
 end
 
+"""
+    logit!(
+        data::ModelSelectionData;
+        outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+        ztest::Bool = TTEST_DEFAULT,
+        modelavg::Bool = MODELAVG_DEFAULT,
+        residualtest::Bool = RESIDUALTEST_DEFAULT,
+        orderresults::Bool = ORDERRESULTS_DEFAULT,
+    ) -> ModelSelectionData
+
+Perform logistic regression model selection on the on the provided `ModelSelectionData` using the specified options. This function mutates the input `ModelSelectionData` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+
+# Keyword Arguments
+- `outsample::Union{Nothing,Int,Array}`: The number of out-of-sample observations, an array of out-of-sample indices, or nothing. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: A vector of symbols representing the selection criteria to be used. Default: `CRITERIA_DEFAULT`.
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates. Default: `ZTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging. Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests. Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results by the specified criteria. Default: `ORDERRESULTS_DEFAULT`.
+
+# Returns
+- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the logit regression results.
+
+# Example
+```julia
+result = logit!(model_selection_data)
+"""
 function logit!(
-    data::ModelSelection.ModelSelectionData;
+    data::ModelSelectionData;
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
@@ -40,14 +103,31 @@ function logit!(
     )
     logit_execute!(data, result)
     ModelSelection.addresult!(data, result)
-    data = addextras(data, result)
+    data = addextras!(data, result)
     return data
 end
 
-function logit_execute!(
-    data::ModelSelection.ModelSelectionData,
-    result::AllSubsetRegressionResult,
-)
+"""
+logit_execute!(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult
+    ) -> AllSubsetRegressionResult
+
+Perform logistic regression model selection analysis for all possible subsets of the explanatory variables in the given `ModelSelectionData`. This function mutates the input `AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the results of the logit regression analysis.
+
+# Returns
+- `AllSubsetRegressionResult`: The updated input `AllSubsetRegressionResult` object containing the logit regression results for all possible subsets of the explanatory variables.
+
+# Example
+```julia
+logit_execute!(model_selection_data, all_subset_regression_result)
+```
+"""
+function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult)
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
@@ -69,7 +149,9 @@ function logit_execute!(
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
     ncoef_gum = size(expvars_data, 2)
-    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
+    depvar_without_outsample_subset,
+    expvars_without_outsample_subset,
+    fixedvariables_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
@@ -78,7 +160,8 @@ function logit_execute!(
     )
     fullexpvars_without_outsample_subset = expvars_without_outsample_subset
     if fixedvariables_without_outsample_subset !== nothing
-        fullexpvars_without_outsample_subset = hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
+        fullexpvars_without_outsample_subset =
+            hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
 
     gum_model = GLM.fit(
@@ -244,6 +327,53 @@ function logit_execute!(
     return result
 end
 
+"""
+# TODO: typing and example
+    logit_execute_job!(
+        num_job,
+        num_jobs,
+        ops_per_worker,
+        depvar,
+        expvars,
+        fixedvariables,
+        start_coef,
+        datanames_index,
+        depvar_data,
+        expvars_data,
+        fixedvariables_data,
+        result_data,
+        intercept,
+        time,
+        datatype,
+        outsample,
+        criteria,
+        ttest,
+        residualtest,
+    )
+
+Execute a single job in the logistic regression (logit) procedure. This function is called by the main `logit!` function to parallelize the model estimation across multiple workers.
+
+# Arguments
+- `num_job`: The job number.
+- `num_jobs`: The total number of jobs.
+- `ops_per_worker`: The number of operations per worker.
+- `depvar`: The dependent variable.
+- `expvars`: The explanatory variables.
+- `fixedvariables`: The fixed variables.
+- `start_coef`: The starting coefficients.
+- `datanames_index`: The index for the names of data.
+- `depvar_data`: The dependent variable data.
+- `expvars_data`: The explanatory variables data.
+- `fixedvariables_data`: The fixed variables data.
+- `result_data`: The results data.
+- `intercept`: A boolean indicating if the model should include an intercept.
+- `time`: The time variable.
+- `datatype`: The type of data.
+- `outsample`: The out-of-sample data used for validation.
+- `criteria`: The criteria used for model selection.
+- `ttest`: A boolean indicating if a t-test should be performed.
+- `residualtest`: A boolean indicating if a residual test should be performed.
+"""
 function logit_execute_job!(
     num_job,
     num_jobs,
@@ -292,6 +422,7 @@ function logit_execute_job!(
     end
 end
 
+
 function logit_execute_row!(
     order,
     depvar,
@@ -314,11 +445,8 @@ function logit_execute_row!(
     num_job = nothing,
     iteration_num = nothing,
 )
-    selected_variables_index = ModelSelection.get_selected_variables(
-        order,
-        expvars,
-        intercept,
-    )
+    selected_variables_index =
+        ModelSelection.get_selected_variables(order, expvars, intercept)
     depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
         depvar_data,
         expvars_data,

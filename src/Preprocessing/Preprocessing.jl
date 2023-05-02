@@ -1,7 +1,8 @@
 module Preprocessing
 
 using DataFrames, SingularSpectrumAnalysis, Statistics
-using ..ModelSelection
+using ModelSelection
+using ModelSelection: CONS
 
 export input, PREPROCESSING_EXTRAKEY
 

@@ -1,3 +1,8 @@
  - Add validation for fixedvariables
  - Add fixed variables in logit
  - Add panel as a fixed var
+ - Cholesky decomposition added to method="fast"
+ - Homogenize logit and ols descriptions
+
+https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md#general-formatting-guidelines-for-julia-code-contributions
+https://documenter.juliadocs.org/stable/man/guide/

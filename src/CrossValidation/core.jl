@@ -153,12 +153,12 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
     out = ModelSelection.sprintf_header_block("Cross validation average results")
     out *= ModelSelection.sprintf_depvar_block(data)
     out *= ModelSelection.sprintf_covvars_block("Selected covariates", datanames_index, expvars, data, result, result.average_data)
-    out *= ModelSelection.sprintf_summary(datanames_index, result, result.average_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.average_data, summary_variables=SUMMARY_VARIABLES)
     out *= ModelSelection.sprintf_newline(1)
     out *= ModelSelection.sprintf_header_block("Cross validation median results")
     out *= ModelSelection.sprintf_depvar_block(data)
     out *= ModelSelection.sprintf_covvars_block("Covariates", datanames_index, data.expvars, data, result, result.median_data)
-    out *= ModelSelection.sprintf_summary(datanames_index, result, result.median_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.median_data, summary_variables=SUMMARY_VARIABLES)
     out *= ModelSelection.sprintf_newline()
     return out
 end

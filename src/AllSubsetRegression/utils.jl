@@ -1,13 +1,32 @@
 """
-Creates ModelSelection result
+    create_result(
+        data::ModelSelectionData,
+        outsample::Union{Int64,Vector{Int},Nothing},
+        criteria::Vector{Symbol},
+        ttest::Bool,
+        modelavg::Bool,
+        residualtest::Bool,
+        orderresults::Bool
+    ) -> AllSubsetRegressionResult
+
+Create an `AllSubsetRegressionResult` object containing the results of the model selection process.
+
 # Arguments
- - `data::ModelSelectionData`: the model selection data.
- - `outsample::Union{Int,Vector{Int},Nothing}`: TODO add definition.
- - `criteria::Vector{Symbol}`: TODO add definition.
- - `ttest::Bool`: TODO add definition.
- - `modelavg::Bool`: TODO add definition.
- - `residualtest::Bool`: TODO add definition.
- - `orderresults::Bool`: TODO add definition.
+- `data::ModelSelectionData`: The data object containing information about the model selection process.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of observations to be used for out-of-sample validation. Set to `nothing` if no out-of-sample validation is desired.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison and selection.
+- `ttest::Bool`: If `true`, perform a t-test on the model coefficients.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+- `residualtest::Bool`: If `true`, perform a residual test on the selected models.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+
+# Returns
+- `AllSubsetRegressionResult`: An object containing the results of the model selection process.
+
+# Example
+```julia
+result = create_result(data, 10, [:aic, :bic], true, false, true, true)
+```
 """
 function create_result(
     data::ModelSelectionData,
@@ -18,20 +37,17 @@ function create_result(
     residualtest::Bool,
     orderresults::Bool,
 )
-    if outsample === nothing
-        outsample = 0
-    end
+    outsample = outsample === nothing ? 0 : outsample
     if (outsample isa Array && size(outsample, 1) > 0) ||
        (!(outsample isa Array) && outsample > 0)
         push!(criteria, :rmseout)
     end
     criteria = unique(criteria)
     datanames = create_datanames(data, criteria, ttest, modelavg, residualtest)
-    modelavg_datanames = (modelavg) ? [] : nothing
-    outsample_max = data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - ((data.intercept) ? 1 : 0)
-    if isa(outsample, Int) && outsample_max <= outsample
-        outsample = 0
-    end
+    modelavg_datanames = modelavg ? [] : nothing
+    outsample_max =
+        data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - ((data.intercept) ? 1 : 0)
+    outsample = isa(outsample, Int) && outsample_max <= outsample ? 0 : outsample
     return AllSubsetRegressionResult(
         datanames,
         modelavg_datanames,
@@ -45,15 +61,30 @@ function create_result(
 end
 
 """
-Constructs the datanames array for results based on this structure:
-Index,Covariates,b,bstd,T-test,Equation general information merged with criteria user-defined options,Order index from user combined criteria,Weight
+    create_datanames(
+        data::ModelSelectionData,
+        criteria::Vector{Symbol},
+        ttest::Bool,
+        modelavg::Bool,
+        residualtest::Bool
+    ) -> Vector{Symbol}
+
+Create a vector of data names (Symbols) representing the output of the model selection process.
+
 # Arguments
- - `data::ModelSelectionData`: the model selection data.
- - `criteria::Vector{Symbol}`: TODO add definition.
- - `ttest::Bool`: TODO add definition.
- - `modelavg::Bool`: TODO add definition.
- - `residualtest::Bool`: TODO add definition.
- - `orderresults::Bool`: TODO add definition.
+- `data::ModelSelectionData`: The data object containing information about the model selection process.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison and selection.
+- `ttest::Bool`: If `true`, perform a t-test on the model coefficients.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+- `residualtest::Bool`: If `true`, perform a residual test on the selected models.
+
+# Returns
+- `Vector{Symbol}`: A vector of data names representing the output of the model selection process.
+
+# Example
+```julia
+datanames = create_datanames(data, [:aic, :bic], true, false, true)
+```
 """
 function create_datanames(
     data::ModelSelectionData,
@@ -104,12 +135,30 @@ function create_datanames(
 end
 
 """
-Gets in-sample data view TODO: Add fixed variables documentation
+    get_insample_subset(
+        depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}},
+        expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}},
+        fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing},
+        outsample::Union{Int64, Vector{Int64}},
+        selected_variables_index::Vector{Int64}
+    ) -> Tuple{Vector, Matrix, Union{Matrix, Nothing}}
+
+Retrieve the in-sample data subsets from the provided data.
+
 # Arguments
- - `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32,Nothing}}, SharedArrays.SharedVector{Union{Float64,Nothing}}}`: TODO add definition.
- - `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32,Nothing}}, SharedArrays.SharedMatrix{Union{Float64,Nothing}}}`: TODO add definition.
- - `outsample::Union{Int64, Vector{Int64}},`: TODO add definition.
- - `selected_variables_index::Vector{Int64}`: TODO add definition.
+- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The dependent variable data.
+- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory variables data.
+- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`: The fixed variables data, or `nothing` if no fixed variables are present.
+- `outsample::Union{Int64, Vector{Int64}}`: The number of observations or indices of observations to be used for out-of-sample validation.
+- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory variables.
+
+# Returns
+- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the in-sample subsets of dependent variable data, explanatory variables data, and fixed variables data (if present).
+
+# Example
+```julia
+depvar_view, expvars_view, fixedvariables_view = get_insample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
+```
 """
 function get_insample_subset(
     depvar_data::Union{
@@ -155,12 +204,30 @@ function get_insample_subset(
 end
 
 """
-Gets out-sample data view.
+    get_outsample_subset(
+        depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}},
+        expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}},
+        fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing},
+        outsample::Union{Int64, Vector{Int64}},
+        selected_variables_index::Vector{Int64}
+    ) -> Tuple{Vector, Matrix, Union{Matrix, Nothing}}
+
+Retrieve the out-of-sample data subsets from the provided data.
+
 # Arguments
-- `depvar_data::Union{SharedArrays.SharedVector{Float64}, SharedArrays.SharedVector{Float32}, SharedArrays.SharedVector{Union{Float32,Nothing}}, SharedArrays.SharedVector{Union{Float64,Nothing}}}`: TODO add definition.
-- `expvars_data::Union{SharedArrays.SharedMatrix{Float64}, SharedArrays.SharedMatrix{Float32}, SharedArrays.SharedMatrix{Union{Float32,Nothing}}, SharedArrays.SharedMatrix{Union{Float64,Nothing}}}`: TODO add definition.
-- `outsample::Union{Int64, Vector{Int64}},`: TODO add definition.
-- `selected_variables_index::Vector{Int64}`: TODO add definition.
+- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The dependent variable data.
+- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory variables data.
+- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`: The fixed variables data, or `nothing` if no fixed variables are present.
+- `outsample::Union{Int64, Vector{Int64}}`: The number of observations or indices of observations to be used for out-of-sample validation.
+- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory variables.
+
+# Returns
+- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the out-of-sample subsets of dependent variable data, explanatory variables data, and fixed variables data (if present).
+
+# Example
+```julia
+depvar_view, expvars_view, fixedvariables_view = get_outsample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
+```
 """
 function get_outsample_subset(
     depvar_data::Union{
@@ -205,11 +272,27 @@ function get_outsample_subset(
 end
 
 """
-Sorts rows.
+    sortrows(
+        B::AbstractMatrix,
+        cols::Array;
+        kws...
+    ) -> AbstractMatrix
+
+Sort the rows of a given matrix `B` based on the specified columns `cols`.
+
 # Arguments
- - `B::AbstractMatrix`: TODO add definition.
- - `cols::Array`: TODO add definition.
- - `kws...`: TODO add definition.
+- `B::AbstractMatrix`: The input matrix to be sorted.
+- `cols::Array`: An array containing the indices of the columns by which to sort the rows of the matrix.
+- `kws...`: Optional keyword arguments to be passed to the `sortperm` function.
+
+# Returns
+- `AbstractMatrix`: A matrix with rows sorted based on the specified columns.
+
+# Example
+```julia
+A = [3 2 1; 1 3 2; 2 1 3]
+sorted_matrix = sortrows(A, [2, 3])
+```
 """
 function sortrows(B::AbstractMatrix, cols::Array; kws...)
     for i = 1:length(cols)
@@ -244,15 +327,26 @@ function sortrows(B::AbstractMatrix, cols::Array; kws...)
 end
 
 """
-Add extra data to data
+    addextras(
+        data::ModelSelectionData,
+        result::ModelSelectionResult
+    ) -> ModelSelectionData
+
+Add extra information from a `ModelSelectionResult` to the `ModelSelectionData` object.
+
 # Arguments
-- `data::ModelSelectionData`: the model selection data.
-- `result::ModelSelectionResult`: the model selection result.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object to which the extra information will be added.
+- `result::ModelSelectionResult`: The `ModelSelectionResult` object containing the extra information to be added.
+
+# Returns
+- `ModelSelectionData`: The updated `ModelSelectionData` object with the extra information added.
+
+# Example
+```julia
+updated_data = addextras!(model_selection_data, model_selection_result)
+```
 """
-function addextras(
-    data::ModelSelectionData,
-    result::ModelSelection.ModelSelectionResult,
-)
+function addextras!(data::ModelSelectionData, result::ModelSelectionResult)
     data.extras[ModelSelection.generate_extra_key(
         ALLSUBSETREGRESSION_EXTRAKEY,
         data.extras,
@@ -276,20 +370,46 @@ function addextras(
 end
 
 """
-Validates if the selected criteria are valid
+    valid_criteria(
+        criteria::Vector{Symbol},
+        available_criteria::Vector{Symbol}
+    ) -> Bool
+
+Check if the specified `criteria` are valid by comparing them to a list of `available_criteria`.
+
 # Arguments
-- `criteria::Vector{Symbol}: the selected criteria.
-- `available_criteria::Vector{Symbol}`: the available criteria.
+- `criteria::Vector{Symbol}`: A vector of symbols representing the criteria to be validated.
+- `available_criteria::Vector{Symbol}`: A vector of symbols representing the available criteria for comparison.
+
+# Returns
+- `Bool`: `true` if all elements in the `criteria` vector are present in the `available_criteria` vector, `false` otherwise.
+
+# Example
+```julia
+is_valid = valid_criteria([:aic, :bic], [:aic, :bic, :rmse])
+```
 """
 function valid_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
     return ModelSelection.in_vector(criteria, available_criteria)
 end
 
 """
-Validates if the selected criteria are valid and throws an error if not
+    validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
+
+Validate the given `criteria` against a list of `available_criteria`.
+
 # Arguments
-- `criteria::Vector{Symbol}: the selected criteria.
-- `available_criteria::Vector{Symbol}`: the available criteria.
+- `criteria`: A vector of symbols representing the criteria to be validated.
+- `available_criteria`: A vector of symbols representing the available criteria.
+
+# Returns
+This function does not return any value. It raises an `ArgumentError` if any of the `criteria` is not valid.
+
+# Examples
+```julia
+validate_criteria([:aic, :bic], [:aic, :bic, :aicc]) # No error
+validate_criteria([:aic, :bad], [:aic, :bic, :aicc]) # ArgumentError
+```
 """
 function validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{Symbol})
     if !valid_criteria(criteria, available_criteria)

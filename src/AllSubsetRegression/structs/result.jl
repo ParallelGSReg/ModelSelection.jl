@@ -1,4 +1,5 @@
-mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
+# TODO: Add docstrings and typing
+mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     datanames::Vector{Symbol}
     modelavg_datanames::Any
 
@@ -9,8 +10,8 @@ mutable struct AllSubsetRegressionResult <: ModelSelection.ModelSelectionResult
         Array{Union{Float32,Missing}},
         Nothing,
     }
-    bestresult_data::Union{Vector{Union{Int32, Int64, Float32, Float64, Missing}},Nothing}
-    modelavg_data::Union{Vector{Union{Int32, Int64, Float32, Float64, Missing}},Nothing}
+    bestresult_data::Union{Vector{Union{Int32,Int64,Float32,Float64,Missing}},Nothing}
+    modelavg_data::Union{Vector{Union{Int32,Int64,Float32,Float64,Missing}},Nothing}
 
     outsample::Any
     criteria::Any

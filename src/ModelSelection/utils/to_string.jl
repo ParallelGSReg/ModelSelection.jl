@@ -165,7 +165,7 @@ function sprintf_covvars_block(covvars_title::String, datanames_index::Dict{Symb
     return out
 end
 
-function sprintf_summary(datanames_index, result, result_data; summary_variables = nothing, criteria_variables = nothing)
+function sprintf_summary_block(datanames_index, result, result_data; summary_variables = nothing, criteria_variables = nothing)
     current_variables = []
     out = ModelSelection.sprintf_simpleline(new_line = true)
     if summary_variables !== nothing
