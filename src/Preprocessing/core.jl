@@ -746,6 +746,7 @@ function execute(
         panel_data,
         intercept,
         datatype,
+        method,
         removemissings,
         nobs,
     )

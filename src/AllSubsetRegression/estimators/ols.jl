@@ -1,7 +1,7 @@
 """
     ols(
         data::ModelSelectionData;
-        outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+        outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
         criteria::Vector{Symbol} = CRITERIA_DEFAULT,
         ttest::Bool = TTEST_DEFAULT,
         modelavg::Bool = MODELAVG_DEFAULT,
@@ -9,21 +9,32 @@
         orderresults::Bool = ORDERRESULTS_DEFAULT,
     ) -> ModelSelectionData
 
-Perform Ordinary Least Squares (OLS) regression analysis on the provided `ModelSelectionData` using the specified options and returns a new ModelSelectionData object containing the results.
+Perform Ordinary Least Squares (OLS) regression analysis on the provided
+`ModelSelectionData` using the specified options and returns a new ModelSelectionData object
+containing the results.
 
 # Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+in the model selection process.
 
 # Keyword Arguments
-- `outsample::Union{Nothing,Int,Array}`: The number of out-of-sample observations, an array of out-of-sample indices, or nothing. Default: `OUTSAMPLE_DEFAULT`.
-- `criteria::Vector{Symbol}`: A vector of symbols representing the selection criteria to be used. Default: `CRITERIA_DEFAULT`.
-- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates. Default: `TTEST_DEFAULT`.
-- `modelavg::Bool`: If `true`, perform model averaging. Default: `MODELAVG_DEFAULT`.
-- `residualtest::Bool`: If `true`, perform residual tests. Default: `RESIDUALTEST_DEFAULT`.
-- `orderresults::Bool`: If `true`, order the results by the specified criteria. Default: `ORDERRESULTS_DEFAULT`.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates.
+   Default: `TTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
 
 # Returns
-- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the OLS regression results.
+- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the OLS
+regression results.
 
 # Example
 ```julia
@@ -32,7 +43,7 @@ result = ols(model_selection_data)
 """
 function ols(
     data::ModelSelectionData;
-    outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+    outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
@@ -53,7 +64,7 @@ end
 """
     ols!(
         data::ModelSelectionData;
-        outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+        outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
         criteria::Vector{Symbol} = CRITERIA_DEFAULT,
         ttest::Bool = TTEST_DEFAULT,
         modelavg::Bool = MODELAVG_DEFAULT,
@@ -61,21 +72,32 @@ end
         orderresults::Bool = ORDERRESULTS_DEFAULT,
     ) -> ModelSelectionData
 
-Perform Ordinary Least Squares (OLS) regression analysis on the provided `ModelSelectionData` using the specified options. This function mutates the input `ModelSelectionData` object.
+Perform Ordinary Least Squares (OLS) regression analysis on the provided
+`ModelSelectionData` using the specified options. This function mutates the input
+`ModelSelectionData` object.
 
 # Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
 
 # Keyword Arguments
-- `outsample::Union{Nothing,Int,Array}`: The number of out-of-sample observations, an array of out-of-sample indices, or nothing. Default: `OUTSAMPLE_DEFAULT`.
-- `criteria::Vector{Symbol}`: A vector of symbols representing the selection criteria to be used. Default: `CRITERIA_DEFAULT`.
-- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates. Default: `TTEST_DEFAULT`.
-- `modelavg::Bool`: If `true`, perform model averaging. Default: `MODELAVG_DEFAULT`.
-- `residualtest::Bool`: If `true`, perform residual tests. Default: `RESIDUALTEST_DEFAULT`.
-- `orderresults::Bool`: If `true`, order the results by the specified criteria. Default: `ORDERRESULTS_DEFAULT`.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates.
+   Default: `TTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
 
 # Returns
-- `ModelSelectionData`: The updated input `ModelSelectionData` object containing the OLS regression results.
+- `ModelSelectionData`: The updated input `ModelSelectionData` object containing the OLS
+   regression results.
 
 # Example
 ```julia
@@ -84,7 +106,7 @@ updated_data = ols!(model_selection_data)
 """
 function ols!(
     data::ModelSelectionData;
-    outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+    outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
@@ -92,15 +114,14 @@ function ols!(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
     validate_criteria(criteria, AVAILABLE_OLS_CRITERIA)
-
     result = create_result(
         data,
         outsample,
         criteria,
-        ttest,
         modelavg,
         residualtest,
         orderresults,
+        ttest = ttest,
     )
     ols_execute!(data, result)
     ModelSelection.addresult!(data, result)
@@ -114,14 +135,20 @@ end
         result::AllSubsetRegressionResult
     ) -> AllSubsetRegressionResult
 
-Execute the Ordinary Least Squares (OLS) regression analysis for all possible subsets of the explanatory variables in the given `ModelSelectionData`. This function mutates the input `AllSubsetRegressionResult` object.
+Perform Ordinary Least Squares (OLS) regression analysis for all possible subsets of the
+explanatory variables in the given `ModelSelectionData`. This function mutates the input
+`AllSubsetRegressionResult` object.
 
 # Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
-- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the results of the OLS regression analysis.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the
+   results of the OLS regression analysis.
 
 # Returns
-- `AllSubsetRegressionResult`: The updated input `AllSubsetRegressionResult` object containing the OLS regression results for all possible subsets of the explanatory variables.
+- `AllSubsetRegressionResult`: The updated input `AllSubsetRegressionResult` object
+   containing the OLS regression results for all possible subsets of the explanatory
+   variables.
 
 # Example
 ```julia
@@ -162,6 +189,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 data.intercept,
                 data.time,
                 data.datatype,
+                data.method,
                 result.outsample,
                 result.criteria,
                 result.ttest,
@@ -194,6 +222,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     data.intercept,
                     data.time,
                     data.datatype,
+                    data.method,
                     result.outsample,
                     result.criteria,
                     result.ttest,
@@ -222,6 +251,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     data.intercept,
                     data.time,
                     data.datatype,
+                    data.method,
                     result.outsample,
                     result.criteria,
                     result.ttest,
@@ -321,53 +351,70 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     end
     result.bestresult_data[datanames_index[:nobs]] =
         Int64(round(result.bestresult_data[datanames_index[:nobs]]))
+    result.nobs = result.bestresult_data[datanames_index[:nobs]]
     return result
 end
 
 """
-# TODO: parameters typing
     ols_execute_job!(
-        num_job,
-        num_jobs,
-        ops_per_worker,
-        depvar,
-        expvars,
-        fixedvariables,
-        datanames_index,
-        depvar_data,
-        expvars_data,
-        fixedvariables_data,
-        result_data,
-        intercept,
-        time,
-        datatype,
-        outsample,
-        criteria,
-        ttest,
-        residualtest
+        num_job::Int64,
+        num_jobs::Int64,
+        ops_per_worker::Int64,
+        depvar::Symbol,
+        expvars::Vector{Symbol},
+        fixedvariables::Union{Vector{Symbol},Nothing},
+        datanames_index::Dict{Symbol, Int64},
+        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        intercept::Bool,
+        time::Union{Symbol,Nothing},
+        datatype::DataType,
+        outsample::Union{Int64,Vector{Int64},Nothing},
+        criteria::Vector{Symbol},
+        ttest::Bool,
+        residualtest::Bool,
     )
 
-Execute a batch of OLS regression analyses in parallel for a subset of the explanatory variables in the given data. This function is intended for use with multi-core parallel processing.
+Execute a single job in the OLS procedure. This function is called by the main
+`ols_execute!` function to parallelize the model estimation across multiple workers.
+This function is intended for use with multi-core parallel processing.
 
 # Arguments
-- `num_job::Int`: The unique identifier for the current job.
-- `num_jobs::Int`: The total number of jobs to be executed.
-- `ops_per_worker::Int`: The number of operations per worker.
-- `depvar`: The dependent variable in the regression model.
-- `expvars`: The explanatory variables in the regression model.
-- `fixedvariables`: The fixed variables in the regression model.
-- `datanames_index`: The index for data names.
-- `depvar_data`: The data for the dependent variable.
-- `expvars_data`: The data for the explanatory variables.
-- `fixedvariables_data`: The data for the fixed variables.
-- `result_data`: The data for storing the results of the OLS regression analyses.
+- `num_job::Int64`: The unique identifier for the current job.
+- `num_jobs::Int64`: The total number of jobs to be executed.
+- `ops_per_worker::Int64`: The number of operations per worker.
+- `depvar::Symbol`: The dependent variable in the regression model.
+- `expvars::Vector{Symbol}`: The explanatory variables in the regression model.
+- `fixedvariables::Union{Vector{Symbol},Nothing}`: The fixed variables in the regression
+   model.
+- `datanames_index::Dict{Symbol, Int64}`: A dictionary that maps variable names to their
+   corresponding column indices in the result_data array.
+- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   dependent variable.
+- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   explanatory variables.
+- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+   for the fixed variables, or `nothing` if no fixed variables are present.
+- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for storing the
+   results of the OLS regression analyses.
 - `intercept::Bool`: Whether the regression model should include an intercept term.
-- `time`: The time variable in the regression model.
-- `datatype`: The data type of the input data.
-- `outsample`: The out-of-sample observations.
-- `criteria::Vector{Symbol}`: The model selection criteria to be used.
-- `ttest::Bool`: Whether to perform a t-test on the model coefficients.
-- `residualtest::Bool`: Whether to perform a residual test on the model.
+- `time::Union{Symbol,Nothing}`: The time variable in the regression model.
+- `datatype::DataType`: Specifies the type of the result data (e.g., Float32 or Float64).
+- `method`: A symbol indicating the desired estimation method. Can be either `:fast` for a
+   faster but less precise estimation, or `:precise` for a slower but more accurate
+   estimation (default).
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+
+# Returns
+This function does not return any value. It modifies the `result_data` SharedArray in-place.
 
 # Example
 ```julia
@@ -386,6 +433,7 @@ ols_execute_job!(
     intercept,
     time,
     datatype,
+    method,
     outsample,
     criteria,
     ttest,
@@ -394,24 +442,25 @@ ols_execute_job!(
 ```
 """
 function ols_execute_job!(
-    num_job,
-    num_jobs,
-    ops_per_worker,
-    depvar,
-    expvars,
-    fixedvariables,
-    datanames_index,
-    depvar_data,
-    expvars_data,
-    fixedvariables_data,
-    result_data,
-    intercept,
-    time,
-    datatype,
-    outsample,
-    criteria,
-    ttest,
-    residualtest,
+    num_job::Int64,
+    num_jobs::Int64,
+    ops_per_worker::Int64,
+    depvar::Symbol,
+    expvars::Vector{Symbol},
+    fixedvariables::Union{Vector{Symbol},Nothing},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    intercept::Bool,
+    time::Union{Symbol,Nothing},
+    datatype::DataType,
+    method::Symbol,
+    outsample::Union{Int64,Vector{Int64},Nothing},
+    criteria::Vector{Symbol},
+    ttest::Bool,
+    residualtest::Bool,
 )
     for j = 1:ops_per_worker
         order = (j - 1) * num_jobs + num_job
@@ -428,6 +477,7 @@ function ols_execute_job!(
             intercept,
             time,
             datatype,
+            method,
             outsample,
             criteria,
             ttest,
@@ -440,56 +490,78 @@ function ols_execute_job!(
 end
 
 """
-TODO: parameters typing and example
     ols_execute_row!(
-        order,
-        depvar,
-        expvars,
-        fixedvariables,
-        datanames_index,
-        depvar_data,
-        expvars_data,
-        fixedvariables_data,
-        result_data,
-        intercept,
-        time,
-        datatype,
-        outsample,
-        criteria,
-        ttest,
-        residualtest;
-        num_jobs = nothing,
-        num_job = nothing,
-        iteration_num = nothing,
+        order::Int64,
+        depvar::Symbol,
+        expvars::Vector{Symbol},
+        fixedvariables::Union{Vector{Symbol},Nothing},
+        datanames_index::Dict{Symbol, Int64},
+        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        intercept::Bool,
+        time::Union{Symbol,Nothing},
+        datatype::DataType,
+        outsample::Union{Int64,Vector{Int64},Nothing},
+        criteria::Vector{Symbol},
+        ttest::Bool,
+        residualtest::Bool;
+        num_jobs::Union{Int64,Nothing} = nothing,
+        num_job::Union{Int64,Nothing} = nothing,
+        iteration_num::Union{Int64,Nothing} = nothing,
     )
 
-Execute a single row in the ordinary least squares (OLS) procedure. This function is called by `ols_execute_job!` for each row and takes the given parameters to estimate the coefficients, perform tests, and calculate criteria.
+Perform OLS estimation for a specific order (i.e., a particular combination of independent
+variables) and store the results in a pre-allocated SharedArray. This implementation
+supports out-of-sample testing, t-tests, and residual tests.
 
 # Arguments
-- `order`: The order of the selected variables.
-- `depvar`: The dependent variable.
-- `expvars`: The explanatory variables.
-- `fixedvariables`: The fixed variables.
-- `datanames_index`: The index for the names of data.
-- `depvar_data`: The dependent variable data.
-- `expvars_data`: The explanatory variables data.
-- `fixedvariables_data`: The fixed variables data.
-- `result_data`: The results data.
-- `intercept`: A boolean indicating if the model should include an intercept.
-- `time`: The time variable.
-- `datatype`: The type of data.
-- `outsample`: The out-of-sample data used for validation.
-- `criteria`: The criteria used for model selection.
-- `ttest`: A boolean indicating if a t-test should be performed.
-- `residualtest`: A boolean indicating if a residual test should be performed.
-- `num_jobs`: (Optional) The number of jobs.
-- `num_job`: (Optional) The job number.
-- `iteration_num`: (Optional) The iteration number.
-"""
-function ols_execute_row!(
+- `order::Int64`: The order of the model (i.e., the specific combination of independent
+   variables to be considered).
+- `depvar::Symbol`: The dependent variable in the regression model.
+- `expvars::Vector{Symbol}`: The explanatory variables in the regression model.
+- `fixedvariables::Union{Vector{Symbol},Nothing}`: The fixed variables in the regression
+   model.
+- `datanames_index::Dict{Symbol, Int64}`: The index for data names.
+- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   dependent variable.
+- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   explanatory variables.
+- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+   for the fixed variables, or `nothing` if no fixed variables are present.
+- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: A pre-allocated
+   SharedArray to store the results of the OLS estimation.
+- `intercept::Bool`: Whether the regression model should include an intercept term.
+- `time::Union{Symbol,Nothing}`: The time variable in the regression model.
+- `datatype::DataType`: Specifies the type of the result data (e.g., Float32 or Float64).
+- `method`: A symbol indicating the desired estimation method. Can be either `:fast` for a
+   faster but less precise estimation, or `:precise` for a slower but more accurate
+   estimation (default).
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `criteria`: A vector of symbols representing the information criteria to be calculated
+   (e.g., AIC, BIC, etc.).
+- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+
+# Optional Keyword Arguments
+- `num_job::Union{Int64,Nothing}`: The unique identifier for the current job.
+- `num_jobs::Union{Int64,Nothing}`: The total number of jobs to be executed.
+- `iteration_num::Union{Int64,Nothing}`: The iteration number.
+
+# Returns
+This function does not return any value. It modifies the `result_data` SharedArray in-place.
+
+# Example
+```julia
+ols_execute_row!(
     order,
     depvar,
     expvars,
+    fixedvariables,
+    depvar_data,
     fixedvariables,
     datanames_index,
     depvar_data,
@@ -499,13 +571,35 @@ function ols_execute_row!(
     intercept,
     time,
     datatype,
+    method,
     outsample,
     criteria,
     ttest,
-    residualtest;
-    num_jobs = nothing,
-    num_job = nothing,
-    iteration_num = nothing,
+    residualtest
+)
+```
+"""
+function ols_execute_row!(
+    order::Int64,
+    depvar::Symbol,
+    expvars::Vector{Symbol},
+    fixedvariables::Union{Vector{Symbol},Nothing},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    intercept::Bool,
+    time::Union{Symbol,Nothing},
+    datatype::DataType,
+    method::Symbol,
+    outsample::Union{Int64,Vector{Int64},Nothing},
+    criteria::Vector{Symbol},
+    ttest::Bool,
+    residualtest::Bool;
+    num_jobs::Union{Int64,Nothing} = nothing,
+    num_job::Union{Int64,Nothing} = nothing,
+    iteration_num::Union{Int64,Nothing} = nothing,
 )
     selected_variables_index =
         ModelSelection.get_selected_variables(order, expvars, intercept)
@@ -526,8 +620,20 @@ function ols_execute_row!(
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
     qrf = qr(fullexpvars_subset)
-    b = qrf \ depvar_subset               # estimate
-    ŷ = fullexpvars_subset * b                # predicted values
+    b = qrf \ depvar_subset
+
+	if method == PRECISE
+		fact = qr(fullexpvars_subset)
+		denominator = depvar_subset
+	elseif method == FAST
+		fact = cholesky(fullexpvars_subset'fullexpvars_subset)
+		denominator = fullexpvars_subset'depvar_subset
+	else
+		error(INVALID_METHOD)
+	end
+
+    b = fact \ denominator                 # estimate
+    ŷ = fullexpvars_subset * b            # predicted values
     er = depvar_subset - ŷ                # in-sample residuals
     er2 = er .^ 2                         # squared errors
     sse = sum(er2)                        # residual sum of squares
@@ -536,14 +642,12 @@ function ols_execute_row!(
     r2 = 1 - var(er) / var(depvar_subset) # model R-squared
 
     if ttest
-        bstd =
-            sqrt.(
-                sum(
-                    (UpperTriangular(qrf.R) \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^
-                    2,
-                    dims = 2,
-                ) * (sse / df_e)
-            )
+		if method==PRECISE
+			uptriang = UpperTriangular(fact.R)
+		elseif method == FAST
+			uptriang = UpperTriangular(fact.U)
+        end
+		bstd = sqrt.(sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)) # std deviation of coefficients
     end
 
     if outsample_enabled > 0
@@ -561,13 +665,17 @@ function ols_execute_row!(
                 hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
         end
 
-        erout = depvar_outsample_subset - fullexpvars_outsample_subset * b  # out-of-sample residuals
-        sseout = sum(erout .^ 2)                                        # residual sum of squares
+        # out-of-sample residuals
+        erout = depvar_outsample_subset - fullexpvars_outsample_subset * b
+        
+        # residual sum of squares
+        sseout = sum(erout .^ 2)
         outsample_count = outsample
         if (isa(outsample, Array))
             outsample_count = size(outsample, 1)
         end
-        rmseout = sqrt(sseout / outsample_count)                        # root mean squared error
+        # root mean squared error
+        rmseout = sqrt(sseout / outsample_count)
         result_data[order, datanames_index[:rmseout]] = rmseout
     end
 
@@ -700,8 +808,14 @@ function ols_execute_row!(
         jbtest = 1 .- cdf(d, statistic)
 
         regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-        qrfw = qr(regmatw)
-        regcoeffw = qrfw \ er2
+		if method==PRECISE
+			factw = qr(regmatw)
+			denominatorw = er2
+		elseif method == FAST
+			factw = cholesky(regmatw'regmatw)
+			denominatorw = regmatw'er2
+		end
+		regcoeffw = factw \ denominatorw
         residw = er2 - regmatw * regcoeffw
         rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
         statisticw = n * rsqw
@@ -722,10 +836,18 @@ function ols_execute_row!(
 
             offset = lag
             regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-            qrfbg = qr(regmatbg)
-            regcoeffbg = qrfbg \ e[offset+1:end]
+			if method==PRECISE
+				factbg = qr(regmatbg)
+				denominatorbg = e[offset+1:end]
+			elseif method == FAST
+				factbg = cholesky(regmatbg'regmatbg)
+				denominatorbg = regmatbg'e[offset+1:end]
+			end
+			regcoeffbg = factbg \ denominatorbg
             residbg = e[offset+1:end] .- regmatbg * regcoeffbg
-            rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end]) # uncentered R^2
+
+            # uncentered R^2
+            rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end])
             statisticbg = (n - offset) * rsqbg
             bgtest = ccdf(Chisq(lag), statisticbg)
             result_data[order, datanames_index[:bgtest]] = bgtest

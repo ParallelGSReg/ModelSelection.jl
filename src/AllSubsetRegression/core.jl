@@ -14,29 +14,41 @@ include("estimators/logit.jl")
         orderresults::Bool = ORDERRESULTS_DEFAULT,
     ) -> ModelSelectionResult
 
-Perform all-subset regression analysis using the specified estimator and options on the provided `ModelSelectionData`.
+Perform all-subset regression analysis using the specified estimator and options on the
+provided `ModelSelectionData`.
 
 # Arguments
-- `estimator::Symbol`: The estimator to be used for regression analysis. Supported values are `:ols` for Ordinary Least Squares and `:logit` for logistic regression.
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+- `estimator::Symbol`: The estimator to be used for regression analysis. Supported values
+   are `:ols` for Ordinary Least Squares and `:logit` for logistic regression.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
 
 # Keyword Arguments
-- `outsample::Union{Int,Array,Nothing}`: The number of out-of-sample observations, an array of out-of-sample indices, or nothing. Default: `OUTSAMPLE_DEFAULT`.
-- `criteria::Vector{Symbol}`: A vector of symbols representing the selection criteria to be used. Default: `CRITERIA_DEFAULT`.
-- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates. Default: `ZTEST_DEFAULT`.
-- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates. Default: `ZTEST_DEFAULT`.
-- `modelavg::Bool`: If `true`, perform model averaging. Default: `MODELAVG_DEFAULT`.
-- `residualtest::Bool`: If `true`, perform residual tests. Default: `RESIDUALTEST_DEFAULT`.
-- `orderresults::Bool`: If `true`, order the results by the specified criteria. Default: `ORDERRESULTS_DEFAULT`.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ttest::Union{Bool, Nothing}`: If `true`, perform t-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `ztest::Union{Bool, Nothing}`: If `true`, perform z-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
 
 # Returns
-- `ModelSelectionResult`: An object containing the results of the all-subset regression analysis.
+- `ModelSelectionResult`: An object containing the results of the all-subset regression
+   analysis.
 
 # Example
 ```julia
 result = all_subset_regression(:ols, model_selection_data)
 ```
-"""	
+"""
 function all_subset_regression(
     estimator::Symbol,
     data::ModelSelectionData;
@@ -48,9 +60,7 @@ function all_subset_regression(
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
-    if ttest && ztest
-        throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
-    end
+    validate_test(ttest=ttest, ztest=ztest)
 
     if estimator == :ols
         AllSubsetRegression.ols!(
@@ -80,17 +90,21 @@ end
 """
     to_string(
         data::ModelSelectionData,
-        result::AllSubsetRegressionResult
+        result::AllSubsetRegressionResult,
     ) -> String
 
-Generate a human-readable string representation of the best model results and model averaging results (if applicable) from the `AllSubsetRegressionResult` object.
+Generate a human-readable string representation of the best model results and model
+averaging results (if applicable) from the `AllSubsetRegressionResult` object.
 
 # Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
-- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the results of the all-subset regression analysis.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
+   results of the all-subset regression analysis.
 
 # Returns
-- `String`: A formatted string representation of the best model results and model averaging results (if applicable).
+- `String`: A formatted string representation of the best model results and model averaging
+   results (if applicable).
 
 # Example
 ```julia

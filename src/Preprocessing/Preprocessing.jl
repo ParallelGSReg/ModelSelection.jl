@@ -2,7 +2,7 @@ module Preprocessing
 
 using DataFrames, SingularSpectrumAnalysis, Statistics
 using ModelSelection
-using ModelSelection: CONS
+using ModelSelection: CONS, FAST, PRECISE, INVALID_METHOD
 
 export input, PREPROCESSING_EXTRAKEY
 

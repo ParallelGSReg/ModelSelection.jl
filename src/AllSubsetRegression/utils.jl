@@ -3,48 +3,71 @@
         data::ModelSelectionData,
         outsample::Union{Int64,Vector{Int},Nothing},
         criteria::Vector{Symbol},
-        ttest::Bool,
         modelavg::Bool,
         residualtest::Bool,
-        orderresults::Bool
+        orderresults::Bool;
+        ttest::Union{Bool,Nothing} = nothing,
+        ztest::Union{Bool,Nothing} = nothing,
     ) -> AllSubsetRegressionResult
 
-Create an `AllSubsetRegressionResult` object containing the results of the model selection process.
+Create an `AllSubsetRegressionResult` object containing the results of the model selection
+process.
 
 # Arguments
-- `data::ModelSelectionData`: The data object containing information about the model selection process.
-- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of observations to be used for out-of-sample validation. Set to `nothing` if no out-of-sample validation is desired.
-- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison and selection.
-- `ttest::Bool`: If `true`, perform a t-test on the model coefficients.
+- `data::ModelSelectionData`: The data object containing information about the model
+   selection process.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection.
 - `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
 - `residualtest::Bool`: If `true`, perform a residual test on the selected models.
 - `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
+
+# Optional Keyword Arguments
+- `ttest::Union{Bool, Nothing}`: If `true`, perform t-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `ztest::Union{Bool, Nothing}`: If `true`, perform z-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
 
 # Returns
-- `AllSubsetRegressionResult`: An object containing the results of the model selection process.
+- `AllSubsetRegressionResult`: An object containing the results of the model selection
+  process.
 
 # Example
 ```julia
-result = create_result(data, 10, [:aic, :bic], true, false, true, true)
+result = create_result(data, 10, [:aic, :bic], true, false, true, ttest = true)
 ```
 """
 function create_result(
     data::ModelSelectionData,
-    outsample::Union{Int64,Vector{Int},Nothing},
+    outsample::Union{Int64,Vector{Int64},Nothing},
     criteria::Vector{Symbol},
-    ttest::Bool,
     modelavg::Bool,
     residualtest::Bool,
-    orderresults::Bool,
+    orderresults::Bool;
+    ttest::Union{Bool,Nothing} = nothing,
+    ztest::Union{Bool,Nothing} = nothing,
 )
+    validate_test(ttest=ttest, ztest=ztest)
+
     outsample = outsample === nothing ? 0 : outsample
-    if (outsample isa Array && size(outsample, 1) > 0) ||
-       (!(outsample isa Array) && outsample > 0)
+    if (outsample isa Array && size(outsample, 1) > 0) || (!(outsample isa Array) && outsample > 0)
         push!(criteria, :rmseout)
     end
     criteria = unique(criteria)
-    datanames = create_datanames(data, criteria, ttest, modelavg, residualtest)
-    modelavg_datanames = modelavg ? [] : nothing
+    datanames = create_datanames(
+        data,
+        criteria,
+        modelavg,
+        residualtest,
+        ttest = ttest,
+        ztest = ztest,
+    )
+    modelavg_datanames::Union{Vector{Symbol},Nothing} = modelavg ? [] : nothing
     outsample_max =
         data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - ((data.intercept) ? 1 : 0)
     outsample = isa(outsample, Int) && outsample_max <= outsample ? 0 : outsample
@@ -54,9 +77,10 @@ function create_result(
         outsample,
         criteria,
         modelavg,
-        ttest,
         residualtest,
         orderresults,
+        ttest = ttest,
+        ztest = ztest,
     )
 end
 
@@ -66,59 +90,85 @@ end
         criteria::Vector{Symbol},
         ttest::Bool,
         modelavg::Bool,
-        residualtest::Bool
+        residualtest::Bool;
+        ttest::Union{Bool,Nothing} = nothing,
+        ztest::Union{Bool,Nothing} = nothing,
     ) -> Vector{Symbol}
 
-Create a vector of data names (Symbols) representing the output of the model selection process.
+Create a vector of data names (Symbols) representing the output of the model selection
+process.
 
 # Arguments
-- `data::ModelSelectionData`: The data object containing information about the model selection process.
-- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison and selection.
+- `data::ModelSelectionData`: The data object containing information about the model
+   selection process.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
 - `ttest::Bool`: If `true`, perform a t-test on the model coefficients.
 - `modelavg::Bool`: If `true`, perform model averaging using the selected models.
-- `residualtest::Bool`: If `true`, perform a residual test on the selected models.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+
+# Optional Keyword Arguments
+- `ttest::Union{Bool, Nothing}`: If `true`, perform t-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `ztest::Union{Bool, Nothing}`: If `true`, perform z-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
 
 # Returns
-- `Vector{Symbol}`: A vector of data names representing the output of the model selection process.
+- `Vector{Symbol}`: A vector of data names representing the output of the model selection
+  process.
 
 # Example
 ```julia
-datanames = create_datanames(data, [:aic, :bic], true, false, true)
+datanames = create_datanames(data, [:aic, :bic], false, true, ttest=true)
 ```
 """
 function create_datanames(
     data::ModelSelectionData,
     criteria::Vector{Symbol},
-    ttest::Bool,
     modelavg::Bool,
-    residualtest::Bool,
+    residualtest::Bool;
+    ttest::Union{Bool,Nothing} = nothing,
+    ztest::Union{Bool,Nothing} = nothing,
 )
-    datanames = []
+    validate_test(ttest=ttest, ztest=ztest)
+
+    datanames::Vector{Symbol} = []
     push!(datanames, INDEX)
+
+    test = false
+    if ttest == true
+        test = true
+        test_suffix = "_t"
+    elseif ztest == true
+        test = true
+        test_suffix = "_z"
+    end
+
     for expvar in data.expvars
         if expvar == CONS
             continue
         end
         push!(datanames, Symbol(string(expvar, "_b")))
-        if ttest
+        if test
             push!(datanames, Symbol(string(expvar, "_bstd")))
-            push!(datanames, Symbol(string(expvar, "_t")))
+            push!(datanames, Symbol(string(expvar, test_suffix)))
         end
     end
     if data.fixedvariables !== nothing
         for fixedvar in data.fixedvariables
             push!(datanames, Symbol(string(fixedvar, "_b")))
-            if ttest
+            if test
                 push!(datanames, Symbol(string(fixedvar, "_bstd")))
-                push!(datanames, Symbol(string(fixedvar, "_t")))
+                push!(datanames, Symbol(string(fixedvar, test_suffix)))
             end
         end
     end
     if data.intercept !== nothing && data.intercept
         push!(datanames, Symbol(string(CONS, "_b")))
-        if ttest
+        if test
             push!(datanames, Symbol(string(CONS, "_bstd")))
-            push!(datanames, Symbol(string(CONS, "_t")))
+            push!(datanames, Symbol(string(CONS, test_suffix)))
         end
     end
     testfields =
@@ -138,26 +188,38 @@ end
     get_insample_subset(
         depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}},
         expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}},
-        fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing},
+        fixedvariables_data::Union{
+            SharedArray{<:Union{Float64, Float32, Nothing}},
+            Nothing
+        },
         outsample::Union{Int64, Vector{Int64}},
-        selected_variables_index::Vector{Int64}
+        selected_variables_index::Vector{Int64},
     ) -> Tuple{Vector, Matrix, Union{Matrix, Nothing}}
 
 Retrieve the in-sample data subsets from the provided data.
 
 # Arguments
-- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The dependent variable data.
-- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory variables data.
-- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`: The fixed variables data, or `nothing` if no fixed variables are present.
-- `outsample::Union{Int64, Vector{Int64}}`: The number of observations or indices of observations to be used for out-of-sample validation.
-- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory variables.
+- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The data for
+   the dependent variable.
+- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`:  The data for
+   the explanatory variables.
+- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`:
+   The data for the fixed variables, or `nothing` if no fixed variables are present.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+  observations to be used for out-of-sample validation. Set to `nothing` if no
+  out-of-sample validation is desired.
+- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory
+  variables.
 
 # Returns
-- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the in-sample subsets of dependent variable data, explanatory variables data, and fixed variables data (if present).
+- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the in-sample subsets 
+   of dependent variable data, explanatory variables data, and fixed variables data
+   (if present).
 
 # Example
 ```julia
-depvar_view, expvars_view, fixedvariables_view = get_insample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
+depvar_view, expvars_view, fixedvariables_view =
+    get_insample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
 ```
 """
 function get_insample_subset(
@@ -207,26 +269,38 @@ end
     get_outsample_subset(
         depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}},
         expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}},
-        fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing},
+        fixedvariables_data::Union{
+            SharedArray{<:Union{Float64, Float32, Nothing}}, 
+            Nothing,
+        },
         outsample::Union{Int64, Vector{Int64}},
-        selected_variables_index::Vector{Int64}
+        selected_variables_index::Vector{Int64},
     ) -> Tuple{Vector, Matrix, Union{Matrix, Nothing}}
 
 Retrieve the out-of-sample data subsets from the provided data.
 
 # Arguments
-- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The dependent variable data.
-- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory variables data.
-- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`: The fixed variables data, or `nothing` if no fixed variables are present.
-- `outsample::Union{Int64, Vector{Int64}}`: The number of observations or indices of observations to be used for out-of-sample validation.
-- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory variables.
+- `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The data for the
+   dependent variable.
+- `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory
+   variables data.
+- `fixedvariables_data::Union{SharedArray{<:Union{Float64, Float32, Nothing}}, Nothing}`:
+   The data for the fixed variables, or `nothing` if no fixed variables are present.
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `selected_variables_index::Vector{Int64}`: The indices of the selected explanatory
+   variables.
 
 # Returns
-- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the out-of-sample subsets of dependent variable data, explanatory variables data, and fixed variables data (if present).
+- `Tuple{Vector, Matrix, Union{Matrix, Nothing}}`: A tuple containing the out-of-sample
+   subsets of dependent variable data, explanatory variables data, and fixed variables data
+   (if present).
 
 # Example
 ```julia
-depvar_view, expvars_view, fixedvariables_view = get_outsample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
+depvar_view, expvars_view, fixedvariables_view = 
+    get_outsample_subset(depvar_data, expvars_data, fixedvariables_data, 10, [1, 2, 4])
 ```
 """
 function get_outsample_subset(
@@ -275,14 +349,15 @@ end
     sortrows(
         B::AbstractMatrix,
         cols::Array;
-        kws...
+        kws...,
     ) -> AbstractMatrix
 
 Sort the rows of a given matrix `B` based on the specified columns `cols`.
 
 # Arguments
 - `B::AbstractMatrix`: The input matrix to be sorted.
-- `cols::Array`: An array containing the indices of the columns by which to sort the rows of the matrix.
+- `cols::Array`: An array containing the indices of the columns by which to sort the rows of
+   the matrix.
 - `kws...`: Optional keyword arguments to be passed to the `sortperm` function.
 
 # Returns
@@ -329,17 +404,20 @@ end
 """
     addextras(
         data::ModelSelectionData,
-        result::ModelSelectionResult
+        result::ModelSelectionResult,
     ) -> ModelSelectionData
 
 Add extra information from a `ModelSelectionResult` to the `ModelSelectionData` object.
 
 # Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object to which the extra information will be added.
-- `result::ModelSelectionResult`: The `ModelSelectionResult` object containing the extra information to be added.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object to which the extra
+   information will be added.
+- `result::ModelSelectionResult`: The `ModelSelectionResult` object containing the extra
+   information to be added.
 
 # Returns
-- `ModelSelectionData`: The updated `ModelSelectionData` object with the extra information added.
+- `ModelSelectionData`: The updated `ModelSelectionData` object with the extra information
+  added.
 
 # Example
 ```julia
@@ -347,10 +425,7 @@ updated_data = addextras!(model_selection_data, model_selection_result)
 ```
 """
 function addextras!(data::ModelSelectionData, result::ModelSelectionResult)
-    data.extras[ModelSelection.generate_extra_key(
-        ALLSUBSETREGRESSION_EXTRAKEY,
-        data.extras,
-    )] = Dict(
+    extras = Dict(
         :datanames => result.datanames,
         :depvar => data.depvar,
         :expvars => data.expvars,
@@ -361,28 +436,41 @@ function addextras!(data::ModelSelectionData, result::ModelSelectionResult)
         :residualtest => result.residualtest,
         :criteria => result.criteria,
         :intercept => data.intercept,
-        :ttest => result.ttest,
         :outsample => result.outsample,
         :modelavg => result.modelavg,
         :orderresults => result.orderresults,
     )
+    if result.ttest == true
+        extras[:ttest] = result.ttest
+    end
+    if result.ztest == true
+        extras[:ztest] = result.ztest
+    end
+    data.extras[ModelSelection.generate_extra_key(
+        ALLSUBSETREGRESSION_EXTRAKEY,
+        data.extras,
+    )] = extras
     return data
 end
 
 """
     valid_criteria(
         criteria::Vector{Symbol},
-        available_criteria::Vector{Symbol}
+        available_criteria::Vector{Symbol},
     ) -> Bool
 
-Check if the specified `criteria` are valid by comparing them to a list of `available_criteria`.
+Check if the specified `criteria` are valid by comparing them to a list of
+`available_criteria`.
 
 # Arguments
-- `criteria::Vector{Symbol}`: A vector of symbols representing the criteria to be validated.
-- `available_criteria::Vector{Symbol}`: A vector of symbols representing the available criteria for comparison.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection.
+- `available_criteria::Vector{Symbol}`: A vector of symbols representing the available
+   criteria for comparison.
 
 # Returns
-- `Bool`: `true` if all elements in the `criteria` vector are present in the `available_criteria` vector, `false` otherwise.
+- `Bool`: `true` if all elements in the `criteria` vector are present in the
+  `available_criteria` vector, `false` otherwise.
 
 # Example
 ```julia
@@ -403,7 +491,8 @@ Validate the given `criteria` against a list of `available_criteria`.
 - `available_criteria`: A vector of symbols representing the available criteria.
 
 # Returns
-This function does not return any value. It raises an `ArgumentError` if any of the `criteria` is not valid.
+This function does not return any value. It raises an `ArgumentError` if any of the
+    `criteria` is not valid.
 
 # Examples
 ```julia
@@ -419,5 +508,30 @@ function validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{
             criteria[(!in).(criteria, Ref(available_criteria))],
         )
         throw(ArgumentError(msg))
+    end
+end
+
+"""
+    validate_test(ttest::Union{Bool, Nothing}, ztest::Union{Bool, Nothing})
+
+Validates the test options specified by the user, ensuring that both t-test and z-test options are not simultaneously set to true.
+
+# Arguments
+- `ttest::Union{Bool, Nothing}`: Flag to indicate whether the t-test should be used (default: `nothing`)
+- `ztest::Union{Bool, Nothing}`: Flag to indicate whether the z-test should be used (default: `nothing`)
+
+# Throws
+- `ArgumentError`: If both `ttest` and `ztest` are set to true, an ArgumentError is thrown with a message indicating that both cannot be true simultaneously.
+
+# Example
+```julia
+validate_test(true, false) # No error
+validate_test(false, true) # No error
+validate_test(true, true)  # ArgumentError: "Both t-test and z-test cannot be true simultaneously."
+``` 
+"""
+function validate_test(;ttest::Union{Bool, Nothing} = nothing, ztest::Union{Bool, Nothing} = nothing)
+    if ttest == true && ztest == true
+        throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
     end
 end

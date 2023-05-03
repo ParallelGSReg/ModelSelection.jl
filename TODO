@@ -1,8 +1,10 @@
- - Add validation for fixedvariables
  - Add fixed variables in logit
  - Add panel as a fixed var
- - Cholesky decomposition added to method="fast"
- - Homogenize logit and ols descriptions
+ - Issue with OLS
+ - Model average in Logit
 
-https://github.com/JuliaLang/julia/blob/master/CONTRIBUTING.md#general-formatting-guidelines-for-julia-code-contributions
-https://documenter.juliadocs.org/stable/man/guide/
+# TBD
+ - Validation in every module
+
+
+" + Documentation in AllSubsetRegression. + Major refactoring. + t-test and z-test splitted 

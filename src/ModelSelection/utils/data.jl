@@ -44,7 +44,8 @@ end
 
 
 """
-Creates an array with datanames and positions
+Creates a dictionary that maps variable names to their corresponding column indices in the result_data array.
+
 # Arguments
 - `datanames::Vector{Symbol}`: the datanames.
 """
