@@ -4,14 +4,14 @@ Returns if feature extraction module was selected by the user.
 - `fe_sqr::Union{Vector{Symbol}, Nothing}`: the square feature extraction symbols.
 - `fe_log::Union{Vector{Symbol}, Nothing}`: the log feature extraction symbols.
 - `fe_inv::Union{Vector{Symbol}, Nothing}`: the inverse feature extraction symbols.
-- `fe_lag::Union{Vector{Symbol}, Nothing}`: the lag feature extraction symbols.
+- `fe_lag::Union{Array{Pair{Symbol, Int64}}, Array{Pair{String, Int64}}, Nothing}`: the lag feature extraction symbols.
 - `interaction::Union{Vector{Symbol}, Nothing}`: the interaction feature extraction symbols.
 """
 function featureextraction_enabled(
-    fe_sqr::Union{Vector{Symbol},Nothing},
-    fe_log::Union{Vector{Symbol},Nothing},
-    fe_inv::Union{Vector{Symbol},Nothing},
-    fe_lag::Union{Vector{Symbol},Nothing},
+    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing},
+    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing},
+    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing},
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing},
     interaction::Union{Vector{Symbol},Nothing},
 )
     return fe_sqr !== nothing ||

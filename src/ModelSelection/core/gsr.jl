@@ -17,10 +17,10 @@ function gsr(
     time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_log::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_inv::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_lag::Union{Nothing,Array} = nothing,
+    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array} = nothing,
     preliminaryselection::Union{Nothing,Symbol} = nothing,
     fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
@@ -85,10 +85,10 @@ function gsr(
     time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_log::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_inv::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_lag::Union{Nothing,Array} = nothing,
+    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array} = nothing,
     preliminaryselection::Union{Nothing,Symbol} = nothing,
     fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
@@ -130,9 +130,9 @@ function gsr(
             removemissings = true,
         )
     end
-
+    
     original_data = copy_modelselectiondata(data)
-
+    
     if preliminaryselection_enabled(preliminaryselection)
         data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
         original_data.extras = data.extras

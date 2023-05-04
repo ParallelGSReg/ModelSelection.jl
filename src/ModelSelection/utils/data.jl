@@ -44,7 +44,8 @@ end
 
 
 """
-Creates an array with datanames and positions
+Creates a dictionary that maps variable names to their corresponding column indices in the result_data array.
+
 # Arguments
 - `datanames::Vector{Symbol}`: the datanames.
 """
@@ -64,7 +65,7 @@ Add intercept to ModelSelectionData expvars and expvars_data.
 """
 function add_intercept!(data::ModelSelectionData)
     data.expvars_data = hcat(data.expvars_data, ones(data.nobs))
-    push!(data.expvars, :_cons)
+    push!(data.expvars, CONS)
     return data
 end
 
@@ -75,7 +76,7 @@ Remove intercept from ModelSelectionData expvars and expvars_data.
 - `data::ModelSelectionData`: the ModelSelectionData to be removed the intercept.
 """
 function remove_intercept!(data::ModelSelectionData)
-    cons_index = get_column_index(:_cons, data.expvars)
+    cons_index = get_column_index(CONS, data.expvars)
     data.expvars_data =
         hcat(data.expvars_data[:, 1:cons_index-1], data.expvars_data[:, cons_index+1:end])
     data.expvars = vcat(data.expvars[1:cons_index-1], data.expvars[cons_index+1:end])
@@ -101,7 +102,7 @@ end
 
 
 """
-Returns selected appropiate explanatory variables for each iteration.
+Returns selected appropiate explanatory variables for each iteration as col position.
 # Arguments
 - `order::Int64`: the order of the model.
 - `datanames::Vector{Symbol}`: the datanames.
@@ -118,7 +119,19 @@ function get_selected_variables(order::Int64, datanames::Vector{Symbol}, interce
         k = k + 1
     end
     if intercept
-        push!(cols, ModelSelection.get_column_index(:_cons, datanames))
+        push!(cols, ModelSelection.get_column_index(CONS, datanames))
     end
     return cols
+end
+
+"""
+Returns selected appropiate explanatory variables for each iteration as varnames.
+# Arguments
+- `order::Int64`: the order of the model.
+- `datanames::Vector{Symbol}`: the datanames.
+- `intercept::Bool`: if the model has intercept.
+"""
+function get_selected_variables_varnames(order::Int64, datanames::Vector{Symbol}, intercept::Bool)
+    cols = get_selected_variables(order, datanames, intercept)
+    return datanames[cols]
 end

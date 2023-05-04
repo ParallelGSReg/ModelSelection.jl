@@ -1,5 +1,48 @@
+"""
+    logit(
+        data::ModelSelectionData;
+        outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
+        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+        ztest::Bool = ZTEST_DEFAULT,
+        modelavg::Bool = MODELAVG_DEFAULT,
+        residualtest::Bool = RESIDUALTEST_DEFAULT,
+        orderresults::Bool = ORDERRESULTS_DEFAULT,
+    ) -> ModelSelectionData
+
+Perform Logistic Regression (logit) model selection on the on the provided
+`ModelSelectionData` using the specified options and returns a new ModelSelectionData object
+containing the results.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+in the model selection process.
+
+# Keyword Arguments
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates.
+   Default: `ZTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
+
+# Returns
+- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the
+logit regression results.
+
+# Example
+```julia
+result = logit(model_selection_data)
+```
+"""
 function logit(
-    data::ModelSelection.ModelSelectionData;
+    data::ModelSelectionData;
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
@@ -18,8 +61,49 @@ function logit(
     )
 end
 
+"""
+    logit!(
+        data::ModelSelectionData;
+        outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
+        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+        ztest::Bool = ZTEST_DEFAULT,
+        modelavg::Bool = MODELAVG_DEFAULT,
+        residualtest::Bool = RESIDUALTEST_DEFAULT,
+        orderresults::Bool = ORDERRESULTS_DEFAULT,
+    ) -> ModelSelectionData
+
+Perform Logistic Regression (logit) regression analysis on the provided
+`ModelSelectionData` using the specified options. This function mutates the input
+`ModelSelectionData` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
+
+# Keyword Arguments
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates.
+   Default: `ZTEST_DEFAULT`.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
+
+# Returns
+- `ModelSelectionData`: The updated input `ModelSelectionData` object containing the logit 
+   regression results.
+
+# Example
+```julia
+result = logit!(model_selection_data)
+"""
 function logit!(
-    data::ModelSelection.ModelSelectionData;
+    data::ModelSelectionData;
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
@@ -28,26 +112,48 @@ function logit!(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
     validate_criteria(criteria, AVAILABLE_LOGIT_CRITERIA)
-    ttest = ztest  # FIXME
     result = create_result(
         data,
         outsample,
         criteria,
-        ttest,
         modelavg,
         residualtest,
         orderresults,
+        ztest = ztest,
     )
     logit_execute!(data, result)
     ModelSelection.addresult!(data, result)
-    data = addextras(data, result)
+    data = addextras!(data, result)
     return data
 end
 
-function logit_execute!(
-    data::ModelSelection.ModelSelectionData,
-    result::AllSubsetRegressionResult,
-)
+"""
+    logit_execute!(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult
+    ) -> AllSubsetRegressionResult
+
+Perform logistic regression model selection analysis for all possible subsets of the
+explanatory variables in the given `ModelSelectionData`. This function mutates the input
+`AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the
+   results of the OLS regression analysis.
+
+# Returns
+- `AllSubsetRegressionResult`: The updated input `AllSubsetRegressionResult` object
+   containing the logit regression results for all possible subsets of the explanatory
+   variables.
+
+# Example
+```julia
+logit_execute!(model_selection_data, all_subset_regression_result)
+```
+"""
+function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult)
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
@@ -69,7 +175,9 @@ function logit_execute!(
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
     ncoef_gum = size(expvars_data, 2)
-    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
+    depvar_without_outsample_subset,
+    expvars_without_outsample_subset,
+    fixedvariables_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
@@ -78,7 +186,8 @@ function logit_execute!(
     )
     fullexpvars_without_outsample_subset = expvars_without_outsample_subset
     if fixedvariables_without_outsample_subset !== nothing
-        fullexpvars_without_outsample_subset = hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
+        fullexpvars_without_outsample_subset =
+            hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
 
     gum_model = GLM.fit(
@@ -110,7 +219,7 @@ function logit_execute!(
                 data.datatype,
                 result.outsample,
                 result.criteria,
-                result.ttest,
+                result.ztest,
                 result.residualtest,
             )
         end
@@ -143,7 +252,7 @@ function logit_execute!(
                     data.datatype,
                     result.outsample,
                     result.criteria,
-                    result.ttest,
+                    result.ztest,
                     result.residualtest,
                 )
             )
@@ -172,7 +281,7 @@ function logit_execute!(
                     data.datatype,
                     result.outsample,
                     result.criteria,
-                    result.ttest,
+                    result.ztest,
                     result.residualtest,
                 )
             end
@@ -200,12 +309,12 @@ function logit_execute!(
     # 	w1 = exp.(-delta / 2)
     # 	result.data[:, datanames_index[:weight]] = w1 ./ sum(w1)
     # 	result.modelavg_data = Vector{Float64}(undef, size(result.datanames))
-    # 	weight_pos = (result.ttest) ? 4 : 2
+    # 	weight_pos = (result.ztest) ? 4 : 2
     # 	for expvar in data.expvars
     # 		obs = result.data[:, datanames_index[Symbol(string(expvar, "_b"))]]
-    # 		if result.ttest
+    # 		if result.ztest
     # 			obs = hcat(obs, result.data[:, datanames_index[Symbol(string(expvar, "_bstd"))]])
-    # 			obs = hcat(obs, result.data[:, datanames_index[Symbol(string(expvar, "_t"))]])
+    # 			obs = hcat(obs, result.data[:, datanames_index[Symbol(string(expvar, "_z"))]])
     # 		end
     # 		obs = hcat(obs, result.data[:, datanames_index[:weight]])
     # 
@@ -213,9 +322,9 @@ function logit_execute!(
     # 		obs[:, weight_pos] /= sum(obs[:, weight_pos])
     # 
     # 		result.modelavg_data[datanames_index[Symbol(string(expvar, "_b"))]] = sum(obs[:, 1] .* obs[:, weight_pos])
-    # 		if result.ttest
+    # 		if result.ztest
     # 			result.modelavg_data[datanames_index[Symbol(string(expvar, "_bstd"))]] = sum(obs[:, 2] .* obs[:, weight_pos])
-    # 			result.modelavg_data[datanames_index[Symbol(string(expvar, "_t"))]] = sum(obs[:, 3] .* obs[:, weight_pos])
+    # 			result.modelavg_data[datanames_index[Symbol(string(expvar, "_z"))]] = sum(obs[:, 3] .* obs[:, weight_pos])
     # 		end
     # 	end
     # 
@@ -241,10 +350,75 @@ function logit_execute!(
         result.bestresult_data = result.data[best_result_index, :]
     end
 
+    result.nobs = result.bestresult_data[datanames_index[:nobs]]
+
     return result
 end
 
-function logit_execute_job!(
+"""
+# TODO: typing and example
+    logit_execute_job!(
+        num_job::Int64,
+        num_jobs::Int64,
+        ops_per_worker::Int64,
+        depvar::Symbol,
+        expvars::Vector{Symbol},
+        fixedvariables::Union{Vector{Symbol},Nothing},
+        start_coef::Vector{Float64},
+        datanames_index::Dict{Symbol, Int64},
+        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        intercept::Bool,
+        time::Union{Symbol,Nothing},
+        datatype::DataType,
+        outsample::Union{Int64,Vector{Int64},Nothing},
+        criteria::Vector{Symbol},
+        ztest::Bool,
+        residualtest::Bool,
+    )
+
+Execute a single job in the logit procedure. This function is called by the main
+`logit_execute!` function to parallelize the model estimation across multiple workers.
+This function is intended for use with multi-core parallel processing.
+
+# Arguments
+- `num_job::Int64`: The unique identifier for the current job.
+- `num_jobs::Int64`: The total number of jobs to be executed.
+- `ops_per_worker::Int64`: The number of operations per worker.
+- `depvar::Symbol`: The dependent variable in the regression model.
+- `expvars::Vector{Symbol}`: The explanatory variables in the regression model.
+- `fixedvariables::Union{Vector{Symbol},Nothing}`: The fixed variables in the regression
+   model.
+- `start_coef`: The starting coefficients.
+- `datanames_index::Dict{Symbol, Int64}`: A dictionary that maps variable names to their
+   corresponding column indices in the result_data array.
+- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   dependent variable.
+- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   explanatory variables.
+- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+   for the fixed variables, or `nothing` if no fixed variables are present.
+- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for storing the
+   results of the OLS regression analyses.
+- `intercept::Bool`: Whether the regression model should include an intercept term.
+- `time::Union{Symbol,Nothing}`: The time variable in the regression model.
+- `datatype::DataType`: Specifies the type of the result data (e.g., Float32 or Float64).
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models
+
+# Returns
+This function does not return any value. It modifies the `result_data` SharedArray in-place.
+
+# Example
+```julia
+logit_execute_job!(
     num_job,
     num_jobs,
     ops_per_worker,
@@ -262,8 +436,31 @@ function logit_execute_job!(
     datatype,
     outsample,
     criteria,
-    ttest,
-    residualtest,
+    ztest,
+    residualtest
+)
+```
+"""
+function logit_execute_job!(
+    num_job::Int64,
+    num_jobs::Int64,
+    ops_per_worker::Int64,
+    depvar::Symbol,
+    expvars::Vector{Symbol},
+    fixedvariables::Union{Vector{Symbol},Nothing},
+    start_coef::Vector{Float64},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    intercept::Bool,
+    time::Union{Symbol,Nothing},
+    datatype::DataType,
+    outsample::Union{Int64,Vector{Int64},Nothing},
+    criteria::Vector{Symbol},
+    ztest::Bool,
+    residualtest::Bool,
 )
     for j = 1:ops_per_worker
         order = (j - 1) * num_jobs + num_job
@@ -283,7 +480,7 @@ function logit_execute_job!(
             datatype,
             outsample,
             criteria,
-            ttest,
+            ztest,
             residualtest,
             num_jobs = num_jobs,
             num_job = num_job,
@@ -292,12 +489,80 @@ function logit_execute_job!(
     end
 end
 
-function logit_execute_row!(
+"""
+    logit_execute_row!(
+        order::Int64,
+        depvar::Symbol,
+        expvars::Vector{Symbol},
+        fixedvariables::Union{Vector{Symbol},Nothing},
+        start_coef::Vector{Float64},
+        datanames_index::Dict{Symbol, Int64},
+        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        intercept::Bool,
+        time::Union{Symbol,Nothing},
+        datatype::DataType,
+        outsample::Union{Int64,Vector{Int64},Nothing},
+        criteria::Vector{Symbol},
+        ztest::Bool,
+        residualtest::Bool;
+        num_jobs::Union{Int64,Nothing} = nothing,
+        num_job::Union{Int64,Nothing} = nothing,
+        iteration_num::Union{Int64,Nothing} = nothing,
+    )
+
+Perform OLS estimation for a specific order (i.e., a particular combination of independent
+variables) and store the results in a pre-allocated SharedArray. This implementation
+supports out-of-sample testing, z-tests, and residual tests.
+
+# Arguments
+- `order::Int64`: The order of the model (i.e., the specific combination of independent
+   variables to be considered).
+- `depvar::Symbol`: The dependent variable in the regression model.
+- `expvars::Vector{Symbol}`: The explanatory variables in the regression model.
+- `fixedvariables::Union{Vector{Symbol},Nothing}`: The fixed variables in the regression
+   model.
+- `start_coef`: The starting coefficients.
+- `datanames_index::Dict{Symbol, Int64}`: The index for data names.
+- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   dependent variable.
+- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+   explanatory variables.
+- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+   for the fixed variables, or `nothing` if no fixed variables are present.
+- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: A pre-allocated
+   SharedArray to store the results of the OLS estimation.
+- `intercept::Bool`: Whether the regression model should include an intercept term.
+- `time::Union{Symbol,Nothing}`: The time variable in the regression model.
+- `datatype::DataType`: Specifies the type of the result data (e.g., Float32 or Float64).
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired.
+- `criteria`: A vector of symbols representing the information criteria to be calculated
+   (e.g., AIC, BIC, etc.).
+- `ztest::Bool`: If `true`, perform z-tests for the coefficient estimates.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+
+# Optional Keyword Arguments
+- `num_job::Union{Int64,Nothing}`: The unique identifier for the current job.
+- `num_jobs::Union{Int64,Nothing}`: The total number of jobs to be executed.
+- `iteration_num::Union{Int64,Nothing}`: The iteration number.
+
+# Returns
+This function does not return any value. It modifies the `result_data` SharedArray in-place.
+
+# Example
+```julia
+logit_execute_row!(
     order,
     depvar,
     expvars,
     fixedvariables,
     start_coef,
+    depvar_data,
+    fixedvariables,
     datanames_index,
     depvar_data,
     expvars_data,
@@ -308,17 +573,35 @@ function logit_execute_row!(
     datatype,
     outsample,
     criteria,
-    ttest,
-    residualtest;
-    num_jobs = nothing,
-    num_job = nothing,
-    iteration_num = nothing,
+    ztest,
+    residualtest
 )
-    selected_variables_index = ModelSelection.get_selected_variables(
-        order,
-        expvars,
-        intercept,
-    )
+```
+"""
+function logit_execute_row!(
+    order::Int64,
+    depvar::Symbol,
+    expvars::Vector{Symbol},
+    fixedvariables::Union{Vector{Symbol},Nothing},
+    start_coef::Vector{Float64},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
+    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    intercept::Bool,
+    time::Union{Symbol,Nothing},
+    datatype::DataType,
+    outsample::Union{Int64,Vector{Int64},Nothing},
+    criteria::Vector{Symbol},
+    ztest::Bool,
+    residualtest::Bool;
+    num_jobs::Union{Int64,Nothing} = nothing,
+    num_job::Union{Int64,Nothing} = nothing,
+    iteration_num::Union{Int64,Nothing} = nothing,
+)
+    selected_variables_index =
+        ModelSelection.get_selected_variables(order, expvars, intercept)
     depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
         depvar_data,
         expvars_data,
@@ -361,7 +644,7 @@ function logit_execute_row!(
 
     ll = GLM.loglikelihood(model)
 
-    if ttest
+    if ztest
         bstd = stderror(model)
     end
 
@@ -384,7 +667,7 @@ function logit_execute_row!(
             order,
             datanames_index[Symbol(string(expvars[selected_variable_index], "_b"))],
         ] = datatype(b[index])
-        if ttest
+        if ztest
             result_data[
                 order,
                 datanames_index[Symbol(string(expvars[selected_variable_index], "_bstd"))],
@@ -405,7 +688,7 @@ function logit_execute_row!(
         end
     end
 
-    result_data[order, datanames_index[:nobs]] = nobs
+    result_data[order, datanames_index[:nobs]] = Int64(round(nobs))
     result_data[order, datanames_index[:ncoef]] = ncoef
     result_data[order, datanames_index[:sse]] = datatype(sse)
     result_data[order, datanames_index[:rmse]] = datatype(rmse)

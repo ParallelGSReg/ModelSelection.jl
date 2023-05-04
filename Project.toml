@@ -20,7 +20,6 @@ SingularSpectrumAnalysis = "77f5812f-bd1f-5f6e-9b72-07b28d8bbbc3"
 Statistics = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [compat]
-julia = "1.6.7"
 DataFrames = "1.5.0"
 Distributions = "0.25.87"
 GLM = "1.8.2"
@@ -28,10 +27,11 @@ GLMNet = "0.7.1"
 JLD2 = "0.4.31"
 ShiftedArrays = "2.0.0"
 SingularSpectrumAnalysis = "0.5.1"
+julia = "1.6.7"
 
 [extras]
-Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
 test = ["Test", "CSV"]

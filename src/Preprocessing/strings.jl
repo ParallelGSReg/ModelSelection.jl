@@ -1,5 +1,4 @@
 DATANAMES_REQUIRED = "required varnames in datanames option"
-INVALID_METHOD = "invalid method, must be :fast (Float32) or :precise (Float64)"
 PANEL_ERROR = "panel variable has some gaps"
 PANEL_VARIABLE_INEXISTENT = "selected panel variable does not exists"
 SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS = "selected fixed variables does not exists"

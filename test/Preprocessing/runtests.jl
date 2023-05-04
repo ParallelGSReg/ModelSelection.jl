@@ -161,21 +161,21 @@ end
     @testset "Intercept" begin
         data = Preprocessing.input("y, x2, x1", data_paneltime_without_missings_tuple)
         @test data.intercept == true
-        @test findfirst(isequal(:_cons), data.expvars) !== nothing
+        @test findfirst(isequal(CONS), data.expvars) !== nothing
         data = Preprocessing.input(
             "y, x2, x1",
             data_paneltime_without_missings_tuple,
             intercept = true,
         )
         @test data.intercept == true
-        @test findfirst(isequal(:_cons), data.expvars) !== nothing
+        @test findfirst(isequal(CONS), data.expvars) !== nothing
         data = Preprocessing.input(
             "y, x2, x1",
             data_paneltime_without_missings_tuple,
             intercept = false,
         )
         @test data.intercept == false
-        @test findfirst(isequal(:_cons), data.expvars) === nothing
+        @test findfirst(isequal(CONS), data.expvars) === nothing
     end
 
     @testset "Method" begin
@@ -392,7 +392,7 @@ end
         @testset "DataFrame" begin
             data = Preprocessing.input("y x2 x1", data_paneltime_without_missings_dataframe)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
@@ -402,14 +402,14 @@ end
                 data = data_paneltime_without_missings_dataframe,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
 
             data = Preprocessing.input("y x2 x1", data_paneltime_with_missings_dataframe)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -420,7 +420,7 @@ end
                 data = data_paneltime_with_missings_dataframe,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -432,7 +432,7 @@ end
                 removemissings = false,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -444,7 +444,7 @@ end
                 removemissings = true,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_removedmissing_data[:, 1]
             t = data.expvars_data == test_removedmissing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -454,7 +454,7 @@ end
         @testset "Tuple" begin
             data = Preprocessing.input("y x2 x1", data_paneltime_without_missings_tuple)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
@@ -462,14 +462,14 @@ end
             data =
                 Preprocessing.input("y x2 x1", data = data_paneltime_without_missings_tuple)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
 
             data = Preprocessing.input("y x2 x1", data_paneltime_with_missings_tuple)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -477,7 +477,7 @@ end
 
             data = Preprocessing.input("y x2 x1", data = data_paneltime_with_missings_tuple)
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -489,7 +489,7 @@ end
                 removemissings = false,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -501,7 +501,7 @@ end
                 removemissings = true,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_removedmissing_data[:, 1]
             @test data.expvars_data == test_removedmissing_data[:, 2:end]
             @test data.nobs == 18
@@ -515,7 +515,7 @@ end
                 datanames = names(data_paneltime_without_missings_dataframe),
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
@@ -526,7 +526,7 @@ end
                 datanames = names(data_paneltime_without_missings_dataframe),
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             @test data.expvars_data == test_nonmissing_data[:, 2:end]
             @test data.nobs == 20
@@ -537,7 +537,7 @@ end
                 datanames = data_paneltime_without_missings_tuple[2],
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_nonmissing_data[:, 1]
             t = data.expvars_data == test_nonmissing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -550,7 +550,7 @@ end
                 removemissings = false,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_missing_data[:, 1]
             t = data.expvars_data == test_missing_data[:, 2:end]
             @test isa(t, Missing) || t == true
@@ -563,7 +563,7 @@ end
                 removemissings = true,
             )
             @test data.depvar == :y
-            @test data.expvars == [:x2, :x1, :_cons]
+            @test data.expvars == [:x2, :x1, CONS]
             @test data.depvar_data == test_removedmissing_data[:, 1]
             t = data.expvars_data == test_removedmissing_data[:, 2:end]
             @test isa(t, Missing) || t == true
