@@ -58,9 +58,9 @@ function filter_raw_data_by_empty_values(
     end
     depvar_data = convert(Array{datatype}, depvar_data[keep_rows, 1])
     expvars_data = convert(Array{datatype}, expvars_data[keep_rows, :])
+
     if fixedvariables_data !== nothing
-        fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, 1])
-        fixedvariables_data = reshape(fixedvariables_data, length(fixedvariables_data), 1)
+        fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, :])
     end
     time_data = time_data !== nothing ? time_data = time_data[keep_rows, 1] : time_data
     panel_data = panel_data !== nothing ? panel_data = panel_data[keep_rows, 1] : panel_data

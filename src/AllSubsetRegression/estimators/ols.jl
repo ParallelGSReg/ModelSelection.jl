@@ -619,8 +619,6 @@ function ols_execute_row!(
 
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
-    qrf = qr(fullexpvars_subset)
-    b = qrf \ depvar_subset
 
 	if method == PRECISE
 		fact = qr(fullexpvars_subset)

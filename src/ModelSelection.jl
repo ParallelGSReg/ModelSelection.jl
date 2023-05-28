@@ -23,7 +23,7 @@ using ..AllSubsetRegression
 using ..CrossValidation
 
 export ModelSelectionData, ModelSelectionResult
-export gsr, save, load, save_csv
+export gsr, save, load, save_csv, to_dict, to_string
 export create_datanames_index, get_column_index, get_selected_variables
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
 export CONS, FAST, PRECISE

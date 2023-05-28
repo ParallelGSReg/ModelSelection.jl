@@ -162,3 +162,55 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
     out *= ModelSelection.sprintf_newline()
     return out
 end
+
+
+"""
+    to_dict(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult,
+    ) -> Dict{Symbol, Any}
+
+Generate a dict representation of the best model results and model
+averaging results (if applicable) from the `AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
+   results of the all-subset regression analysis.
+
+# Returns
+- `Dict`: A formatted Dict representation of the best model results and model averaging
+   results (if applicable).
+
+# Example
+```julia
+result_string = to_dict(model_selection_data, all_subset_regression_result)
+```
+"""
+function to_dict(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
+    datanames_index = ModelSelection.create_datanames_index(result.datanames)
+    expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
+
+    summary = Dict{Symbol, Any}()
+
+    summary[:average] = Dict{Symbol, Any}()
+    summary[:average] = ModelSelection.add_depvar(summary[:average], data.depvar)
+    summary[:average] = ModelSelection.add_best_covars(summary[:average], :expvars, datanames_index, expvars, result, result.average_data)
+    summary[:average][:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary[:average] = ModelSelection.add_best_covars(summary[:average], :fixedvariables, datanames_index, data.fixedvariables, result, result.average_data)
+    end
+    summary[:average] = ModelSelection.add_summary_stats(summary[:average], datanames_index, result.average_data, summary_variables = SUMMARY_VARIABLES)
+
+    summary[:median] = Dict{Symbol, Any}()
+    summary[:median] = ModelSelection.add_depvar(summary[:median], data.depvar)
+    summary[:median] = ModelSelection.add_best_covars(summary[:median], :expvars, datanames_index, data.expvars, result, result.median_data)
+    summary[:median][:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary[:median] = ModelSelection.add_best_covars(summary[:median], :fixedvariables, datanames_index, data.fixedvariables, result, result.median_data)
+    end
+    summary[:median] = ModelSelection.add_summary_stats(summary[:median], datanames_index, result.median_data, summary_variables = SUMMARY_VARIABLES)
+
+    return summary
+end
