@@ -8,7 +8,11 @@ N=size(data,1)
 d=Binomial(1,p)
 data[!,:y]=rand(d,N)
 
-model =  ModelSelection.gsr(:ols, "australia china japan", data, fixedvariables=[:uk], ttest=true, modelavg=true, criteria = [:aic, :aicc], kfoldcrossvalidation=true)
+function notify(message)
+    println(message)
+end
+
+model =  ModelSelection.gsr(:ols, "australia china japan", data, fixedvariables=[:uk], ttest=true, modelavg=true, criteria = [:aic, :aicc], kfoldcrossvalidation=true, notify=notify)
 
 print(model)
 

@@ -34,6 +34,7 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
+    notify = NOTIFY_DEFAULT,
 )
     gsr(
         estimator,
@@ -63,6 +64,7 @@ function gsr(
         kfoldcrossvalidation = kfoldcrossvalidation,
         numfolds = numfolds,
         testsetshare = testsetshare,
+        notify = notify,
     )
 end
 
@@ -102,9 +104,12 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
+    notify = NOTIFY_DEFAULT,
 )
     removemissings = fe_lag === nothing
 
+    # TODO: Move notification to every module
+    notification(notify, "Processing parameters")
     data = Preprocessing.input(
         equation,
         data = data,
@@ -120,6 +125,8 @@ function gsr(
     )
 
     if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
+        # TODO: Move notification to every module
+        notification(notify, "Performing feature extraction")
         data = FeatureExtraction.featureextraction!(
             data,
             fe_sqr = fe_sqr,
@@ -134,6 +141,8 @@ function gsr(
     original_data = copy_modelselectiondata(data)
     
     if preliminaryselection_enabled(preliminaryselection)
+        # TODO: Move notification to every module
+        notification(notify, "Performing preliminary selection")
         data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
         original_data.extras = data.extras
     end
@@ -153,6 +162,8 @@ function gsr(
     original_data.extras = data.extras
 
     if crossvalidation_enabled(kfoldcrossvalidation)
+        # TODO: Move notification to every module
+        notification(notify, "Performing cross validation")
         CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
     end
 
