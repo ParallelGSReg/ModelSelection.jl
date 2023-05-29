@@ -1,5 +1,5 @@
 const ALLSUBSETREGRESSION_EXTRAKEY = :allsubsetregression
-const CRITERIA_DEFAULT = []
+const CRITERIA_DEFAULT = Vector{Symbol}()
 const FIXEDVARIABLES_DEFAULT = nothing
 const INSAMPLE_MIN = 20
 const MODELAVG_DEFAULT = false
