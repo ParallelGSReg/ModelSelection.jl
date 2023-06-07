@@ -1,5 +1,5 @@
-const LINE_LENGTH::Int = 80
-const HALF_LINE_LENGTH::Int = trunc(LINE_LENGTH / 2)
+const LINE_LENGTH = 80
+const HALF_LINE_LENGTH = Int64(trunc(LINE_LENGTH / 2))
 
 
 function sprintf_customline(char::String; len::Int = LINE_LENGTH, new_line::Bool = false)
