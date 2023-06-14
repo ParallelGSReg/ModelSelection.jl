@@ -1,10 +1,58 @@
 include("estimators/ols.jl")
 include("estimators/logit.jl")
 
+"""
+    all_subset_regression(
+        estimator::Symbol,
+        data::ModelSelectionData;
+        outsample::Union{Int,Array,Nothing} = OUTSAMPLE_DEFAULT,
+        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+        ttest::Bool = ZTEST_DEFAULT,
+        ztest::Bool = ZTEST_DEFAULT,
+        modelavg::Bool = MODELAVG_DEFAULT,
+        residualtest::Bool = RESIDUALTEST_DEFAULT,
+        orderresults::Bool = ORDERRESULTS_DEFAULT,
+    ) -> ModelSelectionResult
+
+Perform all-subset regression analysis using the specified estimator and options on the
+provided `ModelSelectionData`.
+
+# Arguments
+- `estimator::Symbol`: The estimator to be used for regression analysis. Supported values
+   are `:ols` for Ordinary Least Squares and `:logit` for logistic regression.
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+
+# Keyword Arguments
+- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
+   observations to be used for out-of-sample validation. Set to `nothing` if no
+   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
+- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
+   and selection. Default: `CRITERIA_DEFAULT`.
+- `ttest::Union{Bool, Nothing}`: If `true`, perform t-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `ztest::Union{Bool, Nothing}`: If `true`, perform z-tests for the coefficient estimates.
+   If ttest and ztest are both `true`, throw an error.
+- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
+   Default: `MODELAVG_DEFAULT`.
+- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
+   Default: `RESIDUALTEST_DEFAULT`.
+- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
+   Default: `ORDERRESULTS_DEFAULT`.
+
+# Returns
+- `ModelSelectionResult`: An object containing the results of the all-subset regression
+   analysis.
+
+# Example
+```julia
+result = all_subset_regression(:ols, model_selection_data)
+```
+"""
 function all_subset_regression(
     estimator::Symbol,
-    data::ModelSelection.ModelSelectionData;
-    outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
+    data::ModelSelectionData;
+    outsample::Union{Int,Array,Nothing} = OUTSAMPLE_DEFAULT,
     criteria::Vector{Symbol} = CRITERIA_DEFAULT,
     ttest::Bool = ZTEST_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
@@ -12,9 +60,7 @@ function all_subset_regression(
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
-    if ttest && ztest
-        throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
-    end
+    validate_test(ttest=ttest, ztest=ztest)
 
     if estimator == :ols
         AllSubsetRegression.ols!(
@@ -42,181 +88,146 @@ function all_subset_regression(
 end
 
 """
-to_string
+    to_string(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult,
+    ) -> String
+
+Generate a human-readable string representation of the best model results and model
+averaging results (if applicable) from the `AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
+   results of the all-subset regression analysis.
+
+# Returns
+- `String`: A formatted string representation of the best model results and model averaging
+   results (if applicable).
+
+# Example
+```julia
+result_string = to_string(model_selection_data, all_subset_regression_result)
+```
 """
-function to_string(
-    data::ModelSelection.ModelSelectionData,
-    result::AllSubsetRegressionResult,
-)
+function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-
-    out = ""
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                              Best model results                              \n"
-    )
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(
-        "                                     Dependent variable: %s                   \n",
-        data.depvar
-    )
-    out *= @sprintf(
-        "                                     ─────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(" Selected covariates                 Coef.")
-    if result.ttest
-        out *= @sprintf("        Std.         t-test")
+    summary_variables = SUMMARY_VARIABLES
+    if :r2adj in result.datanames
+        summary_variables[:r2adj] =
+            Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)
     end
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
-    cols = ModelSelection.get_selected_variables(
+    expvars = ModelSelection.get_selected_variables_varnames(
         Int64(result.bestresult_data[datanames_index[:index]]),
         data.expvars,
-        data.intercept,
+        false,
     )
-
-    for pos in cols
-        varname = data.expvars[pos]
-        out *= @sprintf(" %-35s", varname)
-        out *= @sprintf(
-            " %-10f",
-            result.bestresult_data[datanames_index[Symbol(string(varname, "_b"))]]
-        )
-        if result.ttest
-            out *= @sprintf(
-                "   %-10f",
-                result.bestresult_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-            )
-            out *= @sprintf(
-                "   %-10f",
-                result.bestresult_data[datanames_index[Symbol(string(varname, "_t"))]]
-            )
-        end
-        out *= @sprintf("\n")
-    end
-
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        " Observations                        %-10d\n",
-        result.bestresult_data[datanames_index[:nobs]]
-    )
-    out *= @sprintf(
-        " F-statistic                         %-10f\n",
-        result.bestresult_data[datanames_index[:F]]
-    )
-    if :r2adj in result.datanames
-        out *= @sprintf(
-            " Adjusted R²                         %-10f\n",
-            result.bestresult_data[datanames_index[:r2adj]]
-        )
-    end
+    criteria_variables = Dict()
     for criteria in result.criteria
-        if AVAILABLE_CRITERIA[criteria]["verbose_show"] && criteria != :r2adj
-            out *= @sprintf(
-                " %-30s      %-10f\n",
-                AVAILABLE_CRITERIA[criteria]["verbose_title"],
-                result.bestresult_data[datanames_index[criteria]]
-            )
-        end
+        criteria_variables[criteria] = AVAILABLE_CRITERIA[criteria]
     end
+
+    out = ModelSelection.sprintf_header_block("Best model results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block(
+        "Selected covariates",
+        datanames_index,
+        expvars,
+        data,
+        result,
+        result.bestresult_data,
+    )
+    out *= ModelSelection.sprintf_summary_block(
+        datanames_index,
+        result,
+        result.bestresult_data,
+        summary_variables = summary_variables,
+        criteria_variables = criteria_variables,
+    )
+    if !result.modelavg
+        out *= ModelSelection.sprintf_simpleline(new_line = true)
+        return out
+    end
+    out *= ModelSelection.sprintf_newline()
+    out *= ModelSelection.sprintf_header_block("Model averaging results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block(
+        "Covariates",
+        datanames_index,
+        data.expvars,
+        data,
+        result,
+        result.modelavg_data,
+    )
+    summary_variables[:order] =
+        Dict("verbose_title" => "Combined criteria", "verbose_show" => true)
+    out *= ModelSelection.sprintf_summary_block(
+        datanames_index,
+        result,
+        result.modelavg_data,
+        summary_variables = summary_variables,
+    )
+    out *= ModelSelection.sprintf_newline()
+    return out
+end
+
+
+"""
+    to_dict(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult,
+    ) -> Dict{Symbol, Any}
+
+Generate a dict representation of the best model results and model
+averaging results (if applicable) from the `AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
+   results of the all-subset regression analysis.
+
+# Returns
+- `Dict`: A formatted Dict representation of the best model results and model averaging
+   results (if applicable).
+
+# Example
+```julia
+result_string = to_dict(model_selection_data, all_subset_regression_result)
+```
+"""
+function to_dict(data::ModelSelectionData, result::AllSubsetRegressionResult)
+    summary_variables = SUMMARY_VARIABLES
+    datanames_index = ModelSelection.create_datanames_index(result.datanames)
+    best_results_expvars = ModelSelection.get_selected_variables_varnames(
+        Int64(result.bestresult_data[datanames_index[:index]]),
+        data.expvars,
+        false,
+    )
+    criteria_variables = Dict()
+    for criteria in result.criteria
+        criteria_variables[criteria] = AVAILABLE_CRITERIA[criteria]
+    end
+    summary = Dict{Symbol, Any}()
+    summary = ModelSelection.add_depvar(summary, data.depvar)
+    summary = ModelSelection.add_best_covars(summary, :expvars, datanames_index, best_results_expvars, result, result.bestresult_data)
+    summary[:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary = ModelSelection.add_best_covars(summary, :fixedvariables, datanames_index, data.fixedvariables, result, result.bestresult_data)
+    end
+    summary = ModelSelection.add_summary_stats(summary, datanames_index, result.bestresult_data, summary_variables = summary_variables, criteria_variables = criteria_variables)
 
     if !result.modelavg
-        out *= @sprintf(
-            "──────────────────────────────────────────────────────────────────────────────\n"
-        )
-    else
-        out *= @sprintf("\n")
-        out *= @sprintf("\n")
-        out *= @sprintf(
-            "══════════════════════════════════════════════════════════════════════════════\n"
-        )
-        out *= @sprintf(
-            "                            Model averaging results                           \n"
-        )
-        out *= @sprintf(
-            "══════════════════════════════════════════════════════════════════════════════\n"
-        )
-        out *= @sprintf(
-            "                                                                              \n"
-        )
-        out *= @sprintf(
-            "                                     Dependent variable: %s                   \n",
-            data.depvar
-        )
-        out *= @sprintf(
-            "                                     ─────────────────────────────────────────\n"
-        )
-        out *= @sprintf(
-            "                                                                              \n"
-        )
-        out *= @sprintf(" Covariates                          Coef.")
-        if result.ttest
-            out *= @sprintf("        Std.         t-test")
-        end
-        out *= @sprintf("\n")
-        out *= @sprintf(
-            "──────────────────────────────────────────────────────────────────────────────\n"
-        )
-
-        for varname in data.expvars
-            out *= @sprintf(" %-35s", varname)
-            out *= @sprintf(
-                " %-10f",
-                result.modelavg_data[datanames_index[Symbol(string(varname, "_b"))]]
-            )
-            if result.ttest
-                out *= @sprintf(
-                    "   %-10f",
-                    result.modelavg_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-                )
-                out *= @sprintf(
-                    "   %-10f",
-                    result.modelavg_data[datanames_index[Symbol(string(varname, "_t"))]]
-                )
-            end
-            out *= @sprintf("\n")
-        end
-        out *= @sprintf("\n")
-        out *= @sprintf(
-            "──────────────────────────────────────────────────────────────────────────────\n"
-        )
-        out *= @sprintf(
-            " Observations                        %-10d\n",
-            result.modelavg_data[datanames_index[:nobs]]
-        )
-        out *= @sprintf(
-            " Adjusted R²                         %-10f\n",
-            result.modelavg_data[datanames_index[:r2adj]]
-        )
-        out *= @sprintf(
-            " F-statistic                         %-10f\n",
-            result.modelavg_data[datanames_index[:F]]
-        )
-        out *= @sprintf(
-            " Combined criteria                   %-10f\n",
-            result.modelavg_data[datanames_index[:order]]
-        )
-        out *= @sprintf(
-            "──────────────────────────────────────────────────────────────────────────────\n"
-        )
-
+        return summary
     end
+    summary[:modelavg] = Dict{Symbol, Any}()
+    summary[:modelavg] = ModelSelection.add_best_covars(summary[:modelavg], :expvars, datanames_index, data.expvars, result, result.modelavg_data)
+    summary[:modelavg][:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary[:modelavg] = ModelSelection.add_best_covars(summary[:modelavg], :fixedvariables, datanames_index, data.fixedvariables, result, result.modelavg_data)
+    end
+    summary[:modelavg] = ModelSelection.add_summary_stats(summary[:modelavg], datanames_index, result.modelavg_data, summary_variables = summary_variables, criteria_variables = criteria_variables)
 
-    return out
+    return summary
 end

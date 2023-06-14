@@ -3,12 +3,12 @@ function featureextraction(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
     return featureextraction!(
-        ModelSelection.copy_data(data),
+        ModelSelection.copy_modelselectiondata(data),
         fe_sqr = fe_sqr,
         fe_log = fe_log,
         fe_inv = fe_inv,
@@ -23,7 +23,7 @@ function featureextraction!(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
@@ -47,7 +47,7 @@ function execute!(
     fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
     fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array,Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
@@ -83,10 +83,10 @@ function execute!(
     end
 
     if removemissings
-        data = ModelSelection.filter_data_by_empty_values(data)
+        data = ModelSelection.filter_data_by_empty_values!(data)
     end
 
-    data = ModelSelection.convert_data(data)
+    data = ModelSelection.convert_data!(data)
 
     return data
 end

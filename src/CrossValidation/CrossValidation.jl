@@ -4,7 +4,9 @@ using ..ModelSelection
 using Printf, Random, Statistics
 import Base: iterate
 
-export kfoldcrossvalidation, CROSSVALIDATION_EXTRAKEY, CrossValidationResult, to_string
+export CrossValidationResult
+export kfoldcrossvalidation, to_string
+export CROSSVALIDATION_EXTRAKEY, KFOLDCROSSVALIDATION_DEFAULT, NUMFOLDS_DEFAULT, TESTSETSHARE_DEFAULT
 
 include("const.jl")
 include("utils.jl")

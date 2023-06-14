@@ -17,10 +17,10 @@ function gsr(
     time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_log::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_inv::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_lag::Union{Nothing,Array} = nothing,
+    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array} = nothing,
     preliminaryselection::Union{Nothing,Symbol} = nothing,
     fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
@@ -31,9 +31,10 @@ function gsr(
     modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
     residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
-    kfoldcrossvalidation::Bool = KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = TESTSETSHARE_DEFAULT,
+    kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
+    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
+    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
+    notify = NOTIFY_DEFAULT,
 )
     gsr(
         estimator,
@@ -63,6 +64,7 @@ function gsr(
         kfoldcrossvalidation = kfoldcrossvalidation,
         numfolds = numfolds,
         testsetshare = testsetshare,
+        notify = notify,
     )
 end
 
@@ -85,10 +87,10 @@ function gsr(
     time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
     seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_log::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_inv::Union{Nothing,String,Symbol,Array{String},Array{Symbol}} = nothing,
-    fe_lag::Union{Nothing,Array} = nothing,
+    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
+    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array} = nothing,
     preliminaryselection::Union{Nothing,Symbol} = nothing,
     fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
@@ -99,12 +101,15 @@ function gsr(
     modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
     residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
-    kfoldcrossvalidation::Bool = KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = TESTSETSHARE_DEFAULT,
+    kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
+    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
+    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
+    notify = NOTIFY_DEFAULT,
 )
     removemissings = fe_lag === nothing
 
+    # TODO: Move notification to every module
+    notification(notify, "Processing parameters")
     data = Preprocessing.input(
         equation,
         data = data,
@@ -120,6 +125,8 @@ function gsr(
     )
 
     if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
+        # TODO: Move notification to every module
+        notification(notify, "Performing feature extraction")
         data = FeatureExtraction.featureextraction!(
             data,
             fe_sqr = fe_sqr,
@@ -130,11 +137,13 @@ function gsr(
             removemissings = true,
         )
     end
-
-    original_data = copy_data(data)
-
+    
+    original_data = copy_modelselectiondata(data)
+    
     if preliminaryselection_enabled(preliminaryselection)
-        data = PreliminarySelection.preliminary_selection(preliminaryselection, data)
+        # TODO: Move notification to every module
+        notification(notify, "Performing preliminary selection")
+        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
         original_data.extras = data.extras
     end
 
@@ -152,9 +161,13 @@ function gsr(
 
     original_data.extras = data.extras
 
-    if kfoldcrossvalidation
+    if crossvalidation_enabled(kfoldcrossvalidation)
+        # TODO: Move notification to every module
+        notification(notify, "Performing cross validation")
         CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
     end
+
+    data.original_data = original_data
 
     return data
 end

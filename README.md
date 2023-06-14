@@ -4,6 +4,9 @@
 
 *Model Selection for Julia.*
 
+## Documentation
+Please follow [the next link](https://parallelgsreg.github.io/ModelSelection.jl/).
+
 ## How to save csv and results
 ```julia
 model = ModelSelection.gsr(:ols, ...)

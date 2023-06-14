@@ -68,9 +68,13 @@ function kfoldcrossvalidation(
         dataset = collect(Iterators.flatten(folds[obs]))
         testset = setdiff(1:data.nobs, dataset)
 
-        reduced = ModelSelection.copy_data(data)
+        reduced = ModelSelection.copy_modelselectiondata(data)
         reduced.depvar_data = data.depvar_data[dataset]
         reduced.expvars_data = data.expvars_data[dataset, :]
+
+        if reduced.fixedvariables !== nothing
+            reduced.fixedvariables_data = data.fixedvariables_data[dataset, :]
+        end
 
         if reduced.time !== nothing
             reduced.time_data = data.time_data[dataset]
@@ -81,9 +85,10 @@ function kfoldcrossvalidation(
         end
 
         reduced.nobs = size(dataset, 1)
+        
         _, vars = ModelSelection.PreliminarySelection.lasso!(reduced, addextrasflag = false)
 
-        backup = ModelSelection.copy_data(data)
+        backup = ModelSelection.copy_modelselectiondata(data)
         backup.expvars = data.expvars[vars]
         backup.expvars_data = data.expvars_data[:, vars]
 
@@ -119,6 +124,8 @@ function kfoldcrossvalidation(
 
     average_data = mean(data, dims = 1)
     median_data = median(data, dims = 1)
+    
+    datanames_index = ModelSelection.create_datanames_index(datanames)
 
     result = CrossValidationResult(
         k,
@@ -130,6 +137,9 @@ function kfoldcrossvalidation(
         data,
     )
 
+    result.average_data[datanames_index[:nobs]] = Int64(round(result.average_data[datanames_index[:nobs]]))
+    result.median_data[datanames_index[:nobs]] = Int64(round(result.median_data[datanames_index[:nobs]]))
+
     previousresult = ModelSelection.addresult!(previousresult, result)
 
     addextras(previousresult, result)
@@ -139,142 +149,68 @@ end
 
 function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-
-    out = ""
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                       Cross validation average results                       \n"
-    )
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(
-        "                                     Dependent variable: %s                   \n",
-        data.depvar
-    )
-    out *= @sprintf(
-        "                                     ─────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(" Selected covariates                 Coef.")
-    if result.ttest
-        out *= @sprintf("        Std.         t-test")
-    end
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
-    for varname in data.expvars
-        if Symbol(string(varname, "_b")) in keys(datanames_index)
-            out *= @sprintf(" %-35s", varname)
-            out *= @sprintf(
-                " %-10f",
-                result.average_data[datanames_index[Symbol(string(varname, "_b"))]]
-            )
-            if result.ttest
-                out *= @sprintf(
-                    "   %-10f",
-                    result.average_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-                )
-                out *= @sprintf(
-                    "   %-10f",
-                    result.average_data[datanames_index[Symbol(string(varname, "_t"))]]
-                )
-            end
-            out *= @sprintf("\n")
-        end
-    end
-
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        " Observations                        %-10d\n",
-        result.average_data[datanames_index[:nobs]]
-    )
-    out *= @sprintf(
-        " RMSE OUT                            %-10f\n",
-        result.average_data[datanames_index[:rmseout]]
-    )
-
-    out *= @sprintf("\n")
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                       Cross validation median results                        \n"
-    )
-    out *= @sprintf(
-        "══════════════════════════════════════════════════════════════════════════════\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(
-        "                                     Dependent variable: %s                   \n",
-        data.depvar
-    )
-    out *= @sprintf(
-        "                                     ─────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        "                                                                              \n"
-    )
-    out *= @sprintf(" Covariates                          Coef.")
-    if result.ttest
-        out *= @sprintf("        Std.         t-test")
-    end
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
-    for varname in data.expvars
-        if Symbol(string(varname, "_b")) in keys(datanames_index)
-            out *= @sprintf(" %-35s", varname)
-            out *= @sprintf(
-                " %-10f",
-                result.median_data[datanames_index[Symbol(string(varname, "_b"))]]
-            )
-            if result.ttest
-                out *= @sprintf(
-                    "   %-10f",
-                    result.median_data[datanames_index[Symbol(string(varname, "_bstd"))]]
-                )
-                out *= @sprintf(
-                    "   %-10f",
-                    result.median_data[datanames_index[Symbol(string(varname, "_t"))]]
-                )
-            end
-            out *= @sprintf("\n")
-        end
-    end
-
-    out *= @sprintf("\n")
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-    out *= @sprintf(
-        " Observations                        %-10d\n",
-        result.median_data[datanames_index[:nobs]]
-    )
-    out *= @sprintf(
-        " RMSE OUT                            %-10f\n",
-        result.median_data[datanames_index[:rmseout]]
-    )
-    out *= @sprintf(
-        "──────────────────────────────────────────────────────────────────────────────\n"
-    )
-
+    expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
+    out = ModelSelection.sprintf_header_block("Cross validation average results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block("Selected covariates", datanames_index, expvars, data, result, result.average_data)
+    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.average_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_newline(1)
+    out *= ModelSelection.sprintf_header_block("Cross validation median results")
+    out *= ModelSelection.sprintf_depvar_block(data)
+    out *= ModelSelection.sprintf_covvars_block("Covariates", datanames_index, data.expvars, data, result, result.median_data)
+    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.median_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_newline()
     return out
+end
+
+
+"""
+    to_dict(
+        data::ModelSelectionData,
+        result::AllSubsetRegressionResult,
+    ) -> Dict{Symbol, Any}
+
+Generate a dict representation of the best model results and model
+averaging results (if applicable) from the `AllSubsetRegressionResult` object.
+
+# Arguments
+- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
+   in the model selection process.
+- `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
+   results of the all-subset regression analysis.
+
+# Returns
+- `Dict`: A formatted Dict representation of the best model results and model averaging
+   results (if applicable).
+
+# Example
+```julia
+result_string = to_dict(model_selection_data, all_subset_regression_result)
+```
+"""
+function to_dict(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
+    datanames_index = ModelSelection.create_datanames_index(result.datanames)
+    expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
+
+    summary = Dict{Symbol, Any}()
+
+    summary[:average] = Dict{Symbol, Any}()
+    summary[:average] = ModelSelection.add_depvar(summary[:average], data.depvar)
+    summary[:average] = ModelSelection.add_best_covars(summary[:average], :expvars, datanames_index, expvars, result, result.average_data)
+    summary[:average][:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary[:average] = ModelSelection.add_best_covars(summary[:average], :fixedvariables, datanames_index, data.fixedvariables, result, result.average_data)
+    end
+    summary[:average] = ModelSelection.add_summary_stats(summary[:average], datanames_index, result.average_data, summary_variables = SUMMARY_VARIABLES)
+
+    summary[:median] = Dict{Symbol, Any}()
+    summary[:median] = ModelSelection.add_depvar(summary[:median], data.depvar)
+    summary[:median] = ModelSelection.add_best_covars(summary[:median], :expvars, datanames_index, data.expvars, result, result.median_data)
+    summary[:median][:fixedvariables] = nothing
+    if data.fixedvariables !== nothing
+        summary[:median] = ModelSelection.add_best_covars(summary[:median], :fixedvariables, datanames_index, data.fixedvariables, result, result.median_data)
+    end
+    summary[:median] = ModelSelection.add_summary_stats(summary[:median], datanames_index, result.median_data, summary_variables = SUMMARY_VARIABLES)
+
+    return summary
 end

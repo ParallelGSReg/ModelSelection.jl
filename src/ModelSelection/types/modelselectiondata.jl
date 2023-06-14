@@ -40,12 +40,13 @@ mutable struct ModelSelectionData
     }
     intercept::Bool
     datatype::DataType
+    method::Symbol
     removemissings::Bool
     nobs::Int64
     options::Array{Any}
-    extras::Dict
-    previous_data::Array{Any}
+    extras::Dict{Symbol,Any}
     results::Array{Any}
+    original_data::Union{ModelSelectionData,Nothing}
 
     function ModelSelectionData(
         equation::Vector{Symbol},
@@ -89,14 +90,14 @@ mutable struct ModelSelectionData
         },
         intercept::Bool,
         datatype::DataType,
+        method::Symbol,
         removemissings::Bool,
         nobs::Int64,
     )
         extras = Dict()
         options = Array{Any}(undef, 0)
-        previous_data = Array{Any}(undef, 0)
         results = Array{Any}(undef, 0)
-
+        original_data = nothing
         new(
             equation,
             depvar,
@@ -111,12 +112,13 @@ mutable struct ModelSelectionData
             panel_data,
             intercept,
             datatype,
+            method,
             removemissings,
             nobs,
             options,
             extras,
-            previous_data,
             results,
+            original_data,
         )
     end
 end
