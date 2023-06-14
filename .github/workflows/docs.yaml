@@ -21,4 +21,4 @@ jobs:
           run: julia --color=yes --project=docs/ docs/make.jl
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        - uses: actions/upload-artifact@v3
+        - uses: actions/upload-artifact@v3
