@@ -1,24 +1,26 @@
-name: Create docs
+name: Documentation
 
 on: 
   push:
     branches:
       - main
+    tags: '*'
 
 jobs:
-    docs:
-      name: 'Documentation: html'
-      runs-on: ubuntu-latest
-      steps:
-        - uses: actions/checkout@v3
-        - uses: julia-actions/setup-julia@v1
-          with:
-            version: '1.6.7'
-        - uses: julia-actions/cache@v1
-        - name: Install dependencies
-          run: julia --color=yes --project=docs/ docs/instantiate.jl
-        - name: Build the manual
-          run: julia --color=yes --project=docs/ docs/make.jl
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        - uses: actions/upload-artifact@v3
+  docs:
+    permissions:
+      contents: write
+    name: 'Documentation: html'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: julia-actions/setup-julia@v1
+        with:
+          version: '1.6.7'
+      - uses: julia-actions/cache@v1
+      - name: Install dependencies
+        run: julia --color=yes --project=docs/ docs/instantiate.jl
+      - name: Build the manual
+        run: julia --color=yes --project=docs/ docs/make.jl
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

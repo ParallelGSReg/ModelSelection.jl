@@ -1,5 +1,3 @@
-const REPO = "https://github.com/ParallelGSReg/ModelSelection.jl.git"
-
 using Documenter, DocumenterTools
 using ModelSelection, ModelSelection.AllSubsetRegression
 
@@ -15,4 +13,4 @@ makedocs(
     ],
 )
 
-deploydocs(repo = REPO)
+deploydocs(repo = "github.com/ParallelGSReg/ModelSelection.jl.git")
