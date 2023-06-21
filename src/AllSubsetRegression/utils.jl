@@ -52,10 +52,11 @@ function create_result(
     ttest::Union{Bool,Nothing} = nothing,
     ztest::Union{Bool,Nothing} = nothing,
 )
-    validate_test(ttest=ttest, ztest=ztest)
+    validate_test(ttest = ttest, ztest = ztest)
 
     outsample = outsample === nothing ? 0 : outsample
-    if (outsample isa Array && size(outsample, 1) > 0) || (!(outsample isa Array) && outsample > 0)
+    if (outsample isa Array && size(outsample, 1) > 0) ||
+       (!(outsample isa Array) && outsample > 0)
         push!(criteria, :rmseout)
     end
     criteria = unique(criteria)
@@ -131,7 +132,7 @@ function create_datanames(
     ttest::Union{Bool,Nothing} = nothing,
     ztest::Union{Bool,Nothing} = nothing,
 )
-    validate_test(ttest=ttest, ztest=ztest)
+    validate_test(ttest = ttest, ztest = ztest)
 
     datanames::Vector{Symbol} = []
     push!(datanames, INDEX)
@@ -530,7 +531,10 @@ validate_test(false, true) # No error
 validate_test(true, true)  # ArgumentError: "Both t-test and z-test cannot be true simultaneously."
 ``` 
 """
-function validate_test(;ttest::Union{Bool, Nothing} = nothing, ztest::Union{Bool, Nothing} = nothing)
+function validate_test(;
+    ttest::Union{Bool,Nothing} = nothing,
+    ztest::Union{Bool,Nothing} = nothing,
+)
     if ttest == true && ztest == true
         throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
     end

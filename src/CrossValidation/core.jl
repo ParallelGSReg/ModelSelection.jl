@@ -85,7 +85,7 @@ function kfoldcrossvalidation(
         end
 
         reduced.nobs = size(dataset, 1)
-        
+
         _, vars = ModelSelection.PreliminarySelection.lasso!(reduced, addextrasflag = false)
 
         backup = ModelSelection.copy_modelselectiondata(data)
@@ -124,7 +124,7 @@ function kfoldcrossvalidation(
 
     average_data = mean(data, dims = 1)
     median_data = median(data, dims = 1)
-    
+
     datanames_index = ModelSelection.create_datanames_index(datanames)
 
     result = CrossValidationResult(
@@ -137,8 +137,10 @@ function kfoldcrossvalidation(
         data,
     )
 
-    result.average_data[datanames_index[:nobs]] = Int64(round(result.average_data[datanames_index[:nobs]]))
-    result.median_data[datanames_index[:nobs]] = Int64(round(result.median_data[datanames_index[:nobs]]))
+    result.average_data[datanames_index[:nobs]] =
+        Int64(round(result.average_data[datanames_index[:nobs]]))
+    result.median_data[datanames_index[:nobs]] =
+        Int64(round(result.median_data[datanames_index[:nobs]]))
 
     previousresult = ModelSelection.addresult!(previousresult, result)
 
@@ -152,13 +154,37 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
     expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
     out = ModelSelection.sprintf_header_block("Cross validation average results")
     out *= ModelSelection.sprintf_depvar_block(data)
-    out *= ModelSelection.sprintf_covvars_block("Selected covariates", datanames_index, expvars, data, result, result.average_data)
-    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.average_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_covvars_block(
+        "Selected covariates",
+        datanames_index,
+        expvars,
+        data,
+        result,
+        result.average_data,
+    )
+    out *= ModelSelection.sprintf_summary_block(
+        datanames_index,
+        result,
+        result.average_data,
+        summary_variables = SUMMARY_VARIABLES,
+    )
     out *= ModelSelection.sprintf_newline(1)
     out *= ModelSelection.sprintf_header_block("Cross validation median results")
     out *= ModelSelection.sprintf_depvar_block(data)
-    out *= ModelSelection.sprintf_covvars_block("Covariates", datanames_index, data.expvars, data, result, result.median_data)
-    out *= ModelSelection.sprintf_summary_block(datanames_index, result, result.median_data, summary_variables=SUMMARY_VARIABLES)
+    out *= ModelSelection.sprintf_covvars_block(
+        "Covariates",
+        datanames_index,
+        data.expvars,
+        data,
+        result,
+        result.median_data,
+    )
+    out *= ModelSelection.sprintf_summary_block(
+        datanames_index,
+        result,
+        result.median_data,
+        summary_variables = SUMMARY_VARIABLES,
+    )
     out *= ModelSelection.sprintf_newline()
     return out
 end
@@ -192,25 +218,63 @@ function to_dict(data::ModelSelection.ModelSelectionData, result::CrossValidatio
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
 
-    summary = Dict{Symbol, Any}()
+    summary = Dict{Symbol,Any}()
 
-    summary[:average] = Dict{Symbol, Any}()
+    summary[:average] = Dict{Symbol,Any}()
     summary[:average] = ModelSelection.add_depvar(summary[:average], data.depvar)
-    summary[:average] = ModelSelection.add_best_covars(summary[:average], :expvars, datanames_index, expvars, result, result.average_data)
+    summary[:average] = ModelSelection.add_best_covars(
+        summary[:average],
+        :expvars,
+        datanames_index,
+        expvars,
+        result,
+        result.average_data,
+    )
     summary[:average][:fixedvariables] = nothing
     if data.fixedvariables !== nothing
-        summary[:average] = ModelSelection.add_best_covars(summary[:average], :fixedvariables, datanames_index, data.fixedvariables, result, result.average_data)
+        summary[:average] = ModelSelection.add_best_covars(
+            summary[:average],
+            :fixedvariables,
+            datanames_index,
+            data.fixedvariables,
+            result,
+            result.average_data,
+        )
     end
-    summary[:average] = ModelSelection.add_summary_stats(summary[:average], datanames_index, result.average_data, summary_variables = SUMMARY_VARIABLES)
+    summary[:average] = ModelSelection.add_summary_stats(
+        summary[:average],
+        datanames_index,
+        result.average_data,
+        summary_variables = SUMMARY_VARIABLES,
+    )
 
-    summary[:median] = Dict{Symbol, Any}()
+    summary[:median] = Dict{Symbol,Any}()
     summary[:median] = ModelSelection.add_depvar(summary[:median], data.depvar)
-    summary[:median] = ModelSelection.add_best_covars(summary[:median], :expvars, datanames_index, data.expvars, result, result.median_data)
+    summary[:median] = ModelSelection.add_best_covars(
+        summary[:median],
+        :expvars,
+        datanames_index,
+        data.expvars,
+        result,
+        result.median_data,
+    )
     summary[:median][:fixedvariables] = nothing
     if data.fixedvariables !== nothing
-        summary[:median] = ModelSelection.add_best_covars(summary[:median], :fixedvariables, datanames_index, data.fixedvariables, result, result.median_data)
+        summary[:median] = ModelSelection.add_best_covars(
+            summary[:median],
+            :fixedvariables,
+            datanames_index,
+            data.fixedvariables,
+            result,
+            result.median_data,
+        )
     end
-    summary[:median] = ModelSelection.add_summary_stats(summary[:median], datanames_index, result.median_data, summary_variables = SUMMARY_VARIABLES)
+    summary[:median] = ModelSelection.add_summary_stats(
+        summary[:median],
+        datanames_index,
+        result.median_data,
+        summary_variables = SUMMARY_VARIABLES,
+    )
 
     return summary
 end

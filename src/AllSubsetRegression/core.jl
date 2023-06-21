@@ -60,7 +60,7 @@ function all_subset_regression(
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
 )
-    validate_test(ttest=ttest, ztest=ztest)
+    validate_test(ttest = ttest, ztest = ztest)
 
     if estimator == :ols
         AllSubsetRegression.ols!(
@@ -209,25 +209,65 @@ function to_dict(data::ModelSelectionData, result::AllSubsetRegressionResult)
     for criteria in result.criteria
         criteria_variables[criteria] = AVAILABLE_CRITERIA[criteria]
     end
-    summary = Dict{Symbol, Any}()
+    summary = Dict{Symbol,Any}()
     summary = ModelSelection.add_depvar(summary, data.depvar)
-    summary = ModelSelection.add_best_covars(summary, :expvars, datanames_index, best_results_expvars, result, result.bestresult_data)
+    summary = ModelSelection.add_best_covars(
+        summary,
+        :expvars,
+        datanames_index,
+        best_results_expvars,
+        result,
+        result.bestresult_data,
+    )
     summary[:fixedvariables] = nothing
     if data.fixedvariables !== nothing
-        summary = ModelSelection.add_best_covars(summary, :fixedvariables, datanames_index, data.fixedvariables, result, result.bestresult_data)
+        summary = ModelSelection.add_best_covars(
+            summary,
+            :fixedvariables,
+            datanames_index,
+            data.fixedvariables,
+            result,
+            result.bestresult_data,
+        )
     end
-    summary = ModelSelection.add_summary_stats(summary, datanames_index, result.bestresult_data, summary_variables = summary_variables, criteria_variables = criteria_variables)
+    summary = ModelSelection.add_summary_stats(
+        summary,
+        datanames_index,
+        result.bestresult_data,
+        summary_variables = summary_variables,
+        criteria_variables = criteria_variables,
+    )
 
     if !result.modelavg
         return summary
     end
-    summary[:modelavg] = Dict{Symbol, Any}()
-    summary[:modelavg] = ModelSelection.add_best_covars(summary[:modelavg], :expvars, datanames_index, data.expvars, result, result.modelavg_data)
+    summary[:modelavg] = Dict{Symbol,Any}()
+    summary[:modelavg] = ModelSelection.add_best_covars(
+        summary[:modelavg],
+        :expvars,
+        datanames_index,
+        data.expvars,
+        result,
+        result.modelavg_data,
+    )
     summary[:modelavg][:fixedvariables] = nothing
     if data.fixedvariables !== nothing
-        summary[:modelavg] = ModelSelection.add_best_covars(summary[:modelavg], :fixedvariables, datanames_index, data.fixedvariables, result, result.modelavg_data)
+        summary[:modelavg] = ModelSelection.add_best_covars(
+            summary[:modelavg],
+            :fixedvariables,
+            datanames_index,
+            data.fixedvariables,
+            result,
+            result.modelavg_data,
+        )
     end
-    summary[:modelavg] = ModelSelection.add_summary_stats(summary[:modelavg], datanames_index, result.modelavg_data, summary_variables = summary_variables, criteria_variables = criteria_variables)
+    summary[:modelavg] = ModelSelection.add_summary_stats(
+        summary[:modelavg],
+        datanames_index,
+        result.modelavg_data,
+        summary_variables = summary_variables,
+        criteria_variables = criteria_variables,
+    )
 
     return summary
 end

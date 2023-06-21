@@ -6,7 +6,8 @@ import Base: iterate
 
 export CrossValidationResult
 export kfoldcrossvalidation, to_string
-export CROSSVALIDATION_EXTRAKEY, KFOLDCROSSVALIDATION_DEFAULT, NUMFOLDS_DEFAULT, TESTSETSHARE_DEFAULT
+export CROSSVALIDATION_EXTRAKEY,
+    KFOLDCROSSVALIDATION_DEFAULT, NUMFOLDS_DEFAULT, TESTSETSHARE_DEFAULT
 
 include("const.jl")
 include("utils.jl")

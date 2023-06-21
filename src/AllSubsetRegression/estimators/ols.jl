@@ -620,15 +620,15 @@ function ols_execute_row!(
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
 
-	if method == PRECISE
-		fact = qr(fullexpvars_subset)
-		denominator = depvar_subset
-	elseif method == FAST
-		fact = cholesky(fullexpvars_subset'fullexpvars_subset)
-		denominator = fullexpvars_subset'depvar_subset
-	else
-		error(INVALID_METHOD)
-	end
+    if method == PRECISE
+        fact = qr(fullexpvars_subset)
+        denominator = depvar_subset
+    elseif method == FAST
+        fact = cholesky(fullexpvars_subset'fullexpvars_subset)
+        denominator = fullexpvars_subset'depvar_subset
+    else
+        error(INVALID_METHOD)
+    end
 
     b = fact \ denominator                 # estimate
     ŷ = fullexpvars_subset * b            # predicted values
@@ -640,12 +640,16 @@ function ols_execute_row!(
     r2 = 1 - var(er) / var(depvar_subset) # model R-squared
 
     if ttest
-		if method==PRECISE
-			uptriang = UpperTriangular(fact.R)
-		elseif method == FAST
-			uptriang = UpperTriangular(fact.U)
+        if method == PRECISE
+            uptriang = UpperTriangular(fact.R)
+        elseif method == FAST
+            uptriang = UpperTriangular(fact.U)
         end
-		bstd = sqrt.(sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)) # std deviation of coefficients
+        bstd =
+            sqrt.(
+                sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) *
+                (sse / df_e)
+            ) # std deviation of coefficients
     end
 
     if outsample_enabled > 0
@@ -665,7 +669,7 @@ function ols_execute_row!(
 
         # out-of-sample residuals
         erout = depvar_outsample_subset - fullexpvars_outsample_subset * b
-        
+
         # residual sum of squares
         sseout = sum(erout .^ 2)
         outsample_count = outsample
@@ -806,14 +810,14 @@ function ols_execute_row!(
         jbtest = 1 .- cdf(d, statistic)
 
         regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-		if method==PRECISE
-			factw = qr(regmatw)
-			denominatorw = er2
-		elseif method == FAST
-			factw = cholesky(regmatw'regmatw)
-			denominatorw = regmatw'er2
-		end
-		regcoeffw = factw \ denominatorw
+        if method == PRECISE
+            factw = qr(regmatw)
+            denominatorw = er2
+        elseif method == FAST
+            factw = cholesky(regmatw'regmatw)
+            denominatorw = regmatw'er2
+        end
+        regcoeffw = factw \ denominatorw
         residw = er2 - regmatw * regcoeffw
         rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
         statisticw = n * rsqw
@@ -834,14 +838,14 @@ function ols_execute_row!(
 
             offset = lag
             regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-			if method==PRECISE
-				factbg = qr(regmatbg)
-				denominatorbg = e[offset+1:end]
-			elseif method == FAST
-				factbg = cholesky(regmatbg'regmatbg)
-				denominatorbg = regmatbg'e[offset+1:end]
-			end
-			regcoeffbg = factbg \ denominatorbg
+            if method == PRECISE
+                factbg = qr(regmatbg)
+                denominatorbg = e[offset+1:end]
+            elseif method == FAST
+                factbg = cholesky(regmatbg'regmatbg)
+                denominatorbg = regmatbg'e[offset+1:end]
+            end
+            regcoeffbg = factbg \ denominatorbg
             residbg = e[offset+1:end] .- regmatbg * regcoeffbg
 
             # uncentered R^2

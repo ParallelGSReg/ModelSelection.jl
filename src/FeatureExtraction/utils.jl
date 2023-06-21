@@ -216,8 +216,10 @@ function data_add_fe_lag(data, fe_vars)
                         collect(1:1:nobs)
                     num_rows = size(rows, 1)
                     if !(expvar in data.expvars)
-                        var_data[rows[1]:rows[1]+num_rows-1, m] .=
-                            Shiftedlag(data.expvars_data[rows[1]:rows[1]+num_rows-1, col], i)
+                        var_data[rows[1]:rows[1]+num_rows-1, m] .= Shiftedlag(
+                            data.expvars_data[rows[1]:rows[1]+num_rows-1, col],
+                            i,
+                        )
                         col_added = true
                     else
                         n = ModelSelection.get_column_index(expvar, data.expvars)

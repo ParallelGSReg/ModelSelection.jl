@@ -131,7 +131,11 @@ Returns selected appropiate explanatory variables for each iteration as varnames
 - `datanames::Vector{Symbol}`: the datanames.
 - `intercept::Bool`: if the model has intercept.
 """
-function get_selected_variables_varnames(order::Int64, datanames::Vector{Symbol}, intercept::Bool)
+function get_selected_variables_varnames(
+    order::Int64,
+    datanames::Vector{Symbol},
+    intercept::Bool,
+)
     cols = get_selected_variables(order, datanames, intercept)
     return datanames[cols]
 end

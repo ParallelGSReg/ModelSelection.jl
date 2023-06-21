@@ -5,6 +5,6 @@
 
 # TBD
  - Validation in every module
-
-
-" + Documentation in AllSubsetRegression. + Major refactoring. + t-test and z-test splitted 
+ - Documentation in AllSubsetRegression
+ - Major refactoring
+ - General documentation

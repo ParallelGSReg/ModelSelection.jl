@@ -4,7 +4,10 @@ function preliminary_selection(
     preliminaryselection::Union{Symbol,String},
     data::ModelSelection.ModelSelectionData,
 )
-    return preliminary_selection!(preliminaryselection, ModelSelection.copy_modelselectiondata(data))
+    return preliminary_selection!(
+        preliminaryselection,
+        ModelSelection.copy_modelselectiondata(data),
+    )
 end
 
 

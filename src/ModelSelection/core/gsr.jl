@@ -137,9 +137,9 @@ function gsr(
             removemissings = true,
         )
     end
-    
+
     original_data = copy_modelselectiondata(data)
-    
+
     if preliminaryselection_enabled(preliminaryselection)
         # TODO: Move notification to every module
         notification(notify, "Performing preliminary selection")

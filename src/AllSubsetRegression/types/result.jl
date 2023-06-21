@@ -67,8 +67,8 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     outsample::Union{Int64,Vector{Int64},Nothing}
     criteria::Vector{Symbol}
     modelavg::Bool
-    ttest::Union{Bool, Nothing}
-    ztest::Union{Bool, Nothing}
+    ttest::Union{Bool,Nothing}
+    ztest::Union{Bool,Nothing}
     residualtest::Bool
     orderresults::Bool
     nobs::Int64
@@ -81,10 +81,10 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
         modelavg::Bool,
         residualtest::Bool,
         orderresults::Bool;
-        ttest::Union{Bool, Nothing} = nothing,
-        ztest::Union{Bool, Nothing} = nothing,
+        ttest::Union{Bool,Nothing} = nothing,
+        ztest::Union{Bool,Nothing} = nothing,
     )
-        validate_test(ttest=ttest, ztest=ztest)
+        validate_test(ttest = ttest, ztest = ztest)
         new(
             datanames,
             modelavg_datanames,
