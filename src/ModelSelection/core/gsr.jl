@@ -124,6 +124,33 @@ function gsr(
         removemissings = removemissings,
     )
 
+    data.options[:estimator] = estimator
+    data.options[:equation] = equation
+    data.options[:datanames] = datanames
+    data.options[:method] = method
+    data.options[:intercept] = intercept
+    data.options[:panel] = panel
+    data.options[:time] = time
+    data.options[:seasonaladjustment] = seasonaladjustment
+    data.options[:removeoutliers] = removeoutliers
+    data.options[:fe_sqr] = fe_sqr
+    data.options[:fe_log] = fe_log
+    data.options[:fe_inv] = fe_inv
+    data.options[:fe_lag] = fe_lag
+    data.options[:interaction] = interaction
+    data.options[:preliminaryselection] = preliminaryselection
+    data.options[:fixedvariables] = fixedvariables
+    data.options[:outsample] = outsample
+    data.options[:criteria] = criteria
+    data.options[:ttest] = ttest
+    data.options[:ztest] = ztest
+    data.options[:modelavg] = modelavg
+    data.options[:residualtest] = residualtest
+    data.options[:orderresults] = orderresults
+    data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
+    data.options[:numfolds] = numfolds
+    data.options[:testsetshare] = testsetshare
+
     if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
         # TODO: Move notification to every module
         notification(notify, "Performing feature extraction")
