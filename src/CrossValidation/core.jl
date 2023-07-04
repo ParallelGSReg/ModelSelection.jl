@@ -32,9 +32,10 @@ function kfoldcrossvalidation!(
     previousresult::ModelSelection.ModelSelectionData,
     data::ModelSelection.ModelSelectionData,
     k::Int,
-    s::Float64,
+    s::Float64;
+    notify = nothing,
 )
-    kfoldcrossvalidation(previousresult, data, k, s)
+    kfoldcrossvalidation(previousresult, data, k, s; notify = notify )
 end
 
 
@@ -42,9 +43,10 @@ function kfoldcrossvalidation(
     previousresult::ModelSelection.ModelSelectionData,
     data::ModelSelection.ModelSelectionData,
     k::Int,
-    s::Float64,
+    s::Float64;
+    notify = nothing,
 )
-
+    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 0))
     #db = randperm(data.nobs)
     db = collect(1:data.nobs)
     folds = split_database(db, k)
@@ -63,6 +65,10 @@ function kfoldcrossvalidation(
     # end
 
     bestmodels = []
+
+    progress = 0
+    step = floor(Int64, 50 / k)
+    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
 
     for obs in LOOCV(k)
         dataset = collect(Iterators.flatten(folds[obs]))
@@ -107,7 +113,11 @@ function kfoldcrossvalidation(
                 :datanames => backup.results[1].datanames,
             ),
         )
+        progress = progress + step
+        ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
     end
+
+    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 50))
 
     datanames = unique(Iterators.flatten(model[:datanames] for model in bestmodels))
 
@@ -145,6 +155,7 @@ function kfoldcrossvalidation(
     previousresult = ModelSelection.addresult!(previousresult, result)
 
     addextras(previousresult, result)
+    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 100))
 
     return previousresult
 end

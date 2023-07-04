@@ -25,9 +25,9 @@ end
 """
 Returns if preliminary selection was selected by the user.
 # Arguments
-- `preliminaryselection::Union{Vector{Symbol}, Nothing}`: the preliminary selection option.
+- `preliminaryselection::Union{Symbol, Nothing}`: the preliminary selection option.
 """
-function preliminaryselection_enabled(preliminaryselection::Union{Vector{Symbol},Nothing})
+function preliminaryselection_enabled(preliminaryselection::Union{Symbol,Nothing})
     return preliminaryselection !== nothing
 end
 

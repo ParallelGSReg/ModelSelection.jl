@@ -49,6 +49,7 @@ function ols(
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
+    notify = nothing,
 )
     return ols!(
         ModelSelection.copy_modelselectiondata(data),
@@ -58,6 +59,7 @@ function ols(
         modelavg = modelavg,
         residualtest = residualtest,
         orderresults = orderresults,
+        notify = notify ,
     )
 end
 
@@ -112,7 +114,9 @@ function ols!(
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
+    notify = nothing
 )
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 0))
     validate_criteria(criteria, AVAILABLE_OLS_CRITERIA)
     result = create_result(
         data,
@@ -123,7 +127,7 @@ function ols!(
         orderresults,
         ttest = ttest,
     )
-    ols_execute!(data, result)
+    ols_execute!(data, result, notify=notify)
     ModelSelection.addresult!(data, result)
     data = addextras!(data, result)
     return data
@@ -155,7 +159,9 @@ explanatory variables in the given `ModelSelectionData`. This function mutates t
 ols_execute!(model_selection_data, all_subset_regression_result)
 ```
 """
-function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult)
+function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult; notify = nothing)
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 5))
+
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
@@ -174,6 +180,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     result_data =
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 25))
     if nprocs() == nworkers()
         for order = 1:num_operations
             ols_execute_row!(
@@ -289,7 +296,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 ) ./ std(result.data[:, datanames_index[criteria]])
             )
     end
-
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 75))
     if result.modelavg
         delta =
             maximum(result.data[:, datanames_index[:order]]) .-
@@ -352,6 +359,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     result.bestresult_data[datanames_index[:nobs]] =
         Int64(round(result.bestresult_data[datanames_index[:nobs]]))
     result.nobs = result.bestresult_data[datanames_index[:nobs]]
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 100))
     return result
 end
 

@@ -6,6 +6,7 @@ function featureextraction(
     fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return featureextraction!(
         ModelSelection.copy_modelselectiondata(data),
@@ -15,6 +16,7 @@ function featureextraction(
         fe_lag = fe_lag,
         interaction = interaction,
         removemissings = removemissings,
+        notify = notify ,
     )
 end
 
@@ -26,6 +28,7 @@ function featureextraction!(
     fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     data = execute!(
         data,
@@ -35,6 +38,7 @@ function featureextraction!(
         fe_lag = fe_lag,
         interaction = interaction,
         removemissings = removemissings,
+        notify = notify ,
     )
 
     data = addextras(data, fe_sqr, fe_log, fe_inv, fe_lag, interaction, removemissings)
@@ -50,7 +54,9 @@ function execute!(
     fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
     interaction::Union{Nothing,Array,Dict} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
+    ModelSelection.notification(notify, "Performing Feature extraction", Dict(:progress => 0))
     if data.intercept
         ModelSelection.remove_intercept!(data)
     end
@@ -87,6 +93,6 @@ function execute!(
     end
 
     data = ModelSelection.convert_data!(data)
-
+    ModelSelection.notification(notify, "Performing Feature extraction", Dict(:progress => 100))
     return data
 end

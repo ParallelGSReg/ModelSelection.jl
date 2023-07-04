@@ -34,7 +34,7 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
-    notify = NOTIFY_DEFAULT,
+    notify = nothing,
 )
     gsr(
         estimator,
@@ -104,12 +104,10 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
-    notify = NOTIFY_DEFAULT,
+    notify = nothing,
 )
     removemissings = fe_lag === nothing
 
-    # TODO: Move notification to every module
-    notification(notify, "Processing parameters")
     data = Preprocessing.input(
         equation,
         data = data,
@@ -122,11 +120,10 @@ function gsr(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 
     if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
-        # TODO: Move notification to every module
-        notification(notify, "Performing feature extraction")
         data = FeatureExtraction.featureextraction!(
             data,
             fe_sqr = fe_sqr,
@@ -135,15 +132,14 @@ function gsr(
             fe_inv = fe_inv,
             interaction = interaction,
             removemissings = true,
+            notify = notify ,
         )
     end
 
     original_data = copy_modelselectiondata(data)
 
     if preliminaryselection_enabled(preliminaryselection)
-        # TODO: Move notification to every module
-        notification(notify, "Performing preliminary selection")
-        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
+        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify )
         original_data.extras = data.extras
     end
 
@@ -157,17 +153,43 @@ function gsr(
         modelavg = modelavg,
         residualtest = residualtest,
         orderresults = orderresults,
+        notify = notify ,
     )
 
     original_data.extras = data.extras
 
     if crossvalidation_enabled(kfoldcrossvalidation)
-        # TODO: Move notification to every module
-        notification(notify, "Performing cross validation")
-        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
+        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare, notify = notify)
     end
 
     data.original_data = original_data
+
+    data.options[:estimator] = estimator
+    data.options[:equation] = equation
+    data.options[:datanames] = datanames
+    data.options[:method] = method
+    data.options[:intercept] = intercept
+    data.options[:panel] = panel
+    data.options[:time] = time
+    data.options[:seasonaladjustment] = seasonaladjustment
+    data.options[:removeoutliers] = removeoutliers
+    data.options[:fe_sqr] = fe_sqr
+    data.options[:fe_log] = fe_log
+    data.options[:fe_inv] = fe_inv
+    data.options[:fe_lag] = fe_lag
+    data.options[:interaction] = interaction
+    data.options[:preliminaryselection] = preliminaryselection
+    data.options[:fixedvariables] = fixedvariables
+    data.options[:outsample] = outsample
+    data.options[:criteria] = criteria
+    data.options[:ttest] = ttest
+    data.options[:ztest] = ztest
+    data.options[:modelavg] = modelavg
+    data.options[:residualtest] = residualtest
+    data.options[:orderresults] = orderresults
+    data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
+    data.options[:numfolds] = numfolds
+    data.options[:testsetshare] = testsetshare
 
     return data
 end

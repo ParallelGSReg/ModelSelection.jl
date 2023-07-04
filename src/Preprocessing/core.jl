@@ -12,6 +12,7 @@ Processes the input data based in a multiformat string equation and optional dat
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::String;
@@ -33,6 +34,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation,
@@ -46,6 +48,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -62,6 +65,7 @@ Processes the input data based in a the string array equation and optional data 
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Array{String};
@@ -83,6 +87,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation,
@@ -96,6 +101,7 @@ function input(
         removeoutliers = removeoutliers,
         seasonaladjustment = seasonaladjustment,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -112,6 +118,7 @@ Processes the input data based in a the string vector equation and optional data
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Vector{String};
@@ -133,6 +140,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation,
@@ -146,6 +154,7 @@ function input(
         removeoutliers = removeoutliers,
         seasonaladjustment = seasonaladjustment,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -163,6 +172,7 @@ Processes the input data based in a symbol array equation and optional data and 
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Array{Symbol};
@@ -184,6 +194,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation,
@@ -197,6 +208,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -214,6 +226,7 @@ Processes the input data based in a symbol vector equation and optional data and
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Vector{Symbol};
@@ -235,6 +248,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation,
@@ -248,6 +262,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -265,6 +280,7 @@ Processes the input data based in a multiformat string equation and returns proc
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::String,
@@ -286,6 +302,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     return input(
         equation_str_to_strarr!(equation),
@@ -299,6 +316,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -316,6 +334,7 @@ Processes the input data based in a multiformat string array equation and return
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Array{String},
@@ -337,6 +356,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     equation = vec(equation)
     equation = Vector{String}(equation)
@@ -352,6 +372,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -369,6 +390,7 @@ Processes the input data based in a multiformat string vector equation and retur
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Vector{String},
@@ -390,6 +412,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     if datanames !== nothing
         datanames = Vector{String}(vec(datanames))
@@ -412,6 +435,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -429,6 +453,7 @@ Processes the input data based in a symbol array equation and returns processed 
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Array{Symbol},
@@ -450,6 +475,7 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
     equation = vec(equation)
     equation = Vector{Symbol}(equation)
@@ -465,6 +491,7 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 end
 
@@ -482,6 +509,7 @@ Processes the input data based in a symbol vector equation and returns processed
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function input(
     equation::Vector{Symbol},
@@ -503,7 +531,9 @@ function input(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
+    ModelSelection.notification(notify, "Processing parameters", Dict(:progress => 10))
     method = Symbol(lowercase(string(method)))
     if method == :precise
         datatype = Float64
@@ -579,7 +609,6 @@ function input(
             throw(ArgumentError(msg))
         end
     end
-
     modelselection_data, method, seasonaladjustment, removeoutliers = execute(
         equation,
         data,
@@ -592,11 +621,12 @@ function input(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
 
     modelselection_data =
         addextras(modelselection_data, method, seasonaladjustment, removeoutliers)
-
+    ModelSelection.notification(notify, "Processing parameters", Dict(:progress => 100))
     return modelselection_data
 end
 
@@ -614,6 +644,7 @@ Processes all the inputs parameters and returns processed data.
  - `seasonaladjustment::Union{Dict, Array, Nothing}`: TODO add description.
  - `removeoutliers::Bool`: TODO add description.
  - `removemissings::Bool`: TODO add description.
+ - `notification`: Notifies about current status of the operation.
 """
 function execute(
     equation::Vector{Symbol},
@@ -632,7 +663,9 @@ function execute(
     seasonaladjustment::Union{Dict,Array,Nothing} = SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = nothing,
 )
+    ModelSelection.notification(notify, "Processing parameters", Dict(:progress => 20))
     datatype = method == :precise ? Float64 : Float32
     temp_equation = equation
 
@@ -643,7 +676,7 @@ function execute(
             end
         end
     end
-
+    
     if panel !== nothing &&
        ModelSelection.get_column_index(panel, temp_equation) === nothing
         temp_equation = vcat(temp_equation, panel)
@@ -750,5 +783,6 @@ function execute(
         removemissings,
         nobs,
     )
+    
     return modelselection_data, method, seasonaladjustment, removeoutliers
 end

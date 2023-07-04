@@ -43,7 +43,7 @@ mutable struct ModelSelectionData
     method::Symbol
     removemissings::Bool
     nobs::Int64
-    options::Array{Any}
+    options::Dict{Symbol,Any}
     extras::Dict{Symbol,Any}
     results::Array{Any}
     original_data::Union{ModelSelectionData,Nothing}
@@ -95,7 +95,7 @@ mutable struct ModelSelectionData
         nobs::Int64,
     )
         extras = Dict()
-        options = Array{Any}(undef, 0)
+        options = Dict{Symbol,Any}()
         results = Array{Any}(undef, 0)
         original_data = nothing
         new(
