@@ -1,4 +1,4 @@
-function notification(notify::Any, message::String, data::Any = nothing)
+function notification(notify, message::String, data::Union{Any,Nothing} = nothing)
     if notify === nothing
         return
     end

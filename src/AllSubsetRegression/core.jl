@@ -59,6 +59,7 @@ function all_subset_regression(
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
+    notify = nothing
 )
     validate_test(ttest = ttest, ztest = ztest)
 
@@ -71,6 +72,7 @@ function all_subset_regression(
             modelavg = modelavg,
             residualtest = residualtest,
             orderresults = orderresults,
+            notify = notify ,
         )
     elseif estimator == :logit
         AllSubsetRegression.logit!(
@@ -81,6 +83,7 @@ function all_subset_regression(
             modelavg = modelavg,
             residualtest = residualtest,
             orderresults = orderresults,
+            notify = notify ,
         )
     else
         throw(ArgumentError(INVALID_ESTIMATOR))

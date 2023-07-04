@@ -34,7 +34,7 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
-    notify = NOTIFY_DEFAULT,
+    notify = nothing,
 )
     gsr(
         estimator,
@@ -104,12 +104,10 @@ function gsr(
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
-    notify = NOTIFY_DEFAULT,
+    notify = nothing,
 )
     removemissings = fe_lag === nothing
 
-    # TODO: Move notification to every module
-    notification(notify, "Processing parameters")
     data = Preprocessing.input(
         equation,
         data = data,
@@ -122,7 +120,49 @@ function gsr(
         seasonaladjustment = seasonaladjustment,
         removeoutliers = removeoutliers,
         removemissings = removemissings,
+        notify = notify,
     )
+
+    if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
+        data = FeatureExtraction.featureextraction!(
+            data,
+            fe_sqr = fe_sqr,
+            fe_lag = fe_lag,
+            fe_log = fe_log,
+            fe_inv = fe_inv,
+            interaction = interaction,
+            removemissings = true,
+            notify = notify ,
+        )
+    end
+
+    original_data = copy_modelselectiondata(data)
+
+    if preliminaryselection_enabled(preliminaryselection)
+        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify )
+        original_data.extras = data.extras
+    end
+
+    AllSubsetRegression.all_subset_regression(
+        estimator,
+        data,
+        outsample = outsample,
+        criteria = criteria,
+        ttest = ttest,
+        ztest = ztest,
+        modelavg = modelavg,
+        residualtest = residualtest,
+        orderresults = orderresults,
+        notify = notify ,
+    )
+
+    original_data.extras = data.extras
+
+    if crossvalidation_enabled(kfoldcrossvalidation)
+        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare, notify = notify)
+    end
+
+    data.original_data = original_data
 
     data.options[:estimator] = estimator
     data.options[:equation] = equation
@@ -150,51 +190,6 @@ function gsr(
     data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
     data.options[:numfolds] = numfolds
     data.options[:testsetshare] = testsetshare
-
-    if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
-        # TODO: Move notification to every module
-        notification(notify, "Performing feature extraction")
-        data = FeatureExtraction.featureextraction!(
-            data,
-            fe_sqr = fe_sqr,
-            fe_lag = fe_lag,
-            fe_log = fe_log,
-            fe_inv = fe_inv,
-            interaction = interaction,
-            removemissings = true,
-        )
-    end
-
-    original_data = copy_modelselectiondata(data)
-
-    if preliminaryselection_enabled(preliminaryselection)
-        # TODO: Move notification to every module
-        notification(notify, "Performing preliminary selection")
-        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data)
-        original_data.extras = data.extras
-    end
-
-    AllSubsetRegression.all_subset_regression(
-        estimator,
-        data,
-        outsample = outsample,
-        criteria = criteria,
-        ttest = ttest,
-        ztest = ztest,
-        modelavg = modelavg,
-        residualtest = residualtest,
-        orderresults = orderresults,
-    )
-
-    original_data.extras = data.extras
-
-    if crossvalidation_enabled(kfoldcrossvalidation)
-        # TODO: Move notification to every module
-        notification(notify, "Performing cross validation")
-        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare)
-    end
-
-    data.original_data = original_data
 
     return data
 end

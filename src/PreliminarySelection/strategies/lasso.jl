@@ -1,24 +1,25 @@
 # TODO: Merge _lasso and lasso
-function _lasso(data::ModelSelection.ModelSelectionData)
+function _lasso(data::ModelSelection.ModelSelectionData; notify = nothing)
     return _lasso!(data)
 end
 
 # TODO: Merge _lasso! and lasso!
-function _lasso!(data::ModelSelection.ModelSelectionData)
-    res = lasso!(data)
+function _lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
+    res = lasso!(data, notify=notify)
     res[1].extras[:lasso] = Dict()
     res[1].extras[:lasso][:betas] = res[2]
 
     return res[1]
 end
 
-function lasso(data::ModelSelection.ModelSelectionData)
-    lasso!(ModelSelection.copy_modelselectiondata(data))
+function lasso(data::ModelSelection.ModelSelectionData; notify = nothing)
+    lasso!(ModelSelection.copy_modelselectiondata(data), notify=notify)
 end
 
-function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true)
+function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true, notify = nothing)
+    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 0))
     betas, lambda = lassoselection(data)
-
+    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 30))
     if isnothing(betas)
         return data, map(b -> true, data.expvars)
     end
@@ -40,7 +41,7 @@ function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true)
     if (addextrasflag)
         data = addextras(data, lassonumvars, betas, lambda, vars)
     end
-
+    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 100))
     return data, vars
 end
 

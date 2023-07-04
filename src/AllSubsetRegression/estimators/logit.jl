@@ -49,6 +49,7 @@ function logit(
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
+    notify = nothing,
 )
     return logit!(
         ModelSelection.copy_modelselectiondata(data),
@@ -58,6 +59,7 @@ function logit(
         modelavg = modelavg,
         residualtest = residualtest,
         orderresults = orderresults,
+        notify = notify ,
     )
 end
 
@@ -110,7 +112,9 @@ function logit!(
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
+    notify = nothing,
 )
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
     validate_criteria(criteria, AVAILABLE_LOGIT_CRITERIA)
     result = create_result(
         data,
@@ -121,7 +125,7 @@ function logit!(
         orderresults,
         ztest = ztest,
     )
-    logit_execute!(data, result)
+    logit_execute!(data, result, notify = notify )
     ModelSelection.addresult!(data, result)
     data = addextras!(data, result)
     return data
@@ -153,7 +157,9 @@ explanatory variables in the given `ModelSelectionData`. This function mutates t
 logit_execute!(model_selection_data, all_subset_regression_result)
 ```
 """
-function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult)
+function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult; notify = nothing)
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 5))
+
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
@@ -189,6 +195,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         fullexpvars_without_outsample_subset =
             hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 15))
 
     gum_model = GLM.fit(
         GeneralizedLinearModel,
@@ -200,6 +207,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     )
     start_coef = coeftable(gum_model).cols[1]
 
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 25))
     if nprocs() == nworkers()
         for order = 1:num_operations
             # TODO: Split in multiple lines
@@ -287,6 +295,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             end
         end
     end
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 75))
 
     result.data = Array(result_data)
 
@@ -351,6 +360,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     end
 
     result.nobs = result.bestresult_data[datanames_index[:nobs]]
+    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 100))
 
     return result
 end
