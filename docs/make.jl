@@ -20,7 +20,7 @@ makedocs(
     source = "src",
     build   = "build",
     clean   = true,
-    modules = [ModelSelection, Preprocessing],
+    modules = [ModelSelection, Preprocessing, FeatureExtraction],
     sitename = "ModelSelection.jl",
     pages = [
         "Home" => "index.md",
