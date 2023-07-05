@@ -8,13 +8,6 @@ on:
       - 'src/**'
       - 'docs/**'
       - 'Project.toml'
-  pull_request:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - 'docs/**'
-      - 'Project.toml'
 
 jobs:
   docs:
