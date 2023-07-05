@@ -1,3 +1,5 @@
+ - A better description of the package in Readme and Documentation
+ - Features in Readme and Documentation
  - Add fixed variables in logit
  - Add panel as a fixed var
  - Issue with OLS

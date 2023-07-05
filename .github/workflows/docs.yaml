@@ -4,13 +4,7 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'src/**'
-      - 'docs/**'
-      - 'Project.toml'
-  pull_request:
-    branches:
-      - main
+      - development
     paths:
       - 'src/**'
       - 'docs/**'
