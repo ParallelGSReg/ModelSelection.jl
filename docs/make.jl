@@ -1,5 +1,4 @@
 using Documenter, DocumenterTools
-using DataFrames
 using ModelSelection
 
 # The DOCSARGS environment variable can be used to pass additional arguments to make.jl.
