@@ -1,6 +1,6 @@
 """
 Copies ModelSelectionData to new ModelSelectionData.
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: the ModelSelectionData to be copied.
 """
 function copy_modelselectiondata(data::ModelSelectionData)

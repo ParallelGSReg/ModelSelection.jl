@@ -1,17 +1,18 @@
 """
 Add values to extras
 """
-function addextras(data, lassonumvars, betas, lambda, vars)
-    data.extras[ModelSelection.generate_extra_key(
-        PRELIMINARYSELECTION_EXTRAKEY,
-        data.extras,
-    )] = Dict(
+function addextras!(data, lassonumvars, betas, lambda, vars)
+    extras = Dict(
         :preliminaryselection => :lasso,
-        :lassonumvars => lassonumvars,
-        :lassobetas => betas,
-        :lassolambda => lambda,
+        :numvars => lassonumvars,
+        :betas => betas,
+        :lambda => lambda,
         :nobs => data.nobs,
         :vars => vars,
     )
+    data.extras[ModelSelection.generate_extra_key(
+        PRELIMINARYSELECTION_EXTRAKEY,
+        data.extras,
+    )] = extras
     return data
 end

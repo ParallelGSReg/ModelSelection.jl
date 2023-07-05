@@ -1,6 +1,6 @@
 """
 Converts variables data to the appropriate data type.
-# Arguments
+# Parameters
 - `datatype::Type`: datatype to convert.
 - `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}, Nothing}`: variables data to be converted.
 """
@@ -34,7 +34,7 @@ end
 
 """
 Converts raw data to the appropriate data type.
-# Arguments
+# Parameters
 - `datatype::Type`: the datatype.
 - `depvar_data::Union{Vector{Float32}, Vector{Float64}, Vector{Union{Float32, Missing}}, Vector{Union{Float64, Missing}}}`: dependent variable data.
 - `expvars_data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32, Missing}}, Array{Union{Float64, Missing}}}`: explanatory variables data.
@@ -89,7 +89,7 @@ end
 
 """
 Converts ModelSelectionData data to the appropriate data type.
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: the data to be converted.
 """
 function convert_data!(data::ModelSelectionData)

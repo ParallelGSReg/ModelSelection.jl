@@ -1,30 +1,20 @@
-# TODO: Merge _lasso and lasso
-function _lasso(data::ModelSelection.ModelSelectionData; notify = nothing)
-    return _lasso!(data)
-end
-
 # TODO: Merge _lasso! and lasso!
 function _lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
     res = lasso!(data, notify=notify)
-    res[1].extras[:lasso] = Dict()
-    res[1].extras[:lasso][:betas] = res[2]
+
 
     return res[1]
 end
 
-function lasso(data::ModelSelection.ModelSelectionData; notify = nothing)
-    lasso!(ModelSelection.copy_modelselectiondata(data), notify=notify)
-end
-
-function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true, notify = nothing)
+function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
     ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 0))
     betas, lambda = lassoselection(data)
     ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 30))
+    
     if isnothing(betas)
-        return data, map(b -> true, data.expvars)
+        data = addextras!(data, nothing, map(b -> true, data.expvars), nothing, nothing)
+        return data
     end
-
-    data.extras[:lasso_betas] = betas
 
     vars = map(b -> b != 0, betas)
     lassonumvars = size(filter(b -> b != 0, betas), 1)
@@ -38,16 +28,15 @@ function lasso!(data::ModelSelection.ModelSelectionData; addextrasflag = true, n
     data.expvars = data.expvars[vars]
     data.expvars_data = data.expvars_data[:, vars]
 
-    if (addextrasflag)
-        data = addextras(data, lassonumvars, betas, lambda, vars)
-    end
+    data = addextras!(data, lassonumvars, betas, lambda, vars)
     ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 100))
-    return data, vars
+
+    return data
 end
 
 function computablevars(nvars::Int)
     return 20
-    min(Int(floor(log(2, Sys.total_memory() / 2^30) + 21)), nvars)
+    # FIXME: min(Int(floor(log(2, Sys.total_memory() / 2^30) + 21)), nvars)
 end
 
 function lassoselection(data)

@@ -2,7 +2,7 @@ include("estimators/ols.jl")
 include("estimators/logit.jl")
 
 """
-    all_subset_regression(
+    all_subset_regression!(
         estimator::Symbol,
         data::ModelSelectionData;
         outsample::Union{Int,Array,Nothing} = OUTSAMPLE_DEFAULT,
@@ -17,7 +17,7 @@ include("estimators/logit.jl")
 Perform all-subset regression analysis using the specified estimator and options on the
 provided `ModelSelectionData`.
 
-# Arguments
+# Parameters
 - `estimator::Symbol`: The estimator to be used for regression analysis. Supported values
    are `:ols` for Ordinary Least Squares and `:logit` for logistic regression.
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
@@ -46,14 +46,14 @@ provided `ModelSelectionData`.
 
 # Example
 ```julia
-result = all_subset_regression(:ols, model_selection_data)
+result = all_subset_regression!(:ols, model_selection_data)
 ```
 """
-function all_subset_regression(
+function all_subset_regression!(
     estimator::Symbol,
     data::ModelSelectionData;
     outsample::Union{Int,Array,Nothing} = OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = nothing,
     ttest::Bool = ZTEST_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
@@ -99,7 +99,7 @@ end
 Generate a human-readable string representation of the best model results and model
 averaging results (if applicable) from the `AllSubsetRegressionResult` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 - `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
@@ -185,7 +185,7 @@ end
 Generate a dict representation of the best model results and model
 averaging results (if applicable) from the `AllSubsetRegressionResult` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 - `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the

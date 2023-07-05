@@ -13,7 +13,7 @@
 Create an `AllSubsetRegressionResult` object containing the results of the model selection
 process.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The data object containing information about the model
    selection process.
 - `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
@@ -99,7 +99,7 @@ end
 Create a vector of data names (Symbols) representing the output of the model selection
 process.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The data object containing information about the model
    selection process.
 - `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
@@ -199,7 +199,7 @@ end
 
 Retrieve the in-sample data subsets from the provided data.
 
-# Arguments
+# Parameters
 - `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The data for
    the dependent variable.
 - `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`:  The data for
@@ -280,7 +280,7 @@ end
 
 Retrieve the out-of-sample data subsets from the provided data.
 
-# Arguments
+# Parameters
 - `depvar_data::Union{SharedVector{<:Union{Float64, Float32, Nothing}}}`: The data for the
    dependent variable.
 - `expvars_data::Union{SharedMatrix{<:Union{Float64, Float32, Nothing}}}`: The explanatory
@@ -355,7 +355,7 @@ end
 
 Sort the rows of a given matrix `B` based on the specified columns `cols`.
 
-# Arguments
+# Parameters
 - `B::AbstractMatrix`: The input matrix to be sorted.
 - `cols::Array`: An array containing the indices of the columns by which to sort the rows of
    the matrix.
@@ -403,14 +403,14 @@ function sortrows(B::AbstractMatrix, cols::Array; kws...)
 end
 
 """
-    addextras(
+    addextras!(
         data::ModelSelectionData,
         result::ModelSelectionResult,
     ) -> ModelSelectionData
 
 Add extra information from a `ModelSelectionResult` to the `ModelSelectionData` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object to which the extra
    information will be added.
 - `result::ModelSelectionResult`: The `ModelSelectionResult` object containing the extra
@@ -463,7 +463,7 @@ end
 Check if the specified `criteria` are valid by comparing them to a list of
 `available_criteria`.
 
-# Arguments
+# Parameters
 - `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
    and selection.
 - `available_criteria::Vector{Symbol}`: A vector of symbols representing the available
@@ -487,7 +487,7 @@ end
 
 Validate the given `criteria` against a list of `available_criteria`.
 
-# Arguments
+# Parameters
 - `criteria`: A vector of symbols representing the criteria to be validated.
 - `available_criteria`: A vector of symbols representing the available criteria.
 
@@ -517,7 +517,7 @@ end
 
 Validates the test options specified by the user, ensuring that both t-test and z-test options are not simultaneously set to true.
 
-# Arguments
+# Parameters
 - `ttest::Union{Bool, Nothing}`: Flag to indicate whether the t-test should be used (default: `nothing`)
 - `ztest::Union{Bool, Nothing}`: Flag to indicate whether the z-test should be used (default: `nothing`)
 

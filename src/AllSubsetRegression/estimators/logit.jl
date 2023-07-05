@@ -13,7 +13,7 @@ Perform Logistic Regression (logit) model selection on the on the provided
 `ModelSelectionData` using the specified options and returns a new ModelSelectionData object
 containing the results.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
 in the model selection process.
 
@@ -78,7 +78,7 @@ Perform Logistic Regression (logit) regression analysis on the provided
 `ModelSelectionData` using the specified options. This function mutates the input
 `ModelSelectionData` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used in the model selection process.
 
 # Keyword Arguments
@@ -115,7 +115,7 @@ function logit!(
     notify = nothing,
 )
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
-    validate_criteria(criteria, AVAILABLE_LOGIT_CRITERIA)
+    validate_criteria(criteria, LOGIT_CRITERIA_AVAILABLE)
     result = create_result(
         data,
         outsample,
@@ -141,7 +141,7 @@ Perform logistic regression model selection analysis for all possible subsets of
 explanatory variables in the given `ModelSelectionData`. This function mutates the input
 `AllSubsetRegressionResult` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 - `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the
@@ -393,7 +393,7 @@ Execute a single job in the logit procedure. This function is called by the main
 `logit_execute!` function to parallelize the model estimation across multiple workers.
 This function is intended for use with multi-core parallel processing.
 
-# Arguments
+# Parameters
 - `num_job::Int64`: The unique identifier for the current job.
 - `num_jobs::Int64`: The total number of jobs to be executed.
 - `ops_per_worker::Int64`: The number of operations per worker.
@@ -527,7 +527,7 @@ Perform OLS estimation for a specific order (i.e., a particular combination of i
 variables) and store the results in a pre-allocated SharedArray. This implementation
 supports out-of-sample testing, z-tests, and residual tests.
 
-# Arguments
+# Parameters
 - `order::Int64`: The order of the model (i.e., the specific combination of independent
    variables to be considered).
 - `depvar::Symbol`: The dependent variable in the regression model.

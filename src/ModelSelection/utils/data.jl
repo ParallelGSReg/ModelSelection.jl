@@ -1,6 +1,6 @@
 """
 Returns if a vector is inside another vector.
-# Arguments
+# Parameters
 - `sub_vector::Vector`: vector to match inside another vector.
 - `vector::Vector`: vector that could contains the other vector.
 """
@@ -16,7 +16,7 @@ end
 
 """
 Generate extra name adding a posfix to a name is not exists.
-# Arguments
+# Parameters
 - `extra_name::Symbol`: the name to be added a posfix.
 - `extras::Dict{Symbol,Any}`: the dictionary of extras.
 """
@@ -33,7 +33,7 @@ end
 
 """
 Add ModelSelectionResult to a ModelSelectionData.
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: the ModelSelectionData to be added the result.
 - `result::ModelSelectionResult`: the ModelSelectionResult to be added.
 """
@@ -46,7 +46,7 @@ end
 """
 Creates a dictionary that maps variable names to their corresponding column indices in the result_data array.
 
-# Arguments
+# Parameters
 - `datanames::Vector{Symbol}`: the datanames.
 """
 function create_datanames_index(datanames::Vector{Symbol})
@@ -60,7 +60,7 @@ end
 
 """
 Add intercept to ModelSelectionData expvars and expvars_data.
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: the ModelSelectionData to be added the intercept.
 """
 function add_intercept!(data::ModelSelectionData)
@@ -72,7 +72,7 @@ end
 
 """
 Remove intercept from ModelSelectionData expvars and expvars_data.
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: the ModelSelectionData to be removed the intercept.
 """
 function remove_intercept!(data::ModelSelectionData)
@@ -86,7 +86,7 @@ end
 
 """
 Gets the position of a name in names vector.
-# Arguments
+# Parameters
 - `name::Union{String, Symbol}`: the name to find.
 - `names::Union{Vector{String}, Vector{Symbol}}`: an array of stings and/or symbols.
 """
@@ -103,7 +103,7 @@ end
 
 """
 Returns selected appropiate explanatory variables for each iteration as col position.
-# Arguments
+# Parameters
 - `order::Int64`: the order of the model.
 - `datanames::Vector{Symbol}`: the datanames.
 - `intercept::Bool`: if the model has intercept.
@@ -126,7 +126,7 @@ end
 
 """
 Returns selected appropiate explanatory variables for each iteration as varnames.
-# Arguments
+# Parameters
 - `order::Int64`: the order of the model.
 - `datanames::Vector{Symbol}`: the datanames.
 - `intercept::Bool`: if the model has intercept.

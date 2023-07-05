@@ -1,6 +1,6 @@
 """
 Saves a jld2 file with ModelSelectionData data.
-# Arguments
+# Parameters
 - `filename::String``: output filename.
 - `data::ModelSelection.ModelSelectionData`: the model selection data.
 """
@@ -11,7 +11,7 @@ end
 
 """
 Loads a jld2 file to ModelSelectionData data variable.
-# Arguments
+# Parameters
 - `filename::String``: input filename.
 """
 function load(filename::String)

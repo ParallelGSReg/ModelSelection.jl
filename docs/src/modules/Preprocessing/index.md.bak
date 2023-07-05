@@ -1,0 +1,86 @@
+TODO
+# Preprocessing
+
+This module process the data based on the various inputs that the package has.
+
+## Contents
+
+```@contents
+Pages = ["index.md"]
+```
+
+## Index
+
+```@index
+Pages = ["index.md"]
+```
+
+## Usage
+
+```julia
+using CSV, DataFrames
+using ModelSelection: Preprocessing
+
+data = CSV.read("data.csv", DataFrame)
+
+modelselection_data = input(equation, data)
+```
+
+## Parameters
+
+### `equation::String`
+The equation represents the relationship between the dependent variable and one or more independent variables. It is used to model and predict the value of the dependent variable based on the values of the independent variables.
+
+```julia
+# Stata-like string
+equation = "y x1 x2 x3"
+
+# R-like string
+equation = "y ~ x1 + x2 + x3"
+
+# Strings separated with comma
+equation = "y,x1,x2,x3"
+
+# Vector of strings
+equation = ["y", "x1", "x2", "x3"]
+
+# Vector of symbols
+equation = [:y, :x1, :x2, :x3]
+
+# Using wildcards
+equation = "y *"
+equation = "y x*"
+equation = "y x1 z*"
+equation = "y ~ x*"
+equation = "y ~ ."
+```
+
+### `data::::Union{Array{Float64}, Array{Float32}, Array{Union{Float64,Missing}}, Array{Union{Float32,Missing}}, Tuple, DataFrame}`
+The "data" refers to the set of observations or samples used to estimate the coefficients of the regression equation and make predictions. It consists of pairs of values for the dependent variable and the independent variables.
+
+```julia
+# As an array
+data = [1.0 2.0 3.0; 4.0 5.0 6.9]
+
+# As a tuple
+data = ([1.0 2.0 3.0; 4.0 5.0 6.9], [:x1, :x2, :x3])
+
+# As a DataFrame
+data = DataFrame(x1 = [1.0 2.0 3.0], x2 = [4.0 5.0 6.0])
+```
+
+### `method::Symbol`
+Defines the datatype of the data, to be faster and lightweight or precise and heavyweight.
+If :fast is selected, the data is converted to a lightweight data type (Float32).
+If :precise is selected, the data is converted to a precise data type (Float64).
+
+```julia
+# Lightweight and faster
+method = :fast
+
+# Heavyweight and precise
+method = :precise
+```
+
+!!! warning
+    TODO: missing parameters.

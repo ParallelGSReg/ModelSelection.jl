@@ -2,107 +2,36 @@ function gsr(
     estimator::Symbol,
     equation::Union{String,Array{String},Array{Symbol}},
     data::Union{
-        Array{Float64},
         Array{Float32},
+        Array{Float64},
         Array{Union{Float32,Missing}},
         Array{Union{Float64,Missing}},
         Tuple,
         DataFrame,
-        Nothing,
     };
-    datanames::Union{Array,Array{Symbol,1},Nothing} = nothing,
-    method::Union{Symbol,String} = Preprocessing.METHOD_DEFAULT,
+    datanames::Union{Array{Symbol},Nothing} = nothing,
+    method::Symbol = Preprocessing.METHOD_DEFAULT,
     intercept::Bool = Preprocessing.INTERCEPT_DEFAULT,
-    panel::Union{Symbol,String,Nothing} = Preprocessing.PANEL_DEFAULT,
-    time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
-    seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
+    panel::Union{Symbol,Nothing} = Preprocessing.PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = Preprocessing.TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
     removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
-    interaction::Union{Nothing,Array} = nothing,
-    preliminaryselection::Union{Nothing,Symbol} = nothing,
-    fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
-    outsample::Union{Nothing,Int,Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = AllSubsetRegression.CRITERIA_DEFAULT,
+    fe_sqr::Union{Symbol,Vector{Symbol},Nothing} = nothing,
+    fe_log::Union{Symbol,Vector{Symbol},Nothing} = nothing,
+    fe_inv::Union{Symbol,Vector{Symbol},Nothing} = nothing,
+    fe_lag::Union{Dict{Symbol,Int64},Nothing} = nothing,
+    interaction::Union{Vector{Tuple{Symbol,Symbol}},Nothing} = nothing,
+    preliminaryselection::Union{Symbol,Nothing} = nothing,
+    fixedvariables::Union{Symbol,Vector{Symbol},Nothing} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
+    outsample::Union{Int64,Array{Int64},Nothing} = AllSubsetRegression.OUTSAMPLE_DEFAULT, # NOTE: Array posición de la observación
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = nothing,
     ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,
     ztest::Bool = AllSubsetRegression.ZTEST_DEFAULT,
     modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
     residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
-    notify = nothing,
-)
-    gsr(
-        estimator,
-        equation,
-        data = data,
-        datanames = datanames,
-        method = method,
-        intercept = intercept,
-        panel = panel,
-        time = time,
-        seasonaladjustment = seasonaladjustment,
-        removeoutliers = removeoutliers,
-        fe_sqr = fe_sqr,
-        fe_log = fe_log,
-        fe_inv = fe_inv,
-        fe_lag = fe_lag,
-        interaction = interaction,
-        preliminaryselection = preliminaryselection,
-        fixedvariables = fixedvariables,
-        outsample = outsample,
-        criteria = criteria,
-        ttest = ttest,
-        ztest = ztest,
-        modelavg = modelavg,
-        residualtest = residualtest,
-        orderresults = orderresults,
-        kfoldcrossvalidation = kfoldcrossvalidation,
-        numfolds = numfolds,
-        testsetshare = testsetshare,
-        notify = notify,
-    )
-end
-
-function gsr(
-    estimator::Symbol,
-    equation::Union{String,Array{String},Array{Symbol}};
-    data::Union{
-        Array{Float64},
-        Array{Float32},
-        Array{Union{Float32,Missing}},
-        Array{Union{Float64,Missing}},
-        Tuple,
-        DataFrame,
-        Nothing,
-    },
-    datanames::Union{Array,Array{Symbol,1},Nothing} = nothing,
-    method::Union{Symbol,String} = Preprocessing.METHOD_DEFAULT,
-    intercept::Bool = Preprocessing.INTERCEPT_DEFAULT,
-    panel::Union{Symbol,String,Nothing} = Preprocessing.PANEL_DEFAULT,
-    time::Union{Symbol,String,Nothing} = Preprocessing.TIME_DEFAULT,
-    seasonaladjustment::Union{Dict,Array,Nothing} = Preprocessing.SEASONALADJUSTMENT_DEFAULT,
-    removeoutliers::Bool = Preprocessing.REMOVEOUTLIERS_DEFAULT,
-    fe_sqr::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_log::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_inv::Union{String,Symbol,Array{String},Array{Symbol},Nothing} = nothing,
-    fe_lag::Union{Array{Pair{Symbol,Int64}},Array{Pair{String,Int64}},Nothing} = nothing,
-    interaction::Union{Nothing,Array} = nothing,
-    preliminaryselection::Union{Nothing,Symbol} = nothing,
-    fixedvariables::Union{Nothing,Array} = AllSubsetRegression.FIXEDVARIABLES_DEFAULT,
-    outsample::Union{Nothing,Int,Array} = AllSubsetRegression.OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = AllSubsetRegression.CRITERIA_DEFAULT,
-    ttest::Bool = AllSubsetRegression.TTEST_DEFAULT,
-    ztest::Bool = AllSubsetRegression.ZTEST_DEFAULT,
-    modelavg::Bool = AllSubsetRegression.MODELAVG_DEFAULT,
-    residualtest::Bool = AllSubsetRegression.RESIDUALTEST_DEFAULT,
-    orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
-    kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
-    numfolds::Int = CrossValidation.NUMFOLDS_DEFAULT,
+    numfolds::Int64 = CrossValidation.NUMFOLDS_DEFAULT,
     testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
     notify = nothing,
 )
@@ -110,7 +39,7 @@ function gsr(
 
     data = Preprocessing.input(
         equation,
-        data = data,
+        data,
         datanames = datanames,
         method = method,
         intercept = intercept,
@@ -123,7 +52,7 @@ function gsr(
         notify = notify,
     )
 
-    if featureextraction_enabled(fe_sqr, fe_log, fe_inv, fe_lag, interaction)
+    if fe_sqr !== nothing || fe_log !== nothing || fe_inv !== nothing || fe_lag !== nothing || interaction !== nothing
         data = FeatureExtraction.featureextraction!(
             data,
             fe_sqr = fe_sqr,
@@ -132,18 +61,18 @@ function gsr(
             fe_inv = fe_inv,
             interaction = interaction,
             removemissings = true,
-            notify = notify ,
+            notify = notify,
         )
     end
 
     original_data = copy_modelselectiondata(data)
 
     if preliminaryselection_enabled(preliminaryselection)
-        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify )
+        data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify)
         original_data.extras = data.extras
     end
 
-    AllSubsetRegression.all_subset_regression(
+    AllSubsetRegression.all_subset_regression!(
         estimator,
         data,
         outsample = outsample,
