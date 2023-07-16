@@ -586,6 +586,8 @@ function ols_execute_row!(
     df_e = nobs - ncoef                   # degrees of freedom
     rmse = sqrt(sse / nobs)               # root mean squared error
     r2 = 1 - var(er) / var(depvar_subset) # model R-squared
+    r2adj = 1-(1-r2)*((nobs-1)/df_e)      # adjusted R-squared
+    F=(r2/(ncoef-1))/((1-r2)/df_e)        # F-statistic
 
     if ttest
         if method == PRECISE
@@ -686,6 +688,8 @@ function ols_execute_row!(
     result_data[order, datanames_index[:r2]] = datatype(r2)
     result_data[order, datanames_index[:rmse]] = datatype(rmse)
     result_data[order, datanames_index[:order]] = 0
+    result_data[order, datanames_index[:r2adj]] = datatype(r2adj)
+    result_data[order, datanames_index[:F]] = datatype(F)
 
     if :aic in criteria || :aicc in criteria
         aic =
@@ -722,27 +726,6 @@ function ols_execute_row!(
             result_data[order, datanames_index[:nobs]] * log(2π)
     end
 
-    if :r2adj in criteria || :r2adj in keys(datanames_index)
-        result_data[order, datanames_index[:r2adj]] =
-            1 -
-            (1 - result_data[order, datanames_index[:r2]]) * (
-                (result_data[order, datanames_index[:nobs]] - 1) / (
-                    result_data[order, datanames_index[:nobs]] -
-                    result_data[order, datanames_index[:ncoef]]
-                )
-            )
-    end
-
-    result_data[order, datanames_index[:F]] =
-        (
-            result_data[order, datanames_index[:r2]] /
-            (result_data[order, datanames_index[:ncoef]] - 1)
-        ) / (
-            (1 - result_data[order, datanames_index[:r2]]) / (
-                result_data[order, datanames_index[:nobs]] -
-                result_data[order, datanames_index[:ncoef]]
-            )
-        )
 
     if residualtest
         x = er
@@ -776,7 +759,7 @@ function ols_execute_row!(
         if time !== nothing
             e = er
             lag = 1
-            xmat = expvars_subset
+            xmat = fullexpvars_subset # debe incluir fixedvariables
 
             n = size(e, 1)
             elag = zeros(Float64, n, lag)
