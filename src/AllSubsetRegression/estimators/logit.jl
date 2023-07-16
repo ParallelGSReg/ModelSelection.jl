@@ -180,15 +180,12 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
-    ncoef_gum = size(expvars_data, 2)
-    depvar_without_outsample_subset,
-    expvars_without_outsample_subset,
-    fixedvariables_without_outsample_subset = get_insample_subset(
+    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
         result.outsample,
-        collect(1:ncoef_gum),
+        collect(1:size(expvars_data, 2)),
     )
     fullexpvars_without_outsample_subset = expvars_without_outsample_subset
     if fixedvariables_without_outsample_subset !== nothing
@@ -196,7 +193,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 15))
-
+    start_coef = coeftable(gum_model).cols[1]
     gum_model = GLM.fit(
         GeneralizedLinearModel,
         fullexpvars_without_outsample_subset,
@@ -647,11 +644,12 @@ function logit_execute_row!(
     )
     b = coef(model)
     ŷ = predict(model)
-    er2 = model.rr.devresid      # squared errors
-    sse = sum(er2)                        # residual sum of squares
+    er2 = deviance(model)                 # model.rr.devresid #squared errors
+    sse = sum(er2)                        # deviance residual sum of squares
     df_e = nobs - ncoef                   # degrees of freedom	
-    rmse = sqrt(sse / nobs)               # root mean squared error
-
+    rmse = sqrt(sse / nobs)               # root mean squared error using deviance residuals
+    null_dev = nulldeviance(model)
+    r2 = 1 - (er2/null_dev)               # model Pseudo R-squared
     ll = GLM.loglikelihood(model)
 
     if ztest
@@ -720,6 +718,17 @@ function logit_execute_row!(
 
     if :bic in criteria
         result_data[order, datanames_index[:bic]] = GLM.bic(model)
+    end
+
+    if :r2adj in criteria || :r2adj in keys(datanames_index)
+        result_data[order, datanames_index[:r2adj]] =
+            1 -
+            (1 - result_data[order, datanames_index[:r2]]) * (
+                (result_data[order, datanames_index[:nobs]] - 1) / (
+                    result_data[order, datanames_index[:nobs]] -
+                    result_data[order, datanames_index[:ncoef]]
+                )
+            )
     end
 
     # FIXME:
