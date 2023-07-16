@@ -17,18 +17,16 @@ model = ModelSelection.gsr(
     :ols,
     "australia china japan",
     data,
-    fixedvariables = [:uk],
-    ttest = true,
-    modelavg = true,
-    criteria = [:aic, :aicc],
-    kfoldcrossvalidation = true,
-    notify = job_notify,
+    #fe_sqr = [:japan, :china],
+    #fe_log = [:japan, :china],
+    #fe_inv = [:japan, :china],
+    #fe_lag = Dict(:japan => 1),
+    #interaction = [(:japan, :china)],
 )
-
-print(model)
- 
-"""
 ModelSelection.save_csv("result.csv", model)
+println(model)
+
+"""
 ModelSelection.save("result.jld", model) 
 results = ModelSelection.load("result.jld")
 """

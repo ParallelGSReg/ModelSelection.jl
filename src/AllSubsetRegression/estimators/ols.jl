@@ -1,69 +1,4 @@
 """
-    ols(
-        data::ModelSelectionData;
-        outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
-        criteria::Vector{Symbol} = CRITERIA_DEFAULT,
-        ttest::Bool = TTEST_DEFAULT,
-        modelavg::Bool = MODELAVG_DEFAULT,
-        residualtest::Bool = RESIDUALTEST_DEFAULT,
-        orderresults::Bool = ORDERRESULTS_DEFAULT,
-    ) -> ModelSelectionData
-
-Perform Ordinary Least Squares (OLS) regression analysis on the provided
-`ModelSelectionData` using the specified options and returns a new ModelSelectionData object
-containing the results.
-
-# Arguments
-- `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
-in the model selection process.
-
-# Keyword Arguments
-- `outsample::Union{Int64,Vector{Int},Nothing}`: The number of observations or indices of
-   observations to be used for out-of-sample validation. Set to `nothing` if no
-   out-of-sample validation is desired. Default: `OUTSAMPLE_DEFAULT`.
-- `criteria::Vector{Symbol}`: The selection criteria symbols to be used for model comparison
-   and selection. Default: `CRITERIA_DEFAULT`.
-- `ttest::Bool`: If `true`, perform t-tests for the coefficient estimates.
-   Default: `TTEST_DEFAULT`.
-- `modelavg::Bool`: If `true`, perform model averaging using the selected models.
-   Default: `MODELAVG_DEFAULT`.
-- `residualtest::Bool`: If `true`, perform residual tests on the selected models.
-   Default: `RESIDUALTEST_DEFAULT`.
-- `orderresults::Bool`: If `true`, order the results based on the selection criteria.
-   Default: `ORDERRESULTS_DEFAULT`.
-
-# Returns
-- `ModelSelectionData`: The copy of the input `ModelSelectionData` object containing the OLS
-regression results.
-
-# Example
-```julia
-result = ols(model_selection_data)
-```
-"""
-function ols(
-    data::ModelSelectionData;
-    outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
-    ttest::Bool = TTEST_DEFAULT,
-    modelavg::Bool = MODELAVG_DEFAULT,
-    residualtest::Bool = RESIDUALTEST_DEFAULT,
-    orderresults::Bool = ORDERRESULTS_DEFAULT,
-    notify = nothing,
-)
-    return ols!(
-        ModelSelection.copy_modelselectiondata(data),
-        outsample = outsample,
-        criteria = criteria,
-        ttest = ttest,
-        modelavg = modelavg,
-        residualtest = residualtest,
-        orderresults = orderresults,
-        notify = notify ,
-    )
-end
-
-"""
     ols!(
         data::ModelSelectionData;
         outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
@@ -78,7 +13,7 @@ Perform Ordinary Least Squares (OLS) regression analysis on the provided
 `ModelSelectionData` using the specified options. This function mutates the input
 `ModelSelectionData` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 
@@ -109,7 +44,7 @@ updated_data = ols!(model_selection_data)
 function ols!(
     data::ModelSelectionData;
     outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = OLS_CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
@@ -117,7 +52,12 @@ function ols!(
     notify = nothing
 )
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 0))
-    validate_criteria(criteria, AVAILABLE_OLS_CRITERIA)
+    if criteria === nothing
+        criteria = OLS_CRITERIA_DEFAULT
+    elseif isa(criteria, Symbol)
+        criteria = Vector{Symbol}([criteria])
+    end
+    validate_criteria(criteria, OLS_CRITERIA_AVAILABLE)
     result = create_result(
         data,
         outsample,
@@ -143,7 +83,7 @@ Perform Ordinary Least Squares (OLS) regression analysis for all possible subset
 explanatory variables in the given `ModelSelectionData`. This function mutates the input
 `AllSubsetRegressionResult` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 - `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object to store the
@@ -389,7 +329,7 @@ Execute a single job in the OLS procedure. This function is called by the main
 `ols_execute!` function to parallelize the model estimation across multiple workers.
 This function is intended for use with multi-core parallel processing.
 
-# Arguments
+# Parameters
 - `num_job::Int64`: The unique identifier for the current job.
 - `num_jobs::Int64`: The total number of jobs to be executed.
 - `ops_per_worker::Int64`: The number of operations per worker.
@@ -524,7 +464,7 @@ Perform OLS estimation for a specific order (i.e., a particular combination of i
 variables) and store the results in a pre-allocated SharedArray. This implementation
 supports out-of-sample testing, t-tests, and residual tests.
 
-# Arguments
+# Parameters
 - `order::Int64`: The order of the model (i.e., the specific combination of independent
    variables to be considered).
 - `depvar::Symbol`: The dependent variable in the regression model.

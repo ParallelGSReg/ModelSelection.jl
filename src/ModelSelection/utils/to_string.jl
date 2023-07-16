@@ -202,12 +202,6 @@ function sprintf_covvars_block(
     result_data,
 )
     out = sprintf_covvar_header(covvars_title, result)
-    for varname in expvars
-        if varname === CONS
-            continue
-        end
-        out *= sprintf_covvar(varname, datanames_index, result, result_data)
-    end
     if data.fixedvariables !== nothing
         for varname in data.fixedvariables
             if varname === CONS
@@ -215,6 +209,12 @@ function sprintf_covvars_block(
             end
             out *= sprintf_covvar(varname, datanames_index, result, result_data)
         end
+    end
+    for varname in expvars
+        if varname === CONS
+            continue
+        end
+        out *= sprintf_covvar(varname, datanames_index, result, result_data)
     end
     if CONS in data.expvars
         out *= sprintf_covvar(CONS, datanames_index, result, result_data)

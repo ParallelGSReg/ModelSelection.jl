@@ -79,8 +79,9 @@ const AVAILABLE_CRITERIA = Dict(
     ),
 )
 
-const AVAILABLE_LOGIT_CRITERIA = [:aic, :aicc, :bic, :cp, :loglikelihood, :roc]
-const AVAILABLE_OLS_CRITERIA = [:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse]
+const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
+const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
+const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :loglikelihood, :roc])
 
 const SUMMARY_VARIABLES = Dict(
     :nobs =>

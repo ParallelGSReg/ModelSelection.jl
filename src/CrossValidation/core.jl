@@ -154,7 +154,7 @@ function kfoldcrossvalidation(
 
     previousresult = ModelSelection.addresult!(previousresult, result)
 
-    addextras(previousresult, result)
+    addextras!(previousresult, result)
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 100))
 
     return previousresult
@@ -210,7 +210,7 @@ end
 Generate a dict representation of the best model results and model
 averaging results (if applicable) from the `AllSubsetRegressionResult` object.
 
-# Arguments
+# Parameters
 - `data::ModelSelectionData`: The input `ModelSelectionData` object containing the data used
    in the model selection process.
 - `result::AllSubsetRegressionResult`: The `AllSubsetRegressionResult` object containing the
