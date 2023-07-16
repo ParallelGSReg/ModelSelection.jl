@@ -65,6 +65,7 @@ function ols!(
         modelavg,
         residualtest,
         orderresults,
+        OLS_EQUATION_GENERAL_INFORMATION,
         ttest = ttest,
     )
     ols_execute!(data, result, notify=notify)

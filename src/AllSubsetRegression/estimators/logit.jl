@@ -123,6 +123,7 @@ function logit!(
         modelavg,
         residualtest,
         orderresults,
+        LOGIT_EQUATION_GENERAL_INFORMATION,
         ztest = ztest,
     )
     logit_execute!(data, result, notify = notify )

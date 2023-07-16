@@ -9,7 +9,6 @@ const RESIDUALTEST_DEFAULT = false
 const TTEST_DEFAULT = false
 const ZTEST_DEFAULT = false
 
-const EQUATION_GENERAL_INFORMATION = [:nobs, :ncoef, :sse, :r2, :F, :rmse, :r2adj]
 const INDEX = :index
 const ORDER = :order
 const RESIDUAL_TESTS_CROSS = [:jbtest, :wtest]
@@ -41,12 +40,6 @@ const AVAILABLE_CRITERIA = Dict(
         "index" => -,
         "order" => 4,
     ),
-    :loglikelihood => Dict(
-        "verbose_title" => "Log Likelihood",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 5,
-    ),
     :r2adj => Dict(
         "verbose_title" => "Adjusted R²",
         "verbose_show" => false,
@@ -65,26 +58,23 @@ const AVAILABLE_CRITERIA = Dict(
         "index" => -1,
         "order" => 8,
     ),
-    :roc => Dict(
-        "verbose_title" => "ROC",
+    :rocout => Dict(
+        "verbose_title" => "ROC OUT",
         "verbose_show" => true,
         "index" => -1,
         "order" => 9,
     ),
-    :sse => Dict(
-        "verbose_title" => "SSE",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 10,
-    ),
 )
 
-const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
+const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout])
 const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :loglikelihood, :roc])
+const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj])
+
+const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rocout])
+const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj])
 
 const SUMMARY_VARIABLES = Dict(
-    :nobs =>
-        Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
+    :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
     :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
+    :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
 )

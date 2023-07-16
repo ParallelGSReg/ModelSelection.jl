@@ -48,7 +48,8 @@ function create_result(
     criteria::Vector{Symbol},
     modelavg::Bool,
     residualtest::Bool,
-    orderresults::Bool;
+    orderresults::Bool,
+    equation_general_information::Vector{Symbol};
     ttest::Union{Bool,Nothing} = nothing,
     ztest::Union{Bool,Nothing} = nothing,
 )
@@ -65,6 +66,7 @@ function create_result(
         criteria,
         modelavg,
         residualtest,
+        equation_general_information,
         ttest = ttest,
         ztest = ztest,
     )
@@ -128,7 +130,8 @@ function create_datanames(
     data::ModelSelectionData,
     criteria::Vector{Symbol},
     modelavg::Bool,
-    residualtest::Bool;
+    residualtest::Bool,
+    equation_general_information::Vector{Symbol};
     ttest::Union{Bool,Nothing} = nothing,
     ztest::Union{Bool,Nothing} = nothing,
 )
@@ -175,8 +178,9 @@ function create_datanames(
     testfields =
         (residualtest !== nothing && residualtest) ?
         ((data.time !== nothing) ? RESIDUAL_TESTS_TIME : RESIDUAL_TESTS_CROSS) : []
-    general_information_criteria =
-        unique([EQUATION_GENERAL_INFORMATION; criteria; testfields])
+
+    general_information_criteria = unique([equation_general_information; criteria; testfields])
+
     datanames = vcat(datanames, general_information_criteria)
     push!(datanames, ORDER)
     if modelavg !== nothing && modelavg

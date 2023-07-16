@@ -411,7 +411,7 @@ function addextras!(
     fe_sqr::Union{Vector{Symbol},Nothing} = nothing,
     fe_log::Union{Vector{Symbol},Nothing} = nothing,
     fe_inv::Union{Vector{Symbol},Nothing} = nothing,
-    fe_lag::Union{Dict{Symbol,Int64}} = nothing,
+    fe_lag::Union{Dict{Symbol,Int64},Nothing} = nothing,
     interaction::Union{Vector{Tuple{Symbol,Symbol}},Nothing} = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
