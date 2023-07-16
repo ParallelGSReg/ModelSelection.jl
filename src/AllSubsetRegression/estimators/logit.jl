@@ -643,31 +643,54 @@ function logit_execute_row!(
         start = start_coef_subset,
     )
     b = coef(model)
-    ŷ = predict(model)
-    er2 = deviance(model)                 # model.rr.devresid #squared errors
-    sse = sum(er2)                        # deviance residual sum of squares
-    df_e = nobs - ncoef                   # degrees of freedom	
-    rmse = sqrt(sse / nobs)               # root mean squared error using deviance residuals
+    #ŷ = predict(model)
+    er2 = model.rr.devresid                  # model.rr.devresid #squared errors
+    #er=er2^(0.5)
+    sse = sum(er2)                           # deviance residual sum of squares
+    df_e = nobs - ncoef                     # degrees of freedom	
+    rmse = sqrt(sse / nobs)                  # root mean squared error using deviance residuals
     null_dev = nulldeviance(model)
-    r2 = 1 - (er2/null_dev)               # model Pseudo R-squared
+    r2 = 1 - (sse/null_dev)                  # model Pseudo R-squared
+    r2adj = 1-(1-r2)*((nobs-1)/(df_e)) # adjusted R-squared
     ll = GLM.loglikelihood(model)
+    lln= GLM.nullloglikelihood(model)
+    LR = 2*(ll-lln)                      # Likelihood ratio test
+
 
     if ztest
         bstd = stderror(model)
     end
+    
+"""
+    if outsample_enabled > 0
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
+            get_outsample_subset(
+                depvar_data,
+                expvars_data,
+                fixedvariables_data,
+                outsample,
+                selected_variables_index,
+            )
+        fullexpvars_outsample_subset = expvars_outsample_subset
+        if fixedvariables_outsample_subset !== nothing
+            fullexpvars_outsample_subset =
+                hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+        end
 
-    # FIXME
-    # if outsample_enabled > 0
-    # 	depvar_outsample_subset, expvars_outsample_subset = get_outsample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
-    # 	erout = depvar_outsample_subset - expvars_outsample_subset * b  # out-of-sample residuals
-    # 	sseout = sum(erout .^ 2)                                        # residual sum of squares
-    # 	outsample_count = outsample
-    # 	if (isa(outsample, Array))
-    # 		outsample_count = size(outsample, 1)
-    # 	end
-    # 	rmseout = sqrt(sseout / outsample_count)                        # root mean squared error
-    # 	result_data[order, datanames_index[:rmseout]] = rmseout
-    # end
+        # out-of-sample residuals
+        erout = depvar_outsample_subset - fullexpvars_outsample_subset * b
+
+        # residual sum of squares
+        sseout = sum(erout .^ 2)
+        outsample_count = outsample
+        if (isa(outsample, Array))
+            outsample_count = size(outsample, 1)
+        end
+        # root mean squared error
+        rmseout = sqrt(sseout / outsample_count)
+        result_data[order, datanames_index[:rmseout]] = rmseout
+    end
+   """
 
     result_data[order, datanames_index[:index]] = order
     for (index, selected_variable_index) in enumerate(selected_variables_index)
@@ -696,13 +719,14 @@ function logit_execute_row!(
         end
     end
 
-    result_data[order, datanames_index[:nobs]] = Int64(round(nobs))
-    result_data[order, datanames_index[:ncoef]] = ncoef
-    result_data[order, datanames_index[:sse]] = datatype(sse)
-    result_data[order, datanames_index[:rmse]] = datatype(rmse)
-    result_data[order, datanames_index[:order]] = 0
-
-    # result_data[order, datanames_index[:loglikelihood]] = datatype(loglikelihood)
+    result_data[order, datanames_index[:nobs]] = Int64(round(nobs)) 
+    result_data[order, datanames_index[:ncoef]] = ncoef  
+    result_data[order, datanames_index[:sse]] = datatype(sse) 
+    result_data[order, datanames_index[:r2]] = datatype(r2) 
+    result_data[order, datanames_index[:rmse]] = datatype(rmse) 
+    result_data[order, datanames_index[:order]] = 0 #chequear
+    result_data[order, datanames_index[:r2adj]] = datatype(r2adj) 
+    result_data[order, datanames_index[:LR]] = datatype(LR) 
 
     if :aic in criteria || :aicc in criteria
         aic = GLM.aic(model)  # FIXME: Sort by AIC
@@ -720,65 +744,49 @@ function logit_execute_row!(
         result_data[order, datanames_index[:bic]] = GLM.bic(model)
     end
 
-    if :r2adj in criteria || :r2adj in keys(datanames_index)
-        result_data[order, datanames_index[:r2adj]] =
-            1 -
-            (1 - result_data[order, datanames_index[:r2]]) * (
-                (result_data[order, datanames_index[:nobs]] - 1) / (
-                    result_data[order, datanames_index[:nobs]] -
-                    result_data[order, datanames_index[:ncoef]]
-                )
-            )
+    if residualtest
+    	x = er
+    	n = length(x)
+    	m1 = sum(x) / n
+    	m2 = sum((x .- m1) .^ 2) / n
+    	m3 = sum((x .- m1) .^ 3) / n
+    	m4 = sum((x .- m1) .^ 4) / n
+    	b1 = (m3 / m2^(3 / 2))^2
+    	b2 = (m4 / m2^2)
+    	statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
+    	d = Chisq(2.0)
+    	jbtest = 1 .- cdf(d, statistic)
+    
+    	regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
+    	qrfw = qr(regmatw)
+    	regcoeffw = qrfw \ er2
+    	residw = er2 - regmatw * regcoeffw
+    	rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
+    	statisticw = n * rsqw
+    	wtest = ccdf(Chisq(2), statisticw)
+    
+    	result_data[order, datanames_index[:wtest]] = wtest
+    	result_data[order, datanames_index[:jbtest]] = jbtest
+    	if time !== nothing
+    		e = er
+    		lag = 1
+    		xmat = fullexpvars_subset #deberia incluir fixedvariables
+    
+    		n = size(e, 1)
+    		elag = zeros(Float64, n, lag)
+    		for ii in 1:lag
+    			elag[ii+1:end, ii] = e[1:end-ii]
+    		end
+    
+    		offset = lag
+    		regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
+    		qrfbg = qr(regmatbg)
+    		regcoeffbg = qrfbg \ e[offset+1:end]
+    		residbg = e[offset+1:end] .- regmatbg * regcoeffbg
+    		rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end]) # uncentered R^2
+    		statisticbg = (n - offset) * rsqbg
+    		bgtest = ccdf(Chisq(lag), statisticbg)
+    		result_data[order, datanames_index[:bgtest]] = bgtest
+    	end
     end
-
-    # FIXME:
-    # result_data[order, datanames_index[:F]] =
-    #	(result_data[order, datanames_index[:r2]] / (result_data[order, datanames_index[:ncoef]] - 1)) / ((1 - result_data[order, datanames_index[:r2]]) / (result_data[order, datanames_index[:nobs]] - result_data[order, datanames_index[:ncoef]]))
-
-    # FIXME
-    # if residualtest
-    # 	x = er
-    # 	n = length(x)
-    # 	m1 = sum(x) / n
-    # 	m2 = sum((x .- m1) .^ 2) / n
-    # 	m3 = sum((x .- m1) .^ 3) / n
-    # 	m4 = sum((x .- m1) .^ 4) / n
-    # 	b1 = (m3 / m2^(3 / 2))^2
-    # 	b2 = (m4 / m2^2)
-    # 	statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
-    # 	d = Chisq(2.0)
-    # 	jbtest = 1 .- cdf(d, statistic)
-    # 
-    # 	regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-    # 	qrfw = qr(regmatw)
-    # 	regcoeffw = qrfw \ er2
-    # 	residw = er2 - regmatw * regcoeffw
-    # 	rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
-    # 	statisticw = n * rsqw
-    # 	wtest = ccdf(Chisq(2), statisticw)
-    # 
-    # 	result_data[order, datanames_index[:wtest]] = wtest
-    # 	result_data[order, datanames_index[:jbtest]] = jbtest
-    # 	if time !== nothing
-    # 		e = er
-    # 		lag = 1
-    # 		xmat = expvars_subset
-    # 
-    # 		n = size(e, 1)
-    # 		elag = zeros(Float64, n, lag)
-    # 		for ii in 1:lag
-    # 			elag[ii+1:end, ii] = e[1:end-ii]
-    # 		end
-    # 
-    # 		offset = lag
-    # 		regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-    # 		qrfbg = qr(regmatbg)
-    # 		regcoeffbg = qrfbg \ e[offset+1:end]
-    # 		residbg = e[offset+1:end] .- regmatbg * regcoeffbg
-    # 		rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end]) # uncentered R^2
-    # 		statisticbg = (n - offset) * rsqbg
-    # 		bgtest = ccdf(Chisq(lag), statisticbg)
-    # 		result_data[order, datanames_index[:bgtest]] = bgtest
-    # 	end
-    # end
 end
