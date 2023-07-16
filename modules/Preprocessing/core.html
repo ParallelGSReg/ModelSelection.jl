@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/><title>Core · ModelSelection.jl</title><script data-outdated-warner src="../../assets/warner.js"></script><link href="https://cdnjs.cloudflare.com/ajax/libs/lato-font/3.0.0/css/lato-font.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/juliamono/0.045/juliamono.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/fontawesome.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/solid.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/brands.min.css" rel="stylesheet" type="text/css"/><link href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.13.24/katex.min.css" rel="stylesheet" type="text/css"/><script>documenterBaseURL="../.."</script><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js" data-main="../../assets/documenter.js"></script><script src="../../siteinfo.js"></script><script src="../../../versions.js"></script><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-dark.css" data-theme-name="documenter-dark" data-theme-primary-dark/><link class="docs-theme-link" rel="stylesheet" type="text/css" href="../../assets/themes/documenter-light.css" data-theme-name="documenter-light" data-theme-primary/><script src="../../assets/themeswap.js"></script><link href="../../assets/favicon.ico" rel="icon" type="image/x-icon"/></head><body><div id="documenter"><nav class="docs-sidebar"><a class="docs-logo" href="../../index.html"><img src="../../assets/logo.png" alt="ModelSelection.jl logo"/></a><div class="docs-package-name"><span class="docs-autofit"><a href="../../index.html">ModelSelection.jl</a></span></div><form class="docs-search" action="../../search.html"><input class="docs-search-query" id="documenter-search-query" name="q" type="text" placeholder="Search docs"/></form><ul class="docs-menu"><li><a class="tocitem" href="../../index.html">Home</a></li><li><a class="tocitem" href="../../start.html">Getting Started</a></li><li><a class="tocitem" href="../../usage.html">Usage</a></li><li><span class="tocitem">Modules</span><ul><li><input class="collapse-toggle" id="menuitem-4-1" type="checkbox" checked/><label class="tocitem" for="menuitem-4-1"><span class="docs-label">Preprocessing</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="index.html">Module</a></li><li class="is-active"><a class="tocitem" href="core.html">Core</a><ul class="internal"><li><a class="tocitem" href="#Contents"><span>Contents</span></a></li><li><a class="tocitem" href="#Index"><span>Index</span></a></li><li><a class="tocitem" href="#Functions"><span>Functions</span></a></li></ul></li><li><a class="tocitem" href="utils.html">Utils</a></li><li><a class="tocitem" href="strings.html">Strings</a></li><li><a class="tocitem" href="const.html">Constants</a></li></ul></li><li><input class="collapse-toggle" id="menuitem-4-2" type="checkbox"/><label class="tocitem" for="menuitem-4-2"><span class="docs-label">FeatureExtraction</span><i class="docs-chevron"></i></label><ul class="collapsed"><li><a class="tocitem" href="../FeatureExtraction/index.html">Module</a></li><li><a class="tocitem" href="../FeatureExtraction/core.html">Core</a></li><li><a class="tocitem" href="../FeatureExtraction/utils.html">Utils</a></li><li><a class="tocitem" href="../FeatureExtraction/strings.html">Strings</a></li><li><a class="tocitem" href="../FeatureExtraction/const.html">Constants</a></li></ul></li></ul></li><li><a class="tocitem" href="../../contributing.html">Contributing</a></li><li><a class="tocitem" href="../../news.html">News</a></li><li><a class="tocitem" href="../../todo.html">Todo</a></li><li><a class="tocitem" href="../../license.html">License</a></li></ul><div class="docs-version-selector field has-addons"><div class="control"><span class="docs-label button is-static is-size-7">Version</span></div><div class="docs-selector control is-expanded"><div class="select is-fullwidth is-size-7"><select id="documenter-version-selector"></select></div></div></div></nav><div class="docs-main"><header class="docs-navbar"><nav class="breadcrumb"><ul class="is-hidden-mobile"><li><a class="is-disabled">Modules</a></li><li><a class="is-disabled">Preprocessing</a></li><li class="is-active"><a href="core.html">Core</a></li></ul><ul class="is-hidden-tablet"><li class="is-active"><a href="core.html">Core</a></li></ul></nav><div class="docs-right"><a class="docs-edit-link" href="https://github.com/ParallelGSReg/ModelSelection.jl/blob/main/docs/src/modules/Preprocessing/core.md" title="Edit on GitHub"><span class="docs-icon fab"></span><span class="docs-label is-hidden-touch">Edit on GitHub</span></a><a class="docs-settings-button fas fa-cog" id="documenter-settings-button" href="#" title="Settings"></a><a class="docs-sidebar-button fa fa-bars is-hidden-desktop" id="documenter-sidebar-button" href="#"></a></div></header><article class="content" id="documenter-page"><h1 id="Core"><a class="docs-heading-anchor" href="#Core">Core</a><a id="Core-1"></a><a class="docs-heading-anchor-permalink" href="#Core" title="Permalink"></a></h1><p>This section of the documentation is dedicated to explaining the purpose and usage core functions used throughout the Preprocessing module.</p><h2 id="Contents"><a class="docs-heading-anchor" href="#Contents">Contents</a><a id="Contents-1"></a><a class="docs-heading-anchor-permalink" href="#Contents" title="Permalink"></a></h2><ul><li><a href="core.html#Core">Core</a></li><li class="no-marker"><ul><li><a href="core.html#Contents">Contents</a></li><li><a href="core.html#Index">Index</a></li><li><a href="core.html#Functions">Functions</a></li></ul></li></ul><h2 id="Index"><a class="docs-heading-anchor" href="#Index">Index</a><a id="Index-1"></a><a class="docs-heading-anchor-permalink" href="#Index" title="Permalink"></a></h2><ul><li><a href="core.html#ModelSelection.Preprocessing.execute-Tuple{Vector{Symbol}, Union{Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}, Vector{Symbol}, Symbol, Bool, DataType}"><code>ModelSelection.Preprocessing.execute</code></a></li><li><a href="core.html#ModelSelection.Preprocessing.input-Tuple{String, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a></li><li><a href="core.html#ModelSelection.Preprocessing.input-Tuple{Vector{Symbol}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a></li><li><a href="core.html#ModelSelection.Preprocessing.input-Tuple{Vector{String}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a></li></ul><h2 id="Functions"><a class="docs-heading-anchor" href="#Functions">Functions</a><a id="Functions-1"></a><a class="docs-heading-anchor-permalink" href="#Functions" title="Permalink"></a></h2><article class="docstring"><header><a class="docstring-binding" id="ModelSelection.Preprocessing.input-Tuple{String, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}" href="#ModelSelection.Preprocessing.input-Tuple{String, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">input(
+    equation::String,
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Tuple,
+        DataFrame,
+    };
+    datanames::Union{Array{Symbol},Nothing} = nothing,
+    method::Symbol = METHOD_DEFAULT,
+    intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+    panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+    removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+    removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = NOTIFY_DEFAULT,
+)</code></pre><p>Parse an string equation to an array of strings and call other functions to perform data preprocessing.</p><p><strong>Parameters</strong></p><ul><li><code>equation::String</code>: The equation in string format.</li><li><code>data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}</code>: The input data.</li><li><code>datanames::Union{Array{Symbol},Nothing}</code>: (optional) Names of the variables in the data.</li><li><code>method::Symbol</code>: (optional) The method to use for format the data. Default is <code>METHOD_DEFAULT</code>.</li><li><code>intercept::Bool</code>: (optional) Whether to include an intercept in the model. Default is <code>INTERCEPT_DEFAULT</code>.</li><li><code>fixedvariables::Union{Symbol,Array{Symbol},Nothing}</code>: (optional) Fixed variables to include in the model. Default is <code>FIXED_VARIABLES_DEFAULT</code>.</li><li><code>panel::Union{Symbol,Nothing}</code>: (optional) Panel variable for panel data. Default is <code>PANEL_DEFAULT</code>.</li><li><code>time::Union{Symbol,Nothing}</code>: (optional) Time variable for time series data. Default is <code>TIME_DEFAULT</code>.</li><li><code>seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}</code>: (optional) Seasonal adjustment parameters. Default is <code>SEASONALADJUSTMENT_DEFAULT</code>.</li><li><code>removeoutliers::Bool</code>: (optional) Whether to remove outliers from the data. Default is <code>REMOVEOUTLIERS_DEFAULT</code>.</li><li><code>removemissings::Bool</code>: (optional) Whether to remove missing values from the data. Default is <code>REMOVEMISSINGS_DEFAULT</code>.</li><li><code>notify</code>: (optional) Notification method. Default is <code>NOTIFY_DEFAULT</code>.</li></ul><p><strong>Equation format</strong></p><p>The <code>equation</code> parameter can be in the following formats:</p><pre><code class="nohighlight hljs"># Stata-like string
+equation = &quot;y x1 x2 x3&quot;
+
+# R-like string
+equation = &quot;y ~ x1 + x2 + x3&quot;
+
+# Strings separated with comma
+equation = &quot;y,x1,x2,x3&quot;
+
+# Using wildcards
+equation = &quot;y *&quot;
+equation = &quot;y x*&quot;
+equation = &quot;y x1 z*&quot;
+equation = &quot;y ~ x*&quot;
+equation = &quot;y ~ .&quot;</code></pre><p><strong>Returns</strong></p><ul><li><code>modelselection_data</code>: The resulting model selection data.</li></ul><p><strong>Example</strong></p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>TODO: seasonaladjustment parameter missing.</p></div></div><pre><code class="language-julia hljs">equation = &quot;y x1 x2&quot;
+data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
+datanames = [:panel, :time, :y, :x1, :x2, :x3]
+job_notify(message::String, data::Union{Any,Nothing} = nothing) = println(message, data)
+
+model = input(
+    equation,
+    data,
+    datanames = datanames,
+    method = :fast,
+    intercept = true,
+    fixedvariables = :x3,
+    panel = :panel,
+    time = :time,
+    removeoutliers = true,
+    removemissings = true,
+    notify = job_notify,
+)
+# model: ModelSelectionData(
+    equation=[:y, :x1, :x2],
+    depvar=:y,
+    expvars=[:x1, :x2, :_cons],
+    fixedvariables=[:x3],
+    panel=:panel,
+    time=:time,
+    intercept=true,
+    datatype=Float32,
+    method=:fast,
+    nobs=3,
+    # ...
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ParallelGSReg/ModelSelection.jl/blob/29272eb2e05d3164f3504ed940b17cf00af0cc3f/src/Preprocessing/core.jl#L1-L99">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ModelSelection.Preprocessing.input-Tuple{Vector{String}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}" href="#ModelSelection.Preprocessing.input-Tuple{Vector{String}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">input(
+    equation::Vector{String},
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Tuple,
+        DataFrame,
+    };
+    datanames::Union{Array{Symbol},Nothing} = nothing,
+    method::Symbol = METHOD_DEFAULT,
+    intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+    panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+    removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+    removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = NOTIFY_DEFAULT,
+)</code></pre><p>Converts the equation as vector of strings to a vector of symbols, parsing the wildcards and call other functions to perform data preprocessing.</p><p><strong>Parameters</strong></p><ul><li><code>equation::Array{String}</code>: The equation in string format.</li><li><code>data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}</code>: The input data.</li><li><code>datanames::Union{Array{Symbol},Nothing}</code>: (optional) Names of the variables in the data.</li><li><code>method::Symbol</code>: (optional) The method to use for format the data. Default is <code>METHOD_DEFAULT</code>.</li><li><code>intercept::Bool</code>: (optional) Whether to include an intercept in the model. Default is <code>INTERCEPT_DEFAULT</code>.</li><li><code>fixedvariables::Union{Symbol,Array{Symbol},Nothing}</code>: (optional) Fixed variables to include in the model. Default is <code>FIXED_VARIABLES_DEFAULT</code>.</li><li><code>panel::Union{Symbol,Nothing}</code>: (optional) Panel variable for panel data. Default is <code>PANEL_DEFAULT</code>.</li><li><code>time::Union{Symbol,Nothing}</code>: (optional) Time variable for time series data. Default is <code>TIME_DEFAULT</code>.</li><li><code>seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}</code>: (optional) Seasonal adjustment parameters. Default is <code>SEASONALADJUSTMENT_DEFAULT</code>.</li><li><code>removeoutliers::Bool</code>: (optional) Whether to remove outliers from the data. Default is <code>REMOVEOUTLIERS_DEFAULT</code>.</li><li><code>removemissings::Bool</code>: (optional) Whether to remove missing values from the data. Default is <code>REMOVEMISSINGS_DEFAULT</code>.</li><li><code>notify</code>: (optional) Notification method. Default is <code>NOTIFY_DEFAULT</code>.</li></ul><p><strong>Equation format</strong></p><p>The <code>equation</code> parameter can be in the following formats:</p><pre><code class="nohighlight hljs"># Vector of strings
+equation = [&quot;y&quot;, &quot;x1&quot;, &quot;x2&quot; &quot;x3&quot;]
+
+# Using wildcards
+equation = [&quot;y&quot;, &quot;*&quot;]
+equation = [&quot;y&quot;, &quot;x*&quot;]
+equation = [&quot;y&quot;, &quot;x1&quot;, &quot;z*&quot;]</code></pre><p><strong>Returns</strong></p><ul><li><code>modelselection_data</code>: The resulting model selection data.</li></ul><p><strong>Errors</strong></p><ul><li><code>ArgumentError(DATANAMES_REQUIRED)</code>: When <code>datanames</code> is not provided.</li><li><code>ArgumentError(VARIABLES_NOT_DEFINED)</code>: When <code>equation</code> contains undefined variables.</li></ul><p><strong>Example</strong></p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>TODO: seasonaladjustment parameter missing.</p></div></div><pre><code class="language-julia hljs">equation = [&quot;y&quot;, &quot;x1&quot;, &quot;x2&quot;]
+data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
+datanames = [:panel, :time, :y, :x1, :x2, :x3]
+job_notify(message::String, data::Union{Any,Nothing} = nothing) = println(message, data)
+
+model = input(
+    equation,
+    data,
+    datanames = datanames,
+    method = :fast,
+    intercept = true,
+    fixedvariables = :x3,
+    panel = :panel,
+    time = :time,
+    removeoutliers = true,
+    removemissings = true,
+    notify = job_notify,
+)
+# model: ModelSelectionData(
+    equation=[:y, :x1, :x2],
+    depvar=:y,
+    expvars=[:x1, :x2, :_cons],
+    fixedvariables=[:x3],
+    panel=:panel,
+    time=:time,
+    intercept=true,
+    datatype=Float32,
+    method=:fast,
+    nobs=3,
+    # ...
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ParallelGSReg/ModelSelection.jl/blob/29272eb2e05d3164f3504ed940b17cf00af0cc3f/src/Preprocessing/core.jl#L137-L231">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ModelSelection.Preprocessing.input-Tuple{Vector{Symbol}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}" href="#ModelSelection.Preprocessing.input-Tuple{Vector{Symbol}, Union{Tuple, DataFrame, Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}}"><code>ModelSelection.Preprocessing.input</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">input(
+    equation::Vector{Symbol},
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Tuple,
+        DataFrame,
+    };
+    datanames::Union{Array{Symbol},Nothing} = nothing,
+    method::Symbol = METHOD_DEFAULT,
+    intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+    panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+    removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+    removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = NOTIFY_DEFAULT,
+)</code></pre><p>Process different values that are required for data process and validates that the data and the parameters are valid. Converts the data to the selected type and call <code>excecute</code> function to perform data preprocessing.</p><p><strong>Parameters</strong></p><ul><li><code>equation::Array{String}</code>: The equation in string format.</li><li><code>data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}</code>: The input data.</li><li><code>datanames::Union{Array{Symbol},Nothing}</code>: (optional) Names of the variables in the data.</li><li><code>method::Symbol</code>: (optional) The method to use for format the data. Default is <code>METHOD_DEFAULT</code>.</li><li><code>intercept::Bool</code>: (optional) Whether to include an intercept in the model. Default is <code>INTERCEPT_DEFAULT</code>.</li><li><code>fixedvariables::Union{Symbol,Array{Symbol},Nothing}</code>: (optional) Fixed variables to include in the model. Default is <code>FIXED_VARIABLES_DEFAULT</code>.</li><li><code>panel::Union{Symbol,Nothing}</code>: (optional) Panel variable for panel data. Default is <code>PANEL_DEFAULT</code>.</li><li><code>time::Union{Symbol,Nothing}</code>: (optional) Time variable for time series data. Default is <code>TIME_DEFAULT</code>.</li><li><code>seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}</code>: (optional) Seasonal adjustment parameters. Default is <code>SEASONALADJUSTMENT_DEFAULT</code>.</li><li><code>removeoutliers::Bool</code>: (optional) Whether to remove outliers from the data. Default is <code>REMOVEOUTLIERS_DEFAULT</code>.</li><li><code>removemissings::Bool</code>: (optional) Whether to remove missing values from the data. Default is <code>REMOVEMISSINGS_DEFAULT</code>.</li><li><code>notify</code>: (optional) Notification method. Default is <code>NOTIFY_DEFAULT</code>.</li></ul><p><strong>Returns</strong></p><ul><li><code>modelselection_data</code>: The resulting model selection data.</li></ul><p><strong>Errors</strong></p><ul><li><code>ArgumentError(DATANAMES_REQUIRED)</code>: When <code>datanames</code> is not provided.</li><li><code>ArgumentError(INVALID_METHOD)</code>: When the specified <code>method</code> is invalid.</li><li><code>ArgumentError(SELECTED_VARIABLES_DOES_NOT_EXISTS)</code>: When one or more variables in <code>equation</code> are not present in <code>datanames</code>.</li><li><code>ArgumentError(SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS)</code>: When one or more fixed variables in <code>fixedvariables</code> are not present in <code>datanames</code>.</li><li><code>ArgumentError(SELECTED_FIXED_VARIABLES_IN_EQUATION)</code>: When one or more fixed variables in <code>fixedvariables</code> are also present in <code>equation</code>.</li><li><code>ArgumentError(TIME_VARIABLE_INEXISTENT)</code>: When the specified <code>time</code> variable does not exist in <code>datanames</code>.</li><li><code>ArgumentError(PANEL_VARIABLE_INEXISTENT)</code>: When the specified <code>panel</code> variable does not exist in <code>datanames</code>.</li></ul><p><strong>Example</strong></p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>TODO: seasonaladjustment parameter missing.</p></div></div><pre><code class="language-julia hljs">equation = [:y, :x1, :x2]
+data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
+datanames = [:panel, :time, :y, :x1, :x2, :x3]
+job_notify(message::String, data::Union{Any,Nothing} = nothing) = println(message, data)
+
+model = input(
+    equation,
+    data,
+    datanames = datanames,
+    method = :fast,
+    intercept = true,
+    fixedvariables = :x3,
+    panel = :panel,
+    time = :time,
+    removeoutliers = true,
+    removemissings = true,
+    notify = job_notify,
+)
+# model: ModelSelectionData(
+    equation=[:y, :x1, :x2],
+    depvar=:y,
+    expvars=[:x1, :x2, :_cons],
+    fixedvariables=[:x3],
+    panel=:panel,
+    time=:time,
+    intercept=true,
+    datatype=Float32,
+    method=:fast,
+    nobs=3,
+    # ...
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ParallelGSReg/ModelSelection.jl/blob/29272eb2e05d3164f3504ed940b17cf00af0cc3f/src/Preprocessing/core.jl#L278-L366">source</a></section></article><article class="docstring"><header><a class="docstring-binding" id="ModelSelection.Preprocessing.execute-Tuple{Vector{Symbol}, Union{Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}, Vector{Symbol}, Symbol, Bool, DataType}" href="#ModelSelection.Preprocessing.execute-Tuple{Vector{Symbol}, Union{Array{Float32, N} where N, Array{Float64, N} where N, Array{Union{Missing, Float64}, N} where N, Array{Union{Missing, Float32}, N} where N}, Vector{Symbol}, Symbol, Bool, DataType}"><code>ModelSelection.Preprocessing.execute</code></a> — <span class="docstring-category">Method</span></header><section><div><pre><code class="language-julia hljs">execute(
+    equation::Vector{Symbol},
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+    },
+    datanames::Vector{Symbol},
+    method::Symbol,
+    intercept::Bool,
+    datatype::DataType;
+    fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+    panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+    removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+    removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = NOTIFY_DEFAULT,
+)</code></pre><p>Execute the model selection by performing data filtering, sorting, and conversion.</p><p><strong>Parameters</strong></p><ul><li><code>equation::Vector{Symbol}</code>: The equation in symbol format.</li><li><code>data</code>: The input data as an array.</li><li><code>datanames::Vector{Symbol}</code>: Names of the variables in the data.</li><li><code>method::Symbol</code>: The method to use for model selection.</li><li><code>intercept::Bool</code>: Whether to include an intercept in the model.</li><li><code>datatype::DataType</code>: The data type of the input data.</li><li><code>fixedvariables::Union{Symbol,Array{Symbol},Nothing}</code>: (optional) Fixed variables to include in the model. Default is <code>FIXED_VARIABLES_DEFAULT</code>.</li><li><code>panel::Union{Symbol,Nothing}</code>: (optional) Panel variable for panel data. Default is <code>PANEL_DEFAULT</code>.</li><li><code>time::Union{Symbol,Nothing}</code>: (optional) Time variable for time series data. Default is <code>TIME_DEFAULT</code>.</li><li><code>seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}</code>: (optional) Seasonal adjustment parameters. Default is <code>SEASONALADJUSTMENT_DEFAULT</code>.</li><li><code>removeoutliers::Bool</code>: (optional) Whether to remove outliers from the data. Default is <code>REMOVEOUTLIERS_DEFAULT</code>.</li><li><code>removemissings::Bool</code>: (optional) Whether to remove missing values from the data. Default is <code>REMOVEMISSINGS_DEFAULT</code>.</li><li><code>notify</code>: (optional) Notification method. Default is <code>NOTIFY_DEFAULT</code>.</li></ul><p><strong>Returns</strong></p><ul><li><code>modelselection_data::ModelSelectionData</code>: The resulting model selection data.</li><li><code>method::Symbol</code>: The method used for model selection.</li><li><code>seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}</code>: The seasonal adjustment parameters used.</li><li><code>removeoutliers::Bool</code>: Whether outliers were removed.</li></ul><p><strong>Errors</strong></p><ul><li><code>ArgumentError(DATANAMES_REQUIRED)</code>: When <code>datanames</code> is not provided.</li><li><code>ArgumentError(INVALID_METHOD)</code>: When the specified <code>method</code> is invalid.</li><li><code>ArgumentError(PANEL_ERROR)</code>: When there is an issue with the panel variable.</li><li><code>ArgumentError(TIME_ERROR)</code>: When there is an issue with the time variable.</li><li><code>ArgumentError(TIME_VARIABLE_INEXISTENT)</code>: When the specified <code>time</code> variable does not exist in <code>datanames</code>.</li><li><code>ArgumentError(VARIABLES_NOT_DEFINED)</code>: When the equation variables are not defined in <code>datanames</code>.</li></ul><p><strong>Example</strong></p><div class="admonition is-warning"><header class="admonition-header">Warning</header><div class="admonition-body"><p>TODO: seasonaladjustment parameter missing.</p></div></div><pre><code class="language-julia hljs">function job_notify(message::String, data::Union{Any,Nothing} = nothing)
+    println(message, data)
+end
+
+data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
+model = execute(
+    [:y, :x1, :x2],
+    data,
+    [:panel, :time, :y, :x1, :x2, :x3],
+    :fast,
+    true,
+    Float32,
+    fixedvariables = :x3,
+    panel = :panel,
+    time = :time,
+    removeoutliers = true,
+    removemissings = true,
+    notify = job_notify,
+)
+# model: ModelSelectionData(
+    equation=[:y, :x1, :x2],
+    depvar=:y,
+    expvars=[:x1, :x2, :_cons],
+    fixedvariables=[:x3],
+    panel=:panel,
+    time=:time,
+    intercept=true,
+    datatype=Float32,
+    method=:fast,
+    nobs=3,
+    # ...
+)</code></pre></div><a class="docs-sourcelink" target="_blank" href="https://github.com/ParallelGSReg/ModelSelection.jl/blob/29272eb2e05d3164f3504ed940b17cf00af0cc3f/src/Preprocessing/core.jl#L471-L561">source</a></section></article></article><nav class="docs-footer"><a class="docs-footer-prevpage" href="index.html">« Module</a><a class="docs-footer-nextpage" href="utils.html">Utils »</a><div class="flexbox-break"></div><p class="footer-message">Powered by <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> and the <a href="https://julialang.org/">Julia Programming Language</a>.</p></nav></div><div class="modal" id="documenter-settings"><div class="modal-background"></div><div class="modal-card"><header class="modal-card-head"><p class="modal-card-title">Settings</p><button class="delete"></button></header><section class="modal-card-body"><p><label class="label">Theme</label><div class="select"><select id="documenter-themepicker"><option value="documenter-light">documenter-light</option><option value="documenter-dark">documenter-dark</option></select></div></p><hr/><p>This document was generated with <a href="https://github.com/JuliaDocs/Documenter.jl">Documenter.jl</a> version 0.27.25 on <span class="colophon-date" title="Sunday 16 July 2023 19:16">Sunday 16 July 2023</span>. Using Julia version 1.6.7.</p></section><footer class="modal-card-foot"></footer></div></div></div></body></html>
