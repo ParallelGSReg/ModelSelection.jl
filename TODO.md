@@ -1,3 +1,4 @@
+
  - Add panel as a fixed var
  - Add fixed variables in logit
  - Model average in Logit
