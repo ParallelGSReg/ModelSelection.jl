@@ -58,12 +58,6 @@ const AVAILABLE_CRITERIA = Dict(
         "index" => -1,
         "order" => 8,
     ),
-    :rocout => Dict(
-        "verbose_title" => "ROC OUT",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 9,
-    ),
 )
 
 const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout])

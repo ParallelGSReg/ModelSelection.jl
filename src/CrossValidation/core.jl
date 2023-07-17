@@ -68,7 +68,7 @@ function kfoldcrossvalidation!(
             ttest = asr_result.ttest
             ztest = false
         elseif estimator == :logit
-            criteria = :rocout
+            criteria = :rmseout
             ttest = false
             ztest = asr_result.ztest
         end

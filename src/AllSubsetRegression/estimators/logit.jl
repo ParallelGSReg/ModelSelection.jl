@@ -666,7 +666,6 @@ function logit_execute_row!(
         bstd = stderror(model)
     end
     
-"""
     if outsample_enabled > 0
         depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
             get_outsample_subset(
@@ -683,8 +682,9 @@ function logit_execute_row!(
         end
 
         # out-of-sample residuals
-        erout = depvar_outsample_subset - fullexpvars_outsample_subset * b
-
+        prob = exp.(fullexpvars_outsample_subset * model.pp.beta0) ./ (1 .+ exp.(fullexpvars_outsample_subset * model.pp.beta0))
+        erout=((sign.(-0.5 .+ depvar_outsample_subset)) .* sqrt.(-2 .* (depvar_outsample_subset .* log.(prob) .+ (1 .- depvar_outsample_subset) .* log.(1 .- prob)))).^2
+        
         # residual sum of squares
         sseout = sum(erout .^ 2)
         outsample_count = outsample
@@ -695,7 +695,7 @@ function logit_execute_row!(
         rmseout = sqrt(sseout / outsample_count)
         result_data[order, datanames_index[:rmseout]] = rmseout
     end
-   """
+
 
     result_data[order, datanames_index[:index]] = order
     for (index, selected_variable_index) in enumerate(selected_variables_index)
