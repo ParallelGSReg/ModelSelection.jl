@@ -132,10 +132,15 @@ function logit!(
         LOGIT_EQUATION_GENERAL_INFORMATION,
         ztest = ztest,
     )
-    logit_execute!(data, result, notify = notify )
+    result = logit_execute!(data, result, notify = notify )
     ModelSelection.addresult!(data, result)
+    ModelSelection.addresult!(
+        data,
+        AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY,
+        result,
+    )
     data = addextras!(data, result)
-    return data
+    return result
 end
 
 """
