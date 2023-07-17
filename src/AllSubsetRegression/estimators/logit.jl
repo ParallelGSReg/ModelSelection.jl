@@ -107,7 +107,7 @@ result = logit!(model_selection_data)
 function logit!(
     data::ModelSelectionData;
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = LOGIT_CRITERIA_DEFAULT,
     ztest::Bool = ZTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
@@ -115,6 +115,11 @@ function logit!(
     notify = nothing,
 )
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
+    if criteria === nothing
+        criteria = LOGIT_CRITERIA_DEFAULT
+    elseif isa(criteria, Symbol)
+        criteria = Vector{Symbol}([criteria])
+    end
     validate_criteria(criteria, LOGIT_CRITERIA_AVAILABLE)
     result = create_result(
         data,

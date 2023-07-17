@@ -155,6 +155,7 @@ function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
     out *= ModelSelection.sprintf_newline()
     out *= ModelSelection.sprintf_header_block("Model averaging results")
     out *= ModelSelection.sprintf_depvar_block(data)
+    # FIXME: Fixedvariables?
     out *= ModelSelection.sprintf_covvars_block(
         "Covariates",
         datanames_index,

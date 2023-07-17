@@ -579,7 +579,7 @@ function ols_execute_row!(
         error(INVALID_METHOD)
     end
 
-    b = fact \ denominator                 # estimate
+    b = fact \ denominator                # estimate
     ŷ = fullexpvars_subset * b            # predicted values
     er = depvar_subset - ŷ                # in-sample residuals
     er2 = er .^ 2                         # squared errors

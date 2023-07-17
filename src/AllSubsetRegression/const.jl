@@ -66,12 +66,13 @@ const AVAILABLE_CRITERIA = Dict(
     ),
 )
 
-const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout])
+const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
 const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj])
+const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj, :sse])
 
-const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rocout])
-const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj])
+const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rocout, :sse])
+const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse])
+const LOGIT_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
 
 const SUMMARY_VARIABLES = Dict(
     :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
