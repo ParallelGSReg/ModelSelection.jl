@@ -42,6 +42,17 @@ function addresult!(data::ModelSelectionData, result::ModelSelectionResult)
     return data
 end
 
+function addresult!(data::ModelSelectionData, key::Symbol, result::ModelSelectionResult)
+    data.results_dict[key] = result
+    return data
+end
+
+function getresult(data::ModelSelectionData, key::Symbol)
+    if !haskey(data.results_dict, key)
+        return nothing
+    end
+    return data.results_dict[key]
+end
 
 """
 Creates a dictionary that maps variable names to their corresponding column indices in the result_data array.

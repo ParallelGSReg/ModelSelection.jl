@@ -3,25 +3,15 @@ Pkg.activate(".")
 using CSV, DataFrames, Distributions
 using ModelSelection
 
-data = CSV.read("test/data/visitors.csv", DataFrame)
-p = 0.3
-N = size(data, 1)
-d = Binomial(1, p)
-data[!, :y] = rand(d, N)
-
-function job_notify(message::String, data::Union{Any,Nothing} = nothing)
-    println(message, data)
-end
-
+data = CSV.read("test/data/15x1000_logit.csv", DataFrame)
 model = ModelSelection.gsr(
-    :ols,
-    "australia china japan",
+    :logit,
+    "y x1 x2 x3 x4 x5",
     data,
-    #fe_sqr = [:japan, :china],
-    #fe_log = [:japan, :china],
-    #fe_inv = [:japan, :china],
-    #fe_lag = Dict(:japan => 1),
-    #interaction = [(:japan, :china)],
+    fixedvariables=:x6,
+    # modelavg=true,
+    kfoldcrossvalidation=true,
+    numfolds=20,
 )
 ModelSelection.save_csv("result.csv", model)
 println(model)

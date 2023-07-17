@@ -46,6 +46,7 @@ mutable struct ModelSelectionData
     options::Dict{Symbol,Any}
     extras::Dict{Symbol,Any}
     results::Array{Any}
+    results_dict::Dict{Symbol,ModelSelectionResult}
     original_data::Union{ModelSelectionData,Nothing}
 
     function ModelSelectionData(
@@ -97,6 +98,7 @@ mutable struct ModelSelectionData
         extras = Dict()
         options = Dict{Symbol,Any}()
         results = Array{Any}(undef, 0)
+        results_dict = Dict{Symbol,ModelSelectionResult}()
         original_data = nothing
         new(
             equation,
@@ -118,6 +120,7 @@ mutable struct ModelSelectionData
             options,
             extras,
             results,
+            results_dict,
             original_data,
         )
     end

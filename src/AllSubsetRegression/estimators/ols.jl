@@ -69,10 +69,15 @@ function ols!(
         OLS_EQUATION_GENERAL_INFORMATION,
         ttest = ttest,
     )
-    ols_execute!(data, result, notify=notify)
+    result = ols_execute!(data, result, notify=notify)
     ModelSelection.addresult!(data, result)
+    ModelSelection.addresult!(
+        data,
+        AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY,
+        result,
+    )
     data = addextras!(data, result)
-    return data
+    return result
 end
 
 """

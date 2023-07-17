@@ -29,41 +29,30 @@ function split_database(database::Array{Int,1}, k::Int)
 end
 
 function kfoldcrossvalidation!(
-    previousresult::ModelSelection.ModelSelectionData,
     data::ModelSelection.ModelSelectionData,
+    original_data::ModelSelection.ModelSelectionData,
     k::Int,
     s::Float64;
     notify = nothing,
 )
-    kfoldcrossvalidation(previousresult, data, k, s; notify = notify )
-end
-
-
-function kfoldcrossvalidation(
-    previousresult::ModelSelection.ModelSelectionData,
-    data::ModelSelection.ModelSelectionData,
-    k::Int,
-    s::Float64;
-    notify = nothing,
-)
-    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 0))
-    db = collect(1:data.nobs)
-    folds = split_database(db, k)
+    obs_array = collect(1:original_data.nobs)
+    folds = split_database(obs_array, k)
 
     progress = 0
-    step = floor(Int64, 50 / k)
+    total_step_porcentage = 70
+    step = floor(Int64, total_step_porcentage / k)
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
-    
+
     bestmodels = []
     for obs in LOOCV(k)
         testset = collect(Iterators.flatten(folds[obs]))
-        dataset = setdiff(1:data.nobs, testset)
+        dataset = setdiff(1:original_data.nobs, testset)
 
-        reduced = ModelSelection.copy_modelselectiondata(data)
-        reduced.depvar_data = data.depvar_data[dataset]
-        reduced.expvars_data = data.expvars_data[dataset, :]
+        reduced = ModelSelection.copy_modelselectiondata(original_data)
+        reduced.depvar_data = original_data.depvar_data[dataset]
+        reduced.expvars_data = original_data.expvars_data[dataset, :]
         if reduced.fixedvariables !== nothing
-            reduced.fixedvariables_data = data.fixedvariables_data[dataset, :]
+            reduced.fixedvariables_data = original_data.fixedvariables_data[dataset, :]
         end 
         reduced.nobs = size(dataset, 1)
 
@@ -72,19 +61,20 @@ function kfoldcrossvalidation(
             ModelSelection.PreliminarySelection.preliminary_selection!(preliminary_selection[:preliminaryselection], reduced)
         end
 
-        estimator = previousresult.results[1].estimator
+        asr_result = ModelSelection.getresult(data, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
+        estimator = asr_result.estimator
         if estimator == :ols
             criteria = :rmseout
-            ttest = previousresult.results[1].ttest
+            ttest = asr_result.ttest
             ztest = false
         elseif estimator == :logit
             criteria = :rocout
             ttest = false
-            ztest = previousresult.results[1].ztest
+            ztest = asr_result.ztest
         end
-        residualtest = previousresult.results[1].residualtest
+        residualtest = asr_result.residualtest
 
-        ModelSelection.AllSubsetRegression.all_subset_regression!(
+        reduced_result = ModelSelection.AllSubsetRegression.all_subset_regression!(
             estimator,
             reduced,
             outsample = testset,
@@ -97,61 +87,67 @@ function kfoldcrossvalidation(
         push!(
             bestmodels,
             Dict(
-                :data => reduced.results[1].bestresult_data,
-                :datanames => reduced.results[1].datanames,
+                :data => reduced_result.bestresult_data,
+                :datanames => reduced_result.datanames,
             ),
         )
         progress = progress + step
         ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
     end
 
-    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 50))
+    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => total_step_porcentage))
 
     datanames = unique(Iterators.flatten(model[:datanames] for model in bestmodels))
 
-    data = Array{Any,2}(zeros(size(bestmodels, 1), size(datanames, 1)))
+    crossvalidation_data = Array{Any,2}(zeros(size(bestmodels, 1), size(datanames, 1)))
 
     for (i, model) in enumerate(bestmodels)
         for (f, col) in enumerate(model[:datanames])
             pos = ModelSelection.get_column_index(col, datanames)
-            data[i, pos] = model[:data][f]
+            crossvalidation_data[i, pos] = model[:data][f]
         end
     end
 
-    replace!(data, NaN => 0)
+    replace!(crossvalidation_data, NaN => 0)
 
-    average_data = mean(data, dims = 1)
-    median_data = median(data, dims = 1)
+    average_data = mean(crossvalidation_data, dims = 1)
+    median_data = median(crossvalidation_data, dims = 1)
 
     datanames_index = ModelSelection.create_datanames_index(datanames)
 
+    reduced_result = ModelSelection.getresult(reduced, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
     result = CrossValidationResult(
         k,
         0,
-        reduced.results[1].ttest,
-        reduced.results[1].ztest,
+        reduced_result.ttest,
+        reduced_result.ztest,
         datanames,
         average_data,
         median_data,
-        data,
+        crossvalidation_data,
     )
 
-    result.average_data[datanames_index[:nobs]] =
-        Int64(round(result.average_data[datanames_index[:nobs]]))
-    result.median_data[datanames_index[:nobs]] =
-        Int64(round(result.median_data[datanames_index[:nobs]]))
+    result.average_data[datanames_index[:nobs]] = Int64(round(result.average_data[datanames_index[:nobs]]))
+    result.median_data[datanames_index[:nobs]] = Int64(round(result.median_data[datanames_index[:nobs]]))
 
-    reduced = ModelSelection.addresult!(reduced, result)
+    reduced = ModelSelection.addresult!(data, result)
+    ModelSelection.addresult!(data, CROSSVALIDATION_EXTRAKEY, result)
 
-    addextras!(reduced, result)
+    addextras!(data, result)
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 100))
-
-    return reduced
+    return data
 end
 
 function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-    expvars = ModelSelection.get_selected_variables_varnames(1, data.expvars, false)
+    summary_variables = SUMMARY_VARIABLES
+    if :r2adj in result.datanames
+        summary_variables[:r2adj] = Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)  # FIXME: Use the dictionary
+    end
+    expvars = ModelSelection.get_selected_variables_varnames(
+        1, data.expvars, false,
+    )
+
     out = ModelSelection.sprintf_header_block("Cross validation average results")
     out *= ModelSelection.sprintf_depvar_block(data)
     out *= ModelSelection.sprintf_covvars_block(
@@ -166,8 +162,9 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
         datanames_index,
         result,
         result.average_data,
-        summary_variables = SUMMARY_VARIABLES,
+        summary_variables = summary_variables,
     )
+
     out *= ModelSelection.sprintf_newline(1)
     out *= ModelSelection.sprintf_header_block("Cross validation median results")
     out *= ModelSelection.sprintf_depvar_block(data)
@@ -183,7 +180,7 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
         datanames_index,
         result,
         result.median_data,
-        summary_variables = SUMMARY_VARIABLES,
+        summary_variables = summary_variables,
     )
     out *= ModelSelection.sprintf_newline()
     return out
@@ -275,6 +272,5 @@ function to_dict(data::ModelSelection.ModelSelectionData, result::CrossValidatio
         result.median_data,
         summary_variables = SUMMARY_VARIABLES,
     )
-
     return summary
 end

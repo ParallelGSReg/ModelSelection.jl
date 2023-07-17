@@ -8,9 +8,13 @@ end
 function get_best_covar(varname::Symbol, datanames_index, result, result_data)
     covar =
         Dict{Symbol,Any}(:b => result_data[datanames_index[Symbol(string(varname, "_b"))]])
-    if result.ttest
+    if result.ttest !== nothing && result.ttest
         covar[:bstd] = result_data[datanames_index[Symbol(string(varname, "_bstd"))]]
         covar[:t] = result_data[datanames_index[Symbol(string(varname, "_t"))]]
+    end
+    if result.ztest !== nothing && result.ztest
+        covar[:bstd] = result_data[datanames_index[Symbol(string(varname, "_bstd"))]]
+        covar[:z] = result_data[datanames_index[Symbol(string(varname, "_z"))]]
     end
     return covar
 end

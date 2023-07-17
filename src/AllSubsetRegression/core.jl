@@ -64,7 +64,7 @@ function all_subset_regression!(
     validate_test(ttest = ttest, ztest = ztest)
 
     if estimator == :ols
-        AllSubsetRegression.ols!(
+        return AllSubsetRegression.ols!(
             data,
             outsample = outsample,
             criteria = criteria,
@@ -75,7 +75,7 @@ function all_subset_regression!(
             notify = notify ,
         )
     elseif estimator == :logit
-        AllSubsetRegression.logit!(
+        return AllSubsetRegression.logit!(
             data,
             outsample = outsample,
             criteria = criteria,
@@ -118,14 +118,12 @@ function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     summary_variables = SUMMARY_VARIABLES
     if :r2adj in result.datanames
-        summary_variables[:r2adj] =
-            Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)
+        summary_variables[:r2adj] = Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)  # FIXME: Use the dictionary
     end
     expvars = ModelSelection.get_selected_variables_varnames(
-        Int64(result.bestresult_data[datanames_index[:index]]),
-        data.expvars,
-        false,
+        Int64(result.bestresult_data[datanames_index[:index]]), data.expvars, false,
     )
+
     criteria_variables = Dict()
     for criteria in result.criteria
         criteria_variables[criteria] = AVAILABLE_CRITERIA[criteria]
@@ -201,7 +199,7 @@ result_string = to_dict(model_selection_data, all_subset_regression_result)
 ```
 """
 function to_dict(data::ModelSelectionData, result::AllSubsetRegressionResult)
-    summary_variables = SUMMARY_VARIABLES
+    summary_variables = copy(SUMMARY_VARIABLES)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     best_results_expvars = ModelSelection.get_selected_variables_varnames(
         Int64(result.bestresult_data[datanames_index[:index]]),
