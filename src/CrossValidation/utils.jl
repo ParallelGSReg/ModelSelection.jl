@@ -8,6 +8,7 @@ function addextras!(data, result)
     data.extras[ModelSelection.generate_extra_key(CROSSVALIDATION_EXTRAKEY, data.extras)] =
         Dict(
             :ttest => result.ttest,
+            :ztest => result.ztest,
             :kfolds => result.k,
             :tsetsize => result.s,
             :panel => data.panel,

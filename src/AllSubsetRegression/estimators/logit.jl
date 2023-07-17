@@ -117,6 +117,7 @@ function logit!(
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
     validate_criteria(criteria, LOGIT_CRITERIA_AVAILABLE)
     result = create_result(
+        :logit,
         data,
         outsample,
         criteria,
@@ -194,7 +195,6 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 15))
-    start_coef = coeftable(gum_model).cols[1]
     gum_model = GLM.fit(
         GeneralizedLinearModel,
         fullexpvars_without_outsample_subset,
@@ -208,7 +208,6 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 25))
     if nprocs() == nworkers()
         for order = 1:num_operations
-            # TODO: Split in multiple lines
             logit_execute_row!(
                 order,
                 data.depvar,
@@ -310,7 +309,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             )
     end
 
-    # FIXME
+    # FIXME: modelavg
     # if result.modelavg
     # 	delta = maximum(result.data[:, datanames_index[:order]]) .- result.data[:, datanames_index[:order]]
     # 	w1 = exp.(-delta / 2)

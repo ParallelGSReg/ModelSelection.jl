@@ -53,6 +53,7 @@ result = AllSubsetRegressionResult(
 ```
 """
 mutable struct AllSubsetRegressionResult <: ModelSelectionResult
+    estimator::Symbol
     datanames::Vector{Symbol}
     modelavg_datanames::Union{Vector{Symbol},Nothing}
     data::Union{
@@ -74,6 +75,7 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     nobs::Int64
 
     function AllSubsetRegressionResult(
+        estimator::Symbol,
         datanames::Vector{Symbol},
         modelavg_datanames::Union{Vector{Symbol},Nothing},
         outsample::Union{Int64,Vector{Int64},Nothing},
@@ -86,6 +88,7 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     )
         validate_test(ttest = ttest, ztest = ztest)
         new(
+            estimator,
             datanames,
             modelavg_datanames,
             nothing,

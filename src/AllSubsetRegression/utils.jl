@@ -43,6 +43,7 @@ result = create_result(data, 10, [:aic, :bic], true, false, true, ttest = true)
 ```
 """
 function create_result(
+    estimator::Symbol,
     data::ModelSelectionData,
     outsample::Union{Int64,Vector{Int64},Nothing},
     criteria::Vector{Symbol},
@@ -75,6 +76,7 @@ function create_result(
         data.nobs - INSAMPLE_MIN - size(data.expvars, 1) - ((data.intercept) ? 1 : 0)
     outsample = isa(outsample, Int) && outsample_max <= outsample ? 0 : outsample
     return AllSubsetRegressionResult(
+        estimator,
         datanames,
         modelavg_datanames,
         outsample,

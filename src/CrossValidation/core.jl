@@ -1,7 +1,7 @@
 abstract type CrossValGenerator end
 
 struct LOOCV <: CrossValGenerator
-    n::Int
+    n::Int64
 end
 
 length(c::LOOCV) = c.n
@@ -47,70 +47,58 @@ function kfoldcrossvalidation(
     notify = nothing,
 )
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 0))
-    #db = randperm(data.nobs)
     db = collect(1:data.nobs)
     folds = split_database(db, k)
-
-    # TODO: What this is commented?
-    # if data.time != nothing
-    #     if data.panel != nothing
-    #         # time & panel -> vemos que pasa acá
-    #         folds = []
-    #     else
-    #         # time -> divisiones sin permutación
-    #         folds = []
-    #     end
-    # else
-    #     folds = []
-    # end
-
-    bestmodels = []
 
     progress = 0
     step = floor(Int64, 50 / k)
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
-
+    
+    bestmodels = []
     for obs in LOOCV(k)
-        dataset = collect(Iterators.flatten(folds[obs]))
-        testset = setdiff(1:data.nobs, dataset)
+        testset = collect(Iterators.flatten(folds[obs]))
+        dataset = setdiff(1:data.nobs, testset)
 
         reduced = ModelSelection.copy_modelselectiondata(data)
         reduced.depvar_data = data.depvar_data[dataset]
         reduced.expvars_data = data.expvars_data[dataset, :]
-
         if reduced.fixedvariables !== nothing
             reduced.fixedvariables_data = data.fixedvariables_data[dataset, :]
-        end
-
-        if reduced.time !== nothing
-            reduced.time_data = data.time_data[dataset]
-        end
-
-        if reduced.panel !== nothing
-            reduced.panel_data = data.panel_data[dataset]
-        end
-
+        end 
         reduced.nobs = size(dataset, 1)
 
-        _, vars = ModelSelection.PreliminarySelection.lasso!(reduced, addextrasflag = false)
+        if haskey(data.extras, ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY)
+            preliminary_selection = ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY
+            ModelSelection.PreliminarySelection.preliminary_selection!(preliminary_selection[:preliminaryselection], reduced)
+        end
 
-        backup = ModelSelection.copy_modelselectiondata(data)
-        backup.expvars = data.expvars[vars]
-        backup.expvars_data = data.expvars_data[:, vars]
+        estimator = previousresult.results[1].estimator
+        if estimator == :ols
+            criteria = :rmseout
+            ttest = previousresult.results[1].ttest
+            ztest = false
+        elseif estimator == :logit
+            criteria = :rocout
+            ttest = false
+            ztest = previousresult.results[1].ztest
+        end
+        residualtest = previousresult.results[1].residualtest
 
-        ModelSelection.AllSubsetRegression.ols!(
-            backup,
+        ModelSelection.AllSubsetRegression.all_subset_regression!(
+            estimator,
+            reduced,
             outsample = testset,
-            criteria = [:rmseout],
-            ttest = previousresult.results[1].ttest,
-            residualtest = previousresult.results[1].residualtest,
+            criteria = criteria,
+            ttest = ttest,
+            ztest = ztest,
+            residualtest = residualtest,
         )
 
         push!(
             bestmodels,
             Dict(
-                :data => backup.results[1].bestresult_data,
-                :datanames => backup.results[1].datanames,
+                :data => reduced.results[1].bestresult_data,
+                :datanames => reduced.results[1].datanames,
             ),
         )
         progress = progress + step
@@ -140,7 +128,8 @@ function kfoldcrossvalidation(
     result = CrossValidationResult(
         k,
         0,
-        previousresult.results[1].ttest,
+        reduced.results[1].ttest,
+        reduced.results[1].ztest,
         datanames,
         average_data,
         median_data,
@@ -152,12 +141,12 @@ function kfoldcrossvalidation(
     result.median_data[datanames_index[:nobs]] =
         Int64(round(result.median_data[datanames_index[:nobs]]))
 
-    previousresult = ModelSelection.addresult!(previousresult, result)
+    reduced = ModelSelection.addresult!(reduced, result)
 
-    addextras!(previousresult, result)
+    addextras!(reduced, result)
     ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 100))
 
-    return previousresult
+    return reduced
 end
 
 function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)

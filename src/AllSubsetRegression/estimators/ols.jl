@@ -59,6 +59,7 @@ function ols!(
     end
     validate_criteria(criteria, OLS_CRITERIA_AVAILABLE)
     result = create_result(
+        :ols,
         data,
         outsample,
         criteria,
