@@ -9,5 +9,6 @@ include("utils.jl")
 include("core.jl")
 
 export preliminary_selection!
+export PRELIMINARYSELECTION_EXTRAKEY
 
 end

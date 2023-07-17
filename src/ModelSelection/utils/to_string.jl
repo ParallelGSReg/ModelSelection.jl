@@ -169,8 +169,11 @@ end
 
 function sprintf_covvar_header(covvars_title, result; len = LINE_LENGTH)
     values = ["Coef."]
-    if result.ttest
+    if result.ttest !== nothing && result.ttest # FIXME: make a better solution that does not require this check
         values = vcat(values, ["Std.", "t-test"])
+    end
+    if result.ztest !== nothing && result.ztest # FIXME: make a better solution that does not require this check
+        values = vcat(values, ["Std.", "z-test"])
     end
     out = sprintf_label_values(covvars_title, values, new_line = true)
     out *= sprintf_simpleline(len = len, new_line = true)
@@ -180,12 +183,21 @@ end
 
 function sprintf_covvar(varname, datanames_index, result, result_data)
     values = [result_data[datanames_index[Symbol(string(varname, "_b"))]]]
-    if result.ttest
+    if result.ttest !== nothing && result.ttest
         values = vcat(
             values,
             [
                 result_data[datanames_index[Symbol(string(varname, "_bstd"))]],
                 result_data[datanames_index[Symbol(string(varname, "_t"))]],
+            ],
+        )
+    end
+    if result.ztest !== nothing && result.ztest
+        values = vcat(
+            values,
+            [
+                result_data[datanames_index[Symbol(string(varname, "_bstd"))]],
+                result_data[datanames_index[Symbol(string(varname, "_z"))]],
             ],
         )
     end
