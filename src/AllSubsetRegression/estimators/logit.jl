@@ -683,7 +683,7 @@ function logit_execute_row!(
 
         # out-of-sample residuals
         prob = exp.(fullexpvars_outsample_subset * model.pp.beta0) ./ (1 .+ exp.(fullexpvars_outsample_subset * model.pp.beta0))
-        erout=((sign.(-0.5 .+ depvar_outsample_subset)) .* sqrt.(-2 .* (depvar_outsample_subset .* log.(prob) .+ (1 .- depvar_outsample_subset) .* log.(1 .- prob)))).^2
+        erout = (sign.(-0.5 .+ depvar_outsample_subset)) .* sqrt.(-2 .* (depvar_outsample_subset .* log.(prob) .+ (1 .- depvar_outsample_subset) .* log.(1 .- prob)))
         
         # residual sum of squares
         sseout = sum(erout .^ 2)
