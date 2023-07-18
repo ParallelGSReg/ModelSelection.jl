@@ -45,7 +45,7 @@ const INTERCEPT_DEFAULT = true
 
 Constant representing the default estimation method, which is FAST.
 """
-const METHOD_DEFAULT = :fast
+const METHOD_DEFAULT = :qr_32
 
 """
     PANEL_DEFAULT

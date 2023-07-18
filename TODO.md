@@ -1,10 +1,12 @@
  - Add panel as a fixed var
+ - Add time as a fixed var
+ - Panel must have time
  - Add fixed variables in logit
  - Model average in Logit
  - Multiple features for logit
  - Features in Readme and Documentation
- - Validate that crossvalidation must not have panel
- - Validate preliminary selection must be used with ols
+ - Validates that variables must be > 1
+ - Panel can be string
 
 # TBD
  - A better description of the package in Readme and Documentation

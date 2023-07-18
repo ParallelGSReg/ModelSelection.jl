@@ -233,20 +233,26 @@ function get_insample_subset(
     depvar_data::Union{
         SharedArrays.SharedVector{Float64},
         SharedArrays.SharedVector{Float32},
-        SharedArrays.SharedVector{Union{Float32,Nothing}},
+        SharedArrays.SharedVector{Float16},
         SharedArrays.SharedVector{Union{Float64,Nothing}},
+        SharedArrays.SharedVector{Union{Float32,Nothing}},
+        SharedArrays.SharedVector{Union{Float16,Nothing}},
     },
     expvars_data::Union{
         SharedArrays.SharedMatrix{Float64},
         SharedArrays.SharedMatrix{Float32},
-        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Float16},
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float16,Nothing}},
     },
     fixedvariables_data::Union{
         SharedArrays.SharedArray{Float64},
         SharedArrays.SharedArray{Float32},
-        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Float16},
         SharedArrays.SharedArray{Union{Float64,Nothing}},
+        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Union{Float16,Nothing}},
         Nothing,
     },
     outsample::Union{Int64,Vector{Int64}},
@@ -314,20 +320,26 @@ function get_outsample_subset(
     depvar_data::Union{
         SharedArrays.SharedVector{Float64},
         SharedArrays.SharedVector{Float32},
-        SharedArrays.SharedVector{Union{Float32,Nothing}},
+        SharedArrays.SharedVector{Float16},
         SharedArrays.SharedVector{Union{Float64,Nothing}},
+        SharedArrays.SharedVector{Union{Float32,Nothing}},
+        SharedArrays.SharedVector{Union{Float16,Nothing}},
     },
     expvars_data::Union{
         SharedArrays.SharedMatrix{Float64},
         SharedArrays.SharedMatrix{Float32},
-        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Float16},
         SharedArrays.SharedMatrix{Union{Float64,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float32,Nothing}},
+        SharedArrays.SharedMatrix{Union{Float16,Nothing}},
     },
     fixedvariables_data::Union{
         SharedArrays.SharedArray{Float64},
         SharedArrays.SharedArray{Float32},
-        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Float16},
         SharedArrays.SharedArray{Union{Float64,Nothing}},
+        SharedArrays.SharedArray{Union{Float32,Nothing}},
+        SharedArrays.SharedArray{Union{Float16,Nothing}},
         Nothing,
     },
     outsample::Union{Int64,Vector{Int64}},
@@ -543,5 +555,20 @@ function validate_test(;
 )
     if ttest == true && ztest == true
         throw(ArgumentError(TTEST_ZTEST_BOTH_TRUE))
+    end
+end
+
+function validate_dataset(data::ModelSelectionData, outsample::Union{Int64,Vector{Int64}})
+    if isa(outsample, Int64)
+        outsample_obs = outsample
+    else
+        outsample_obs = size(outsample, 1)
+    end
+    fullexpvars = data.expvars
+    if data.fixedvariables !== nothing
+        fullexpvars = vcat(fullexpvars, data.fixedvariables)
+    end
+    if data.nobs - outsample_obs < size(fullexpvars, 1)
+        throw(ArgumentError(TOO_MANY_COVARIATES))
     end
 end

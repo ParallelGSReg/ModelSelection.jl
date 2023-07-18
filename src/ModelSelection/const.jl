@@ -1,5 +1,24 @@
 const CONS = :_cons
-const FAST = :fast
-const PRECISE = :precise
+const QR_64 = :qr_64
+const QR_32 = :qr_32
+const QR_16 = :qr_16
+const CHO_64 = :cho_64
+const CHO_32 = :cho_32
+const CHO_16 = :cho_16
+const SVD_64 = :svd_64
+const SVD_32 = :svd_32
+const SVD_16 = :svd_16
+const AVAILABLE_METHODS = [QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16]
 const NOTIFY_DEFAULT = nothing
-const AVAILABLE_METHODS = [FAST, PRECISE]
+const PROGRESS = :progress
+const METHODS_DATATYPES = Dict(
+    QR_64 => Float64,
+    QR_32 => Float32,
+    QR_16 => Float16,
+    CHO_64 => Float64,
+    CHO_32 => Float32,
+    CHO_16 => Float16,
+    SVD_64 => Float64,
+    SVD_32 => Float32,
+    SVD_16 => Float16,
+)

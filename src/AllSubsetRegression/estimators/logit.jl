@@ -213,7 +213,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         LogitLink(),
         start = zeros(size(fullexpvars_without_outsample_subset, 2)),
     )
-    start_coef = coeftable(gum_model).cols[1]
+    start_coef = coeftable(gum_model).cols[1] # FIXME: Convert to datatype
 
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 25))
     if nprocs() == nworkers()
@@ -467,10 +467,10 @@ function logit_execute_job!(
     fixedvariables::Union{Vector{Symbol},Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     intercept::Bool,
     time::Union{Symbol,Nothing},
     datatype::DataType,
@@ -602,10 +602,10 @@ function logit_execute_row!(
     fixedvariables::Union{Vector{Symbol},Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     intercept::Bool,
     time::Union{Symbol,Nothing},
     datatype::DataType,

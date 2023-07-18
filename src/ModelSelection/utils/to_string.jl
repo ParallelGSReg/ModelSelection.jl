@@ -39,7 +39,7 @@ end
 
 
 function sprintf_center(
-    text::Union{String,Symbol,Int32,Int64,Float32,Float64};
+    text::Union{String,Symbol,Int64,Int32,Int16,Float64,Float32,Float16};
     len::Int = LINE_LENGTH,
     new_line::Bool = false,
 )
@@ -91,7 +91,7 @@ function sprintf_variable(value::Symbol; left_padding::Int = 0, right_padding::I
 end
 
 function sprintf_variable(
-    value::Union{Float32,Float64};
+    value::Union{Float64,Float32,Float16};
     left_padding::Int = 0,
     right_padding::Int = 0,
 )
@@ -103,7 +103,7 @@ function sprintf_variable(
 end
 
 function sprintf_variable(
-    value::Union{Int32,Int64};
+    value::Union{Int64,Int32,Int16};
     left_padding::Int = 0,
     right_padding::Int = 0,
 )
@@ -121,10 +121,12 @@ function sprintf_label_values(
         Array{String},
         Int,
         Array{Int},
-        Float32,
-        Array{Float32},
         Float64,
         Array{Float64},
+        Float32,
+        Array{Float32},
+        Float16,
+        Array{Float16},
     };
     len::Int = HALF_LINE_LENGTH,
     new_line::Bool = false,
@@ -184,8 +186,7 @@ end
 function sprintf_covvar(varname, datanames_index, result, result_data)
     values = [result_data[datanames_index[Symbol(string(varname, "_b"))]]]
     if result.ttest !== nothing && result.ttest
-        values = vcat(
-            values,
+        values = vcat(values,
             [
                 result_data[datanames_index[Symbol(string(varname, "_bstd"))]],
                 result_data[datanames_index[Symbol(string(varname, "_t"))]],
@@ -224,6 +225,10 @@ function sprintf_covvars_block(
     end
     for varname in expvars
         if varname === CONS
+            continue
+        end
+        pos = datanames_index[Symbol(string(varname, "_b"))]
+        if result_data[pos] == 0
             continue
         end
         out *= sprintf_covvar(varname, datanames_index, result, result_data)

@@ -2,10 +2,12 @@ function gsr(
     estimator::Symbol,
     equation::Union{String,Array{String},Array{Symbol}},
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
@@ -32,7 +34,6 @@ function gsr(
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int64 = CrossValidation.NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
     notify = nothing,
 )
     removemissings = fe_lag === nothing
@@ -68,6 +69,7 @@ function gsr(
     original_data = copy_modelselectiondata(data)
 
     if preliminaryselection_enabled(preliminaryselection)
+        PreliminarySelection.validate_estimator(estimator)
         data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify)
         original_data.extras = data.extras
     end
@@ -88,7 +90,7 @@ function gsr(
     original_data.extras = data.extras
 
     if crossvalidation_enabled(kfoldcrossvalidation)
-        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare, notify = notify)
+        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, notify = notify)
     end
 
     data.original_data = original_data
@@ -118,7 +120,6 @@ function gsr(
     data.options[:orderresults] = orderresults
     data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
     data.options[:numfolds] = numfolds
-    data.options[:testsetshare] = testsetshare
 
     return data
 end

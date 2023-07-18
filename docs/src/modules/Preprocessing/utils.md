@@ -19,7 +19,6 @@ Pages = ["utils.md"]
 ```@docs
 Preprocessing.addextras!(
     data::ModelSelection.ModelSelectionData,
-    method::Symbol,
     seasonaladjustment::Union{Dict{Symbol,Int64},Nothing},
     removeoutliers::Bool,
 )
