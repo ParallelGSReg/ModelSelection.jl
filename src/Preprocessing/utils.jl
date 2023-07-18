@@ -1,7 +1,6 @@
 """
     addextras!(
-        data::ModelSelection.ModelSelectionData,
-        method::Symbol,
+        data::ModelSelectionData,
         seasonaladjustment::Union{Dict{Symbol,Int64},Nothing},
         removeoutliers::Bool,
     )
@@ -10,8 +9,7 @@ Adds extra information to the ModelSelectionData object.
 The function modifies the `data` object in-place and returns the modified object.
     
 # Parameters
-- `data::ModelSelection.ModelSelectionData`: The ModelSelectionData object to which the extra information will be added.
-- `method::Symbol`: The method symbol representing the estimation method used.
+- `data::ModelSelectionData`: The ModelSelectionData object to which the extra information will be added.
 - `seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}`: Additional seasonal adjustment information.
 - `removeoutliers::Bool`: A boolean indicating whether outliers should be removed.
 
@@ -20,18 +18,22 @@ The function modifies the `data` object in-place and returns the modified object
     TODO: Pending example.
 """
 function addextras!(
-    data::ModelSelection.ModelSelectionData,
-    method::Symbol,
+    data::ModelSelectionData,
     seasonaladjustment::Union{Dict{Symbol,Int64},Nothing},
     removeoutliers::Bool,
 )
-    data.extras[ModelSelection.generate_extra_key(PREPROCESSING_EXTRAKEY, data.extras)] =
+    datanames = vcat(data.depvar, data.expvars)
+    if data.fixedvariables !== nothing
+        datanames = vcat(datanames, data.fixedvariables)
+    end
+    data.extras[PREPROCESSING_EXTRAKEY] =
         Dict(
-            :datanames => vcat(data.depvar, data.expvars),
+            :datanames => datanames,
             :depvar => data.depvar,
             :expvars => data.expvars,
+            :fixedvariables => data.fixedvariables,
             :data => DEFAULT_DATANAME,
-            :method => method,
+            :method => data.method,
             :intercept => data.intercept,
             :panel => data.panel,
             :time => data.time,
@@ -178,17 +180,19 @@ equation = [:x, :z]
 """
 function filter_data_by_selected_columns(
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     equation::Vector{Symbol},
     datanames::Vector{Symbol},
 )
     columns = []
     for var in equation
-        append!(columns, ModelSelection.get_column_index(var, datanames))
+        append!(columns, get_column_index(var, datanames))
     end
     data = data[:, columns]
     datanames = datanames[columns]
@@ -237,10 +241,12 @@ datanames = get_datanames(data)
 """
 function get_datanames(
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
@@ -287,8 +293,10 @@ function get_datanames_from_data(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Union{Float32,Missing}},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     },
@@ -330,10 +338,10 @@ datatype = get_datatype(:invalid)
 ```
 """
 function get_datatype(method::Symbol)
-    if !(method in ModelSelection.AVAILABLE_METHODS)
+    if !(method in AVAILABLE_METHODS)
         return nothing
     end
-    return method == PRECISE ? Float64 : Float32
+    return METHODS_DATATYPES[method]
 end
 
 """
@@ -378,8 +386,10 @@ function get_rawdata_from_data(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     },
@@ -419,8 +429,10 @@ function remove_outliers!(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Union{Float32,Missing}},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
 )
     for column = 1:size(data, 2)
@@ -453,8 +465,10 @@ function remove_outliers!(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Union{Float32,Missing}},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     column::Int64,
 )
@@ -512,10 +526,12 @@ This function iterates over each variable specified in the variables dictionary 
 """
 function seasonal_adjustment!(
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
     variables::Dict{Symbol,Int64},
@@ -559,14 +575,16 @@ function seasonal_adjustment!(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Union{Float32,Missing}},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
     name::Symbol,
     factor::Int64,
 )
-    column = ModelSelection.get_column_index(name, datanames)
+    column = get_column_index(name, datanames)
     nobs = size(data, 2)
     col = @view(data[:, column])
     L = Int(round(nobs / 2 / factor)) * factor
@@ -626,17 +644,19 @@ sorted_data = sort_data(data, datanames, panel = panel_var, time = time_var)
 """
 function sort_data(
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol};
     time::Union{Symbol,Nothing} = nothing,
     panel::Union{Symbol,Nothing} = nothing,
 )
-    time_pos = ModelSelection.get_column_index(time, datanames)
-    panel_pos = ModelSelection.get_column_index(panel, datanames)
+    time_pos = get_column_index(time, datanames)
+    panel_pos = get_column_index(panel, datanames)
 
     if time_pos !== nothing && panel_pos !== nothing
         data = sortslices(data, by = x -> (x[panel_pos], x[time_pos]), dims = 1)
@@ -691,13 +711,15 @@ function validate_panel(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Union{Float32,Missing}},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
     panel::Symbol,
 )
-    return !any(ismissing, data[:, ModelSelection.get_column_index(panel, datanames)])
+    return !any(ismissing, data[:, get_column_index(panel, datanames)])
 end
 
 """
@@ -775,17 +797,19 @@ valid_time = validate_time(data, datanames, time_var, panel = panel_var)
 """
 function validate_time(
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
     time::Union{Symbol};
     panel::Union{Symbol,Nothing} = nothing,
 )
-    time_index = ModelSelection.get_column_index(time, datanames)
-    panel_index = ModelSelection.get_column_index(panel, datanames)
+    time_index = get_column_index(time, datanames)
+    panel_index = get_column_index(panel, datanames)
     if panel === nothing
         previous_value = data[1, time_index]
         for value in data[2:end, time_index]

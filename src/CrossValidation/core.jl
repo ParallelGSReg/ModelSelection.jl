@@ -1,17 +1,8 @@
-abstract type CrossValGenerator end
-
-struct LOOCV <: CrossValGenerator
-    n::Int64
+struct NumFolds
+    num::Int64
 end
 
-length(c::LOOCV) = c.n
-
-function iterate(c::LOOCV, s::Int = 1)
-    (s > c.n) && return nothing
-    return (leave_one_out(c.n, s), s + 1)
-end
-
-function leave_one_out(n::Int, i::Int)
+function leave_one_fold_out(n::Int, i::Int)
     @assert 1 <= i <= n
     x = Array{Int}(undef, n - 1)
     for j = 1:i-1
@@ -23,45 +14,63 @@ function leave_one_out(n::Int, i::Int)
     return x
 end
 
-function split_database(database::Array{Int,1}, k::Int)
+function Base.iterate(numfolds::NumFolds, state::Int64 = 1)
+    if numfolds.num < state
+        return nothing
+    end
+    return leave_one_fold_out(numfolds.num, state), state + 1
+end
+
+length(numfolds::NumFolds) = numfolds.num
+
+function split_database(database::Array{Int,1}, numfolds::Int)
     n = size(database, 1)
-    [database[(i-1)*(ceil(Int, n / k))+1:min(i * (ceil(Int, n / k)), n)] for i = 1:k]
+    [database[(i-1)*(ceil(Int, n / numfolds))+1:min(i * (ceil(Int, n / numfolds)), n)] for i = 1:numfolds]
 end
 
 function kfoldcrossvalidation!(
     data::ModelSelection.ModelSelectionData,
     original_data::ModelSelection.ModelSelectionData,
-    k::Int,
-    s::Float64;
+    numfolds::Int;
     notify = nothing,
 )
+    validate_panel_time(data)
+    validate_numfolds(data, numfolds)
+    
     obs_array = collect(1:original_data.nobs)
-    folds = split_database(obs_array, k)
+    folds = split_database(obs_array, numfolds)
 
     progress = 0
     total_step_porcentage = 70
-    step = floor(Int64, total_step_porcentage / k)
-    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
+    step = floor(Int64, total_step_porcentage / numfolds)
+    notification(notify, "Performing Cross validation", progress=progress)
+    asr_result = ModelSelection.getresult(data, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
 
     bestmodels = []
-    for obs in LOOCV(k)
-        testset = collect(Iterators.flatten(folds[obs]))
-        dataset = setdiff(1:original_data.nobs, testset)
-
-        reduced = ModelSelection.copy_modelselectiondata(original_data)
-        reduced.depvar_data = original_data.depvar_data[dataset]
-        reduced.expvars_data = original_data.expvars_data[dataset, :]
-        if reduced.fixedvariables !== nothing
-            reduced.fixedvariables_data = original_data.fixedvariables_data[dataset, :]
-        end 
-        reduced.nobs = size(dataset, 1)
-
+    cont = 1
+    for obs in NumFolds(numfolds)
+        dataset = collect(Iterators.flatten(folds[obs]))
+        testset = setdiff(1:original_data.nobs, dataset)
+        
+        model_data = ModelSelection.copy_modelselectiondata(original_data)
+        
         if haskey(data.extras, ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY)
-            preliminary_selection = ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY
+            reduced = ModelSelection.copy_modelselectiondata(original_data)
+            reduced.depvar_data = original_data.depvar_data[dataset]
+            reduced.expvars_data = original_data.expvars_data[dataset, :]
+            if reduced.fixedvariables !== nothing
+                reduced.fixedvariables_data = original_data.fixedvariables_data[dataset, :]
+            end 
+            reduced.nobs = size(dataset, 1)
+            
+            preliminary_selection = data.extras[ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY]
             ModelSelection.PreliminarySelection.preliminary_selection!(preliminary_selection[:preliminaryselection], reduced)
+
+            vars = reduced.extras[ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY][:vars]
+            model_data.expvars = data.expvars[vars]
+            model_data.expvars_data = data.expvars_data[:, vars]
         end
 
-        asr_result = ModelSelection.getresult(data, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
         estimator = asr_result.estimator
         if estimator == :ols
             criteria = :rmseout
@@ -73,32 +82,31 @@ function kfoldcrossvalidation!(
             ztest = asr_result.ztest
         end
         residualtest = asr_result.residualtest
-
-        reduced_result = ModelSelection.AllSubsetRegression.all_subset_regression!(
+        model_result = ModelSelection.AllSubsetRegression.all_subset_regression!(
             estimator,
-            reduced,
+            model_data,
             outsample = testset,
             criteria = criteria,
             ttest = ttest,
             ztest = ztest,
             residualtest = residualtest,
         )
-
+        ModelSelection.save_csv("result_"*string(cont)*".csv", model_data)
+        cont = cont + 1
         push!(
             bestmodels,
             Dict(
-                :data => reduced_result.bestresult_data,
-                :datanames => reduced_result.datanames,
+                :data => model_result.bestresult_data,
+                :datanames => model_result.datanames,
             ),
         )
         progress = progress + step
-        ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => progress))
+        notification(notify, "Performing Cross validation", progress=progress)
     end
 
-    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => total_step_porcentage))
+    notification(notify, "Performing Cross validation", progress=progress)
 
     datanames = unique(Iterators.flatten(model[:datanames] for model in bestmodels))
-
     crossvalidation_data = Array{Any,2}(zeros(size(bestmodels, 1), size(datanames, 1)))
 
     for (i, model) in enumerate(bestmodels)
@@ -107,20 +115,16 @@ function kfoldcrossvalidation!(
             crossvalidation_data[i, pos] = model[:data][f]
         end
     end
-
     replace!(crossvalidation_data, NaN => 0)
 
     average_data = mean(crossvalidation_data, dims = 1)
     median_data = median(crossvalidation_data, dims = 1)
-
     datanames_index = ModelSelection.create_datanames_index(datanames)
 
-    reduced_result = ModelSelection.getresult(reduced, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
     result = CrossValidationResult(
-        k,
-        0,
-        reduced_result.ttest,
-        reduced_result.ztest,
+        numfolds,
+        asr_result.ttest,
+        asr_result.ztest,
         datanames,
         average_data,
         median_data,
@@ -130,13 +134,13 @@ function kfoldcrossvalidation!(
     result.average_data[datanames_index[:nobs]] = Int64(round(result.average_data[datanames_index[:nobs]]))
     result.median_data[datanames_index[:nobs]] = Int64(round(result.median_data[datanames_index[:nobs]]))
 
-    reduced = ModelSelection.addresult!(data, result)
+    data = ModelSelection.addresult!(data, result)
     ModelSelection.addresult!(data, CROSSVALIDATION_EXTRAKEY, result)
-
     addextras!(data, result)
-    ModelSelection.notification(notify, "Performing Cross validation", Dict(:progress => 100))
+    notification(notify, "Performing Cross validation", progress=progress)
     return data
 end
+
 
 function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidationResult)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
@@ -144,16 +148,13 @@ function to_string(data::ModelSelection.ModelSelectionData, result::CrossValidat
     if :r2adj in result.datanames
         summary_variables[:r2adj] = Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)  # FIXME: Use the dictionary
     end
-    expvars = ModelSelection.get_selected_variables_varnames(
-        1, data.expvars, false,
-    )
 
     out = ModelSelection.sprintf_header_block("Cross validation average results")
     out *= ModelSelection.sprintf_depvar_block(data)
     out *= ModelSelection.sprintf_covvars_block(
         "Selected covariates",
         datanames_index,
-        expvars,
+        data.expvars,
         data,
         result,
         result.average_data,

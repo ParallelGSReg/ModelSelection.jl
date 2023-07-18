@@ -1,3 +1,19 @@
+function validate_numfolds(data::ModelSelection.ModelSelectionData, numfolds::Int64)
+    fullexpvars = data.expvars
+    if data.fixedvariables !== nothing
+        fullexpvars = vcat(fullexpvars, data.fixedvariables)
+    end
+    if data.nobs / numfolds < size(fullexpvars, 1)
+        throw(ArgumentError(NUMFOLD_TO_LARGE))
+    end
+end
+
+function validate_panel_time(data::ModelSelection.ModelSelectionData)
+    if data.panel !== nothing || data.time !== nothing
+        throw(ArgumentError(PANEL_TIME_NOT_SUPPORTED))
+    end
+end
+
 """
 Add extra data to data
 # Parameters
@@ -10,7 +26,6 @@ function addextras!(data, result)
             :ttest => result.ttest,
             :ztest => result.ztest,
             :kfolds => result.k,
-            :tsetsize => result.s,
             :panel => data.panel,
             :time => data.time,
             :datanames => result.datanames,
@@ -19,3 +34,4 @@ function addextras!(data, result)
         )
     return data
 end
+

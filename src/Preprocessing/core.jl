@@ -102,8 +102,10 @@ function input(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
@@ -234,8 +236,10 @@ function input(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
@@ -369,8 +373,10 @@ function input(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
@@ -385,7 +391,7 @@ function input(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
     notify = NOTIFY_DEFAULT,
 )
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 10))
+    notification(notify, NOTIFY_MESSAGE, progress=10)
 
     datanames = get_datanames(data, datanames = datanames)
     if datanames === nothing
@@ -398,12 +404,8 @@ function input(
     end
     data = get_rawdata_from_data(data)
 
-    if !ModelSelection.in_vector(equation, datanames)
-        msg = string(
-            SELECTED_VARIABLES_DOES_NOT_EXISTS,
-            ": ",
-            equation[(!in).(equation, Ref(datanames))],
-        )
+    if !in_vector(equation, datanames)
+        msg = string(SELECTED_VARIABLES_DOES_NOT_EXISTS, ": ", equation[(!in).(equation, Ref(datanames))])
         throw(ArgumentError(msg))
     end
 
@@ -412,20 +414,12 @@ function input(
             fixedvariables = Vector([fixedvariables])
         end
         fixedvariables = Vector{Symbol}(fixedvariables)
-        if !ModelSelection.in_vector(fixedvariables, datanames)
-            msg = string(
-                SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS,
-                ": ",
-                fixedvariables[(!in).(fixedvariables, Ref(datanames))],
-            )
+        if !in_vector(fixedvariables, datanames)
+            msg = string(SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS, ": ", fixedvariables[(!in).(fixedvariables, Ref(datanames))])
             throw(ArgumentError(msg))
         end
-        if ModelSelection.in_vector(fixedvariables, equation)
-            msg = string(
-                SELECTED_FIXED_VARIABLES_IN_EQUATION,
-                ": ",
-                fixedvariables[(in).(fixedvariables, Ref(equation))],
-            )
+        if in_vector(fixedvariables, equation)
+            msg = string(SELECTED_FIXED_VARIABLES_IN_EQUATION, ": ", fixedvariables[(in).(fixedvariables, Ref(equation))])
             throw(ArgumentError(msg))
         end
     end
@@ -435,14 +429,14 @@ function input(
     end
 
     if time !== nothing
-        if ModelSelection.get_column_index(time, datanames) === nothing
+        if get_column_index(time, datanames) === nothing
             msg = string(TIME_VARIABLE_INEXISTENT, ": ", time)
             throw(ArgumentError(msg))
         end
     end
 
     if panel !== nothing
-        if ModelSelection.get_column_index(panel, datanames) === nothing
+        if get_column_index(panel, datanames) === nothing
             msg = string(PANEL_VARIABLE_INEXISTENT, ": ", panel)
             throw(ArgumentError(msg))
         end
@@ -462,9 +456,8 @@ function input(
         removemissings = removemissings,
         notify = notify,
     )
-    modelselection_data =
-        addextras!(modelselection_data, method, seasonaladjustment, removeoutliers)
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 100))
+    modelselection_data = addextras!(modelselection_data, seasonaladjustment, removeoutliers)
+    notification(notify, NOTIFY_MESSAGE, progress=100)
     return modelselection_data
 end
 
@@ -564,8 +557,10 @@ function execute(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
     method::Symbol,
@@ -579,23 +574,22 @@ function execute(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
     notify = NOTIFY_DEFAULT,
 )
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 20))
+    notification(notify, NOTIFY_MESSAGE, progress=20)
 
     temp_equation = equation
     if fixedvariables !== nothing
         for fixedvariable in fixedvariables
-            if ModelSelection.get_column_index(fixedvariable, temp_equation) === nothing
+            if get_column_index(fixedvariable, temp_equation) === nothing
                 temp_equation = vcat(temp_equation, fixedvariable)
             end
         end
     end
 
-    if panel !== nothing &&
-       ModelSelection.get_column_index(panel, temp_equation) === nothing
+    if panel !== nothing && get_column_index(panel, temp_equation) === nothing
         temp_equation = vcat(temp_equation, panel)
     end
 
-    if time !== nothing && ModelSelection.get_column_index(time, temp_equation) === nothing
+    if time !== nothing && get_column_index(time, temp_equation) === nothing
         temp_equation = vcat(temp_equation, time)
     end
 
@@ -605,7 +599,7 @@ function execute(
     panel_data = nothing
     if panel !== nothing
         if validate_panel(data, datanames, panel)
-            panel_data = data[:, ModelSelection.get_column_index(panel, datanames)]
+            panel_data = data[:, get_column_index(panel, datanames)]
         else
             throw(ArgumentError(PANEL_ERROR))
         end
@@ -614,7 +608,7 @@ function execute(
     time_data = nothing
     if time !== nothing
         if validate_time(data, datanames, time, panel = panel)
-            time_data = data[:, ModelSelection.get_column_index(time, datanames)]
+            time_data = data[:, get_column_index(time, datanames)]
         else
             throw(ArgumentError(TIME_ERROR))
         end
@@ -630,7 +624,7 @@ function execute(
     if fixedvariables !== nothing
         cols = []
         for fixedvariable in fixedvariables
-            push!(cols, ModelSelection.get_column_index(fixedvariable, datanames))
+            push!(cols, get_column_index(fixedvariable, datanames))
         end
         fixedvariables_data = data[:, cols]
     end
@@ -657,7 +651,7 @@ function execute(
 
     if removemissings
         depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
-            ModelSelection.filter_raw_data_by_empty_values(
+            filter_raw_data_by_empty_values(
                 datatype,
                 depvar_data,
                 expvars_data,
@@ -668,7 +662,7 @@ function execute(
     end
 
     depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
-        ModelSelection.convert_raw_data(
+        convert_raw_data(
             datatype,
             depvar_data,
             expvars_data,
@@ -678,7 +672,7 @@ function execute(
         )
 
     nobs = size(depvar_data, 1)
-    modelselection_data = ModelSelection.ModelSelectionData(
+    modelselection_data = ModelSelectionData(
         equation,
         depvar,
         expvars,

@@ -62,6 +62,9 @@ function all_subset_regression!(
     notify = nothing
 )
     validate_test(ttest = ttest, ztest = ztest)
+    if outsample === nothing
+        outsample = OUTSAMPLE_DEFAULT
+    end
 
     if estimator == :ols
         return AllSubsetRegression.ols!(

@@ -1,11 +1,3 @@
-# TODO: Merge _lasso! and lasso!
-function _lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
-    res = lasso!(data, notify=notify)
-
-
-    return res[1]
-end
-
 function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
     ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 0))
     betas, lambda = lassoselection(data)
@@ -18,13 +10,12 @@ function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
 
     vars = map(b -> b != 0, betas)
     lassonumvars = size(filter(b -> b != 0, betas), 1)
-
     vars = vars[1:size(data.expvars, 1)]
-
     if data.intercept
         vars[ModelSelection.get_column_index(CONS, data.expvars)] = true
     end
 
+    # FIXME: Move to a function
     data.expvars = data.expvars[vars]
     data.expvars_data = data.expvars_data[:, vars]
 

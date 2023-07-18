@@ -1,3 +1,9 @@
+function validate_estimator(estimator::Symbol)
+    if estimator !== :ols
+        throw(ArgumentError(ESTIMATOR_NOT_SUPPORTED))
+    end
+end
+
 """
 Add values to extras
 """
@@ -10,9 +16,6 @@ function addextras!(data, lassonumvars, betas, lambda, vars)
         :nobs => data.nobs,
         :vars => vars,
     )
-    data.extras[ModelSelection.generate_extra_key(
-        PRELIMINARYSELECTION_EXTRAKEY,
-        data.extras,
-    )] = extras
+    data.extras[PRELIMINARYSELECTION_EXTRAKEY] = extras
     return data
 end

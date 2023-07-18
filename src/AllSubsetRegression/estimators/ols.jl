@@ -57,7 +57,12 @@ function ols!(
     elseif isa(criteria, Symbol)
         criteria = Vector{Symbol}([criteria])
     end
+    if outsample === nothing
+        outsample = OUTSAMPLE_DEFAULT
+    end
     validate_criteria(criteria, OLS_CRITERIA_AVAILABLE)
+    validate_dataset(data, outsample)
+
     result = create_result(
         :ols,
         data,
@@ -124,10 +129,23 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     if data.fixedvariables_data !== nothing
         fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
     end
-    result_data =
-        fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
+    panel_data = nothing
+    if data.panel_data !== nothing
+        panel_data = convert(SharedArray, data.panel_data)
+    end
+    time_data = nothing
+    if data.time_data !== nothing
+        time_data = convert(SharedArray, data.time_data)
+    end
+    result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 25))
+    
+    panel_values = nothing
+    if data.panel !== nothing
+        panel_values = unique(data.panel_data)
+    end
+    
     if nprocs() == nworkers()
         for order = 1:num_operations
             ols_execute_row!(
@@ -135,13 +153,17 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 data.depvar,
                 data.expvars,
                 data.fixedvariables,
+                data.panel,
+                data.time,
                 datanames_index,
                 depvar_data,
                 expvars_data,
                 fixedvariables_data,
+                panel_data,
+                time_data,
                 result_data,
+                panel_values,
                 data.intercept,
-                data.time,
                 data.datatype,
                 data.method,
                 result.outsample,
@@ -168,13 +190,17 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     data.depvar,
                     data.expvars,
                     data.fixedvariables,
+                    data.panel,
+                    data.time,
                     datanames_index,
                     depvar_data,
                     expvars_data,
                     fixedvariables_data,
+                    panel_data,
+                    time_data,
                     result_data,
+                    panel_values,
                     data.intercept,
-                    data.time,
                     data.datatype,
                     data.method,
                     result.outsample,
@@ -197,13 +223,17 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     data.depvar,
                     data.expvars,
                     data.fixedvariables,
+                    data.panel,
+                    data.time,
                     datanames_index,
                     depvar_data,
                     expvars_data,
                     fixedvariables_data,
+                    panel_data,
+                    time_data,
                     result_data,
+                    panel_values,
                     data.intercept,
-                    data.time,
                     data.datatype,
                     data.method,
                     result.outsample,
@@ -250,7 +280,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
             result.data[:, datanames_index[:order]]
         w1 = exp.(-delta / 2)
         result.data[:, datanames_index[:weight]] = w1 ./ sum(w1)
-        result.modelavg_data = Vector{Union{Int64,Float64}}(undef, size(result.datanames))
+        result.modelavg_data = Vector{Union{Int64,data.datatype}}(undef, size(result.datanames))
         weight_pos = (result.ttest) ? 4 : 2
         for expvar in data.expvars
             obs = result.data[:, datanames_index[Symbol(string(expvar, "_b"))]]
@@ -285,8 +315,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 )
             end
         end
-        result.modelavg_data[datanames_index[:nobs]] =
-            Int64(round(result.modelavg_data[datanames_index[:nobs]]))
+        result.modelavg_data[datanames_index[:nobs]] = Int64(round(result.modelavg_data[datanames_index[:nobs]]))
     end
 
     if result.orderresults
@@ -319,10 +348,10 @@ end
         expvars::Vector{Symbol},
         fixedvariables::Union{Vector{Symbol},Nothing},
         datanames_index::Dict{Symbol, Int64},
-        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+        expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+        fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+        result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
         intercept::Bool,
         time::Union{Symbol,Nothing},
         datatype::DataType,
@@ -346,13 +375,13 @@ This function is intended for use with multi-core parallel processing.
    model.
 - `datanames_index::Dict{Symbol, Int64}`: A dictionary that maps variable names to their
    corresponding column indices in the result_data array.
-- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+- `depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: The data for the
    dependent variable.
-- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+- `expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: The data for the
    explanatory variables.
-- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+- `fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing}`: The data
    for the fixed variables, or `nothing` if no fixed variables are present.
-- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for storing the
+- `result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: The data for storing the
    results of the OLS regression analyses.
 - `intercept::Bool`: Whether the regression model should include an intercept term.
 - `time::Union{Symbol,Nothing}`: The time variable in the regression model.
@@ -403,13 +432,17 @@ function ols_execute_job!(
     depvar::Symbol,
     expvars::Vector{Symbol},
     fixedvariables::Union{Vector{Symbol},Nothing},
-    datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    intercept::Bool,
+    panel::Union{Symbol,Nothing},
     time::Union{Symbol,Nothing},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    panel_values::Union{Vector{Float64},Vector{Float32},Vector{Float16},Nothing},
+    intercept::Bool,
     datatype::DataType,
     method::Symbol,
     outsample::Union{Int64,Vector{Int64},Nothing},
@@ -424,13 +457,17 @@ function ols_execute_job!(
             depvar,
             expvars,
             fixedvariables,
+            panel,
+            time,
             datanames_index,
             depvar_data,
             expvars_data,
             fixedvariables_data,
+            panel_data,
+            time_data,
             result_data,
+            panel_values,
             intercept,
-            time,
             datatype,
             method,
             outsample,
@@ -451,10 +488,10 @@ end
         expvars::Vector{Symbol},
         fixedvariables::Union{Vector{Symbol},Nothing},
         datanames_index::Dict{Symbol, Int64},
-        depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-        expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-        fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-        result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+        depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+        expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+        fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+        result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
         intercept::Bool,
         time::Union{Symbol,Nothing},
         datatype::DataType,
@@ -479,13 +516,13 @@ supports out-of-sample testing, t-tests, and residual tests.
 - `fixedvariables::Union{Vector{Symbol},Nothing}`: The fixed variables in the regression
    model.
 - `datanames_index::Dict{Symbol, Int64}`: The index for data names.
-- `depvar_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+- `depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: The data for the
    dependent variable.
-- `expvars_data::Union{SharedArray{Float32},SharedArray{Float64}}`: The data for the
+- `expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: The data for the
    explanatory variables.
-- `fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing}`: The data
+- `fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing}`: The data
    for the fixed variables, or `nothing` if no fixed variables are present.
-- `result_data::Union{SharedArray{Float32},SharedArray{Float64}}`: A pre-allocated
+- `result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}}`: A pre-allocated
    SharedArray to store the results of the OLS estimation.
 - `intercept::Bool`: Whether the regression model should include an intercept term.
 - `time::Union{Symbol,Nothing}`: The time variable in the regression model.
@@ -539,13 +576,17 @@ function ols_execute_row!(
     depvar::Symbol,
     expvars::Vector{Symbol},
     fixedvariables::Union{Vector{Symbol},Nothing},
-    datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    intercept::Bool,
+    panel::Union{Symbol,Nothing},
     time::Union{Symbol,Nothing},
+    datanames_index::Dict{Symbol,Int64},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    panel_values::Union{Vector{Float64},Vector{Float32},Vector{Float16},Nothing},
+    intercept::Bool,
     datatype::DataType,
     method::Symbol,
     outsample::Union{Int64,Vector{Int64},Nothing},
@@ -556,8 +597,7 @@ function ols_execute_row!(
     num_job::Union{Int64,Nothing} = nothing,
     iteration_num::Union{Int64,Nothing} = nothing,
 )
-    selected_variables_index =
-        ModelSelection.get_selected_variables(order, expvars, intercept)
+    selected_variables_index = ModelSelection.get_selected_variables(order, expvars, intercept)
     depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
         depvar_data,
         expvars_data,
@@ -566,7 +606,6 @@ function ols_execute_row!(
         selected_variables_index,
     )
     outsample_enabled = size(depvar_subset, 1) < size(depvar_data, 1)
-
     fullexpvars_subset = expvars_subset
     if fixedvariables_subset !== nothing
         fullexpvars_subset = hcat(fullexpvars_subset, fixedvariables_subset)
@@ -575,15 +614,18 @@ function ols_execute_row!(
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
 
-    if method == PRECISE
-        fact = qr(fullexpvars_subset)
-        denominator = depvar_subset
-    elseif method == FAST
-        fact = cholesky(fullexpvars_subset'fullexpvars_subset)
-        denominator = fullexpvars_subset'depvar_subset
-    else
-        error(INVALID_METHOD)
-    end
+    if method in [QR_64, QR_32, QR_16] 
+		fact = qr(fullexpvars_subset)
+		denominator = depvar_subset
+	elseif method in [CHO_64, CHO_32, CHO_16] 
+		fact = cholesky(fullexpvars_subset'fullexpvars_subset)
+		denominator = fullexpvars_subset'depvar_subset
+	elseif method in [SVD_64, SVD_32, SVD_16] 
+		fact = svd(fullexpvars_subset)
+		denominator = depvar_subset
+	else
+		error(INVALID_METHOD)
+	end
 
     b = fact \ denominator                 # estimate
     ŷ = fullexpvars_subset * b            # predicted values
@@ -594,7 +636,7 @@ function ols_execute_row!(
     rmse = sqrt(sse / nobs)               # root mean squared error
     r2 = 1 - var(er) / var(depvar_subset) # model R-squared
     r2adj = 1-(1-r2)*((nobs-1)/df_e)      # adjusted R-squared
-    F=(r2/(ncoef-1))/((1-r2)/df_e)        # F-statistic
+    F= (r2/(ncoef-1))/((1-r2)/df_e)        # F-statistic
 
     if ttest
         if method == PRECISE
@@ -602,12 +644,21 @@ function ols_execute_row!(
         elseif method == FAST
             uptriang = UpperTriangular(fact.U)
         end
-        bstd =
-            sqrt.(
-                sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) *
-                (sse / df_e)
-            ) # std deviation of coefficients
+        bstd = sqrt.(sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)) # std deviation of coefficients
     end
+
+    if ttest
+        if method in [QR_64, QR_32, QR_16] 
+			diagvcov = sum((UpperTriangular(fact.R) \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)
+		elseif method in [CHO_64, CHO_32, CHO_16]
+			diagvcov = sum((UpperTriangular(fact.U) \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)
+		elseif method in [SVD_64, SVD_32, SVD_16]
+			diagvcov = diag(fact.V * diagm(fact.S)^(-2) * fact.Vt * (sse / df_e))
+		else
+			error(INVALID_METHOD)
+		end
+		bstd = sqrt.(diagvcov) # std deviation of coefficients
+	end
 
     if outsample_enabled > 0
         depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
@@ -620,8 +671,7 @@ function ols_execute_row!(
             )
         fullexpvars_outsample_subset = expvars_outsample_subset
         if fixedvariables_outsample_subset !== nothing
-            fullexpvars_outsample_subset =
-                hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
         end
 
         # out-of-sample residuals
@@ -640,51 +690,27 @@ function ols_execute_row!(
 
     result_data[order, datanames_index[:index]] = order
     for (index, selected_variable_index) in enumerate(selected_variables_index)
-        result_data[
-            order,
-            datanames_index[Symbol(string(expvars[selected_variable_index], "_b"))],
-        ] = datatype(b[index])
+        variable_b = datanames_index[Symbol(string(expvars[selected_variable_index], "_b"))]
+        result_data[order, variable_b] = datatype(b[index])
         if ttest
-            result_data[
-                order,
-                datanames_index[Symbol(string(expvars[selected_variable_index], "_bstd"))],
-            ] = datatype(bstd[index])
-            result_data[
-                order,
-                datanames_index[Symbol(string(expvars[selected_variable_index], "_t"))],
-            ] =
-                result_data[
-                    order,
-                    datanames_index[Symbol(string(expvars[selected_variable_index], "_b"))],
-                ] / result_data[
-                    order,
-                    datanames_index[Symbol(
-                        string(expvars[selected_variable_index], "_bstd"),
-                    )],
-                ]
+            variable_bstd = datanames_index[Symbol(string(expvars[selected_variable_index], "_bstd"))]
+            variable_t = datanames_index[Symbol(string(expvars[selected_variable_index], "_t"))]
+            result_data[order, variable_bstd] = datatype(bstd[index])
+            result_data[order, variable_t] = result_data[order, variable_b] / result_data[order, variable_bstd]
         end
     end
 
     if fixedvariables !== nothing
         selected_variables_length = length(selected_variables_index)
-
         for (index, fixedvariable) in enumerate(fixedvariables)
             actual_index = selected_variables_length + index
-            result_data[order, datanames_index[Symbol(string(fixedvariable, "_b"))]] =
-                datatype(b[actual_index])
+            variable_b = datanames_index[Symbol(string(fixedvariable, "_b"))]
+            result_data[order, variable_b] = datatype(b[actual_index])
             if ttest
-                result_data[
-                    order,
-                    datanames_index[Symbol(string(fixedvariable, "_bstd"))],
-                ] = datatype(bstd[actual_index])
-                result_data[order, datanames_index[Symbol(string(fixedvariable, "_t"))]] =
-                    result_data[
-                        order,
-                        datanames_index[Symbol(string(fixedvariable, "_b"))],
-                    ] / result_data[
-                        order,
-                        datanames_index[Symbol(string(fixedvariable, "_bstd"))],
-                    ]
+                variable_bstd = datanames_index[Symbol(string(fixedvariable, "_bstd"))]
+                variable_t = datanames_index[Symbol(string(fixedvariable, "_t"))]
+                result_data[order, variable_bstd] = datatype(bstd[actual_index])
+                result_data[order, variable_t] = result_data[order, variable_b] / result_data[order, variable_bstd]
             end
         end
     end
@@ -699,8 +725,7 @@ function ols_execute_row!(
     result_data[order, datanames_index[:F]] = datatype(F)
 
     if :aic in criteria || :aicc in criteria
-        aic =
-            2 * result_data[order, datanames_index[:ncoef]] +
+        aic = 2 * result_data[order, datanames_index[:ncoef]] +
             result_data[order, datanames_index[:nobs]] * log(
                 result_data[order, datanames_index[:sse]] /
                 result_data[order, datanames_index[:nobs]],
@@ -748,13 +773,19 @@ function ols_execute_row!(
         jbtest = 1 .- cdf(d, statistic)
 
         regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-        if method == PRECISE
-            factw = qr(regmatw)
-            denominatorw = er2
-        elseif method == FAST
-            factw = cholesky(regmatw'regmatw)
-            denominatorw = regmatw'er2
-        end
+        if method in [QR_64, QR_32, QR_16] 
+			factw = qr(regmatw)
+			denominatorw = er2
+		elseif method in [CHO_64, CHO_32, CHO_16] 
+			factw = cholesky(regmatw'regmatw)
+			denominatorw = regmatw'er2
+		elseif method in [SVD_64, SVD_32, SVD_16] # FIXME: Refactor to a const
+			factw = svd(regmatw)
+			denominatorw = er2
+		else
+			error(INVALID_METHOD)
+		end
+
         regcoeffw = factw \ denominatorw
         residw = er2 - regmatw * regcoeffw
         rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
@@ -776,13 +807,19 @@ function ols_execute_row!(
 
             offset = lag
             regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-            if method == PRECISE
-                factbg = qr(regmatbg)
-                denominatorbg = e[offset+1:end]
-            elseif method == FAST
-                factbg = cholesky(regmatbg'regmatbg)
-                denominatorbg = regmatbg'e[offset+1:end]
-            end
+            if method in [QR_64, QR_32, QR_16] 
+				factbg = qr(regmatbg)
+				denominatorbg = e[offset+1:end]
+			elseif method in [CHO_64, CHO_32, CHO_16] 
+				factbg = cholesky(regmatbg'regmatbg)
+				denominatorbg = regmatbg'e[offset+1:end]
+			elseif method in [SVD_64, SVD_32, SVD_16]
+				factbg = svd(regmatbg)
+				denominatorbg = e[offset+1:end]
+			else
+				error(METHOD_INVALID)
+			end
+
             regcoeffbg = factbg \ denominatorbg
             residbg = e[offset+1:end] .- regmatbg * regcoeffbg
 
