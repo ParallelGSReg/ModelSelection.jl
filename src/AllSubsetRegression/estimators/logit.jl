@@ -663,7 +663,7 @@ function logit_execute_row!(
     b = coef(model)
     #ŷ = predict(model)
     er2 = model.rr.devresid                  # model.rr.devresid #squared errors
-    #er=er2^(0.5)
+    er=er2^(0.5)
     sse = sum(er2)                           # deviance residual sum of squares
     df_e = nobs - ncoef                     # degrees of freedom	
     rmse = sqrt(sse / nobs)                  # root mean squared error using deviance residuals
