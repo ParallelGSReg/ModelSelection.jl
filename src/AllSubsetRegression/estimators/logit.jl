@@ -763,48 +763,60 @@ function logit_execute_row!(
     end
 
     if residualtest
-    	x = er
-    	n = length(x)
-    	m1 = sum(x) / n
-    	m2 = sum((x .- m1) .^ 2) / n
-    	m3 = sum((x .- m1) .^ 3) / n
-    	m4 = sum((x .- m1) .^ 4) / n
-    	b1 = (m3 / m2^(3 / 2))^2
-    	b2 = (m4 / m2^2)
-    	statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
-    	d = Chisq(2.0)
-    	jbtest = 1 .- cdf(d, statistic)
-    
-    	regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-    	qrfw = qr(regmatw)
-    	regcoeffw = qrfw \ er2
-    	residw = er2 - regmatw * regcoeffw
-    	rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
-    	statisticw = n * rsqw
-    	wtest = ccdf(Chisq(2), statisticw)
-    
-    	result_data[order, datanames_index[:wtest]] = wtest
-    	result_data[order, datanames_index[:jbtest]] = jbtest
-    	if time !== nothing
-    		e = er
-    		lag = 1
-    		xmat = fullexpvars_subset #deberia incluir fixedvariables
-    
-    		n = size(e, 1)
-    		elag = zeros(Float64, n, lag)
-    		for ii in 1:lag
-    			elag[ii+1:end, ii] = e[1:end-ii]
-    		end
-    
-    		offset = lag
-    		regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-    		qrfbg = qr(regmatbg)
-    		regcoeffbg = qrfbg \ e[offset+1:end]
-    		residbg = e[offset+1:end] .- regmatbg * regcoeffbg
-    		rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end]) # uncentered R^2
-    		statisticbg = (n - offset) * rsqbg
-    		bgtest = ccdf(Chisq(lag), statisticbg)
-    		result_data[order, datanames_index[:bgtest]] = bgtest
-    	end
+        x = er
+        n = length(x)
+        m1 = sum(x) / n
+        m2 = sum((x .- m1) .^ 2) / n
+        m3 = sum((x .- m1) .^ 3) / n
+        m4 = sum((x .- m1) .^ 4) / n
+        b1 = (m3 / m2^(3 / 2))^2
+        b2 = (m4 / m2^2)
+        statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
+        d = Chisq(2.0)
+        jbtest = 1 .- cdf(d, statistic)
+        # there is controversy about the normality assumption for nonlinear models.
+
+        xb_predict = model.pp.eta
+        interactions = xb_predict .* fullexpvars_subset
+        fullexpvars_with_interactions = hcat(fullexpvars_subset, interactions)
+        model_het = GLM.fit(
+            GeneralizedLinearModel,
+            fullexpvars_with_interactions,
+            depvar_subset,
+            Binomial(),
+            LogitLink(),
+        )
+        ll2= GLM.loglikelihood(model_het)
+        statisticw = 2*(ll2-ll)
+        wtest = ccdf(Chisq(ncoef), statisticw)    
+        # we use a LR test  for heteroskedasticity as a variation of the Wooldridge (2010) LM test.       
+        
+        result_data[order, datanames_index[:wtest]] = wtest
+        result_data[order, datanames_index[:jbtest]] = jbtest
+
+        if time !== nothing
+            er_mean = mean(er)
+            x = [i < er_mean ? 0 : 1 for i in er]
+            n = length(x)
+            nabove = sum(x)
+            nbelow = n - nabove
+            
+            # Get the expected value and standard deviation
+            μ = 1 + 2 * nabove * (nbelow / n)
+            σ = sqrt((μ - 1) * (μ - 2) / (n - 1))
+        
+            # Get the number of runs
+            nruns = 1
+            for k in 1:(n - 1)
+                @inbounds if x[k] != x[k + 1]
+                    nruns += 1
+                end
+            end
+        
+            # calculate simple z-statistic
+            z = (nruns - μ) / σ
+            wwtest = ccdf(Normal(), z)
+            result_data[order, datanames_index[:wwtest]] = wwtest
+        end
     end
 end
