@@ -776,7 +776,7 @@ function logit_execute_row!(
         jbtest = 1 .- cdf(d, statistic)
         # there is controversy about the normality assumption for nonlinear models.
 
-        xb_predict = model.pp.eta
+        xb_predict = model.rr.eta
         interactions = xb_predict .* fullexpvars_subset
         fullexpvars_with_interactions = hcat(fullexpvars_subset, interactions)
         model_het = GLM.fit(
