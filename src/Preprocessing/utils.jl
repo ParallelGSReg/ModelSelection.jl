@@ -33,7 +33,7 @@ function addextras!(
             :expvars => data.expvars,
             :fixedvariables => data.fixedvariables,
             :data => DEFAULT_DATANAME,
-            :method => data.method,
+            :datatype => data.datatype,
             :intercept => data.intercept,
             :panel => data.panel,
             :time => data.time,
@@ -308,40 +308,6 @@ function get_datanames_from_data(
         datanames = map(Symbol, vec(data[2]))
     end
     return datanames
-end
-
-
-"""
-    get_datatype(method::Symbol)
-            
-Get the datatype based on the specified method.
-
-# Parameters
-- `method::Symbol`: The method for which to determine the datatype.
-
-# Returns
-- `Symbol`: The datatype corresponding to the specified method.
-- `Nothing`: If the specified method is invalid.
-
-# Example
-```julia
-datatype = get_datatype(:precise)
-# datatype: Float64
-```
-```julia
-datatype = get_datatype(:fast)
-# datatype: Float32
-```
-```julia
-datatype = get_datatype(:invalid)
-# datatype: nothing
-```
-"""
-function get_datatype(method::Symbol)
-    if !(method in AVAILABLE_METHODS)
-        return nothing
-    end
-    return METHODS_DATATYPES[method]
 end
 
 """

@@ -3,26 +3,32 @@ Pkg.activate(".")
 using CSV, DataFrames, Distributions
 using ModelSelection
 
-data = CSV.read("test/data/visitors.csv", DataFrame)
-p = 0.3
-N = size(data, 1)
-d = Binomial(1, p)
-data[!, :y] = rand(d, N)
-
-model = ModelSelection.gsr(
+data = CSV.read("test/data/15x1000.csv", DataFrame)
+@time model = ModelSelection.gsr(
     :ols,
-    "australia china japan",
-    fixedvariables=:uk,
-    # modelavg=true,
+    "y x1 x2 x3 x4",
     data,
-    kfoldcrossvalidation=true,
-    numfolds=20,
+    method=:svd_32,
+)
+"""
+using Pkg
+Pkg.activate(".")
+using CSV, DataFrames, Distributions
+using ModelSelection
+
+data = CSV.read("test/data/15x1000.csv", DataFrame)
+@time model = ModelSelection.gsr(
+    :ols,
+    "y x1 x2",
+    data,
+    modelavg=true,
+    method=:cho_64,
 )
 
 ModelSelection.save_csv("result.csv", model)
 println(model)
 
-"""
+
 ModelSelection.save("result.jld", model) 
 results = ModelSelection.load("result.jld")
 """

@@ -18,7 +18,6 @@ function copy_modelselectiondata(data::ModelSelectionData)
         data.panel_data !== nothing ? copy(data.panel_data) : nothing,
         data.intercept,
         data.datatype,
-        data.method,
         data.removemissings,
         data.nobs,
     )

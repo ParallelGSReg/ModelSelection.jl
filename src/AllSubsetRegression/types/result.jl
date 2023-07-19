@@ -55,6 +55,7 @@ result = AllSubsetRegressionResult(
 mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     estimator::Symbol
     datanames::Vector{Symbol}
+    method::Symbol
     modelavg_datanames::Union{Vector{Symbol},Nothing}
     data::Union{
        Array{Float64},
@@ -79,6 +80,7 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     function AllSubsetRegressionResult(
         estimator::Symbol,
         datanames::Vector{Symbol},
+        method::Symbol,
         modelavg_datanames::Union{Vector{Symbol},Nothing},
         outsample::Union{Int64,Vector{Int64},Nothing},
         criteria::Vector{Symbol},
@@ -92,6 +94,7 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
         new(
             estimator,
             datanames,
+            method,
             modelavg_datanames,
             nothing,
             nothing,

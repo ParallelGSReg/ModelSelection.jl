@@ -43,6 +43,7 @@ updated_data = ols!(model_selection_data)
 """
 function ols!(
     data::ModelSelectionData;
+    method::Union{Symbol,Nothing} = OLS_METHOD_DEFAULT,
     outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
     criteria::Union{Symbol,Vector{Symbol},Nothing} = OLS_CRITERIA_DEFAULT,
     ttest::Bool = TTEST_DEFAULT,
@@ -52,11 +53,15 @@ function ols!(
     notify = nothing
 )
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 0))
+    if method === nothing
+        method = OLS_METHOD_DEFAULT
+    end
     if criteria === nothing
         criteria = OLS_CRITERIA_DEFAULT
     elseif isa(criteria, Symbol)
         criteria = Vector{Symbol}([criteria])
     end
+    
     if outsample === nothing
         outsample = OUTSAMPLE_DEFAULT
     end
@@ -65,6 +70,7 @@ function ols!(
 
     result = create_result(
         :ols,
+        method,
         data,
         outsample,
         criteria,
@@ -165,7 +171,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 panel_values,
                 data.intercept,
                 data.datatype,
-                data.method,
+                result.method,
                 result.outsample,
                 result.criteria,
                 result.ttest,
@@ -202,7 +208,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     panel_values,
                     data.intercept,
                     data.datatype,
-                    data.method,
+                    result.method,
                     result.outsample,
                     result.criteria,
                     result.ttest,
@@ -235,7 +241,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                     panel_values,
                     data.intercept,
                     data.datatype,
-                    data.method,
+                    result.method,
                     result.outsample,
                     result.criteria,
                     result.ttest,
@@ -624,7 +630,7 @@ function ols_execute_row!(
 		fact = svd(fullexpvars_subset)
 		denominator = depvar_subset
 	else
-		error(INVALID_METHOD)
+		error(INVALID_METHOD_BASIC)
 	end
 
     b = fact \ denominator                # estimate
@@ -639,15 +645,6 @@ function ols_execute_row!(
     F= (r2/(ncoef-1))/((1-r2)/df_e)        # F-statistic
 
     if ttest
-        if method == PRECISE
-            uptriang = UpperTriangular(fact.R)
-        elseif method == FAST
-            uptriang = UpperTriangular(fact.U)
-        end
-        bstd = sqrt.(sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)) # std deviation of coefficients
-    end
-
-    if ttest
         if method in [QR_64, QR_32, QR_16] 
 			diagvcov = sum((UpperTriangular(fact.R) \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)
 		elseif method in [CHO_64, CHO_32, CHO_16]
@@ -655,7 +652,7 @@ function ols_execute_row!(
 		elseif method in [SVD_64, SVD_32, SVD_16]
 			diagvcov = diag(fact.V * diagm(fact.S)^(-2) * fact.Vt * (sse / df_e))
 		else
-			error(INVALID_METHOD)
+			error(INVALID_METHOD_BASIC)
 		end
 		bstd = sqrt.(diagvcov) # std deviation of coefficients
 	end
@@ -783,7 +780,7 @@ function ols_execute_row!(
 			factw = svd(regmatw)
 			denominatorw = er2
 		else
-			error(INVALID_METHOD)
+			error(INVALID_METHOD_BASIC)
 		end
 
         regcoeffw = factw \ denominatorw
@@ -800,7 +797,7 @@ function ols_execute_row!(
             xmat = fullexpvars_subset # debe incluir fixedvariables
 
             n = size(e, 1)
-            elag = zeros(Float64, n, lag)
+            elag = zeros(datatype, n, lag) # FIXME: Datatype
             for ii = 1:lag
                 elag[ii+1:end, ii] = e[1:end-ii]
             end

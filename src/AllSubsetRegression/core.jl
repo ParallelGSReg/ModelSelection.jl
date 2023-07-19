@@ -62,6 +62,7 @@ function all_subset_regression!(
     notify = nothing
 )
     validate_test(ttest = ttest, ztest = ztest)
+    validate_estimator(estimator)
     if outsample === nothing
         outsample = OUTSAMPLE_DEFAULT
     end
@@ -88,8 +89,6 @@ function all_subset_regression!(
             orderresults = orderresults,
             notify = notify ,
         )
-    else
-        throw(ArgumentError(INVALID_ESTIMATOR))
     end
 end
 
