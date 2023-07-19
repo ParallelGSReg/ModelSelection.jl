@@ -50,7 +50,6 @@ mutable struct ModelSelectionData
     }
     intercept::Bool
     datatype::DataType
-    method::Symbol
     removemissings::Bool
     nobs::Int64
     options::Dict{Symbol,Any}
@@ -111,7 +110,6 @@ mutable struct ModelSelectionData
         },
         intercept::Bool,
         datatype::DataType,
-        method::Symbol,
         removemissings::Bool,
         nobs::Int64,
     )
@@ -134,7 +132,6 @@ mutable struct ModelSelectionData
             panel_data,
             intercept,
             datatype,
-            method,
             removemissings,
             nobs,
             options,

@@ -12,7 +12,7 @@ function gsr(
         DataFrame,
     };
     datanames::Union{Array{Symbol},Nothing} = nothing,
-    method::Symbol = Preprocessing.METHOD_DEFAULT,
+    method::Union{Symbol,Nothing} = nothing,
     intercept::Bool = Preprocessing.INTERCEPT_DEFAULT,
     panel::Union{Symbol,Nothing} = Preprocessing.PANEL_DEFAULT,
     time::Union{Symbol,Nothing} = Preprocessing.TIME_DEFAULT,
@@ -36,13 +36,15 @@ function gsr(
     numfolds::Int64 = CrossValidation.NUMFOLDS_DEFAULT,
     notify = nothing,
 )
-    removemissings = fe_lag === nothing
+    AllSubsetRegression.validate_estimator(estimator)
+    datatype = AllSubsetRegression.get_datatype(estimator, method)
 
+    removemissings = fe_lag === nothing
     data = Preprocessing.input(
         equation,
         data,
         datanames = datanames,
-        method = method,
+        datatype = datatype,
         intercept = intercept,
         fixedvariables = fixedvariables,
         panel = panel,

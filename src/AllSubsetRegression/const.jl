@@ -60,12 +60,42 @@ const AVAILABLE_CRITERIA = Dict(
     ),
 )
 
-const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout])
-const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj])
+const QR_64 = :qr_64
+const QR_32 = :qr_32
+const QR_16 = :qr_16
+const CHO_64 = :cho_64
+const CHO_32 = :cho_32
+const CHO_16 = :cho_16
+const SVD_64 = :svd_64
+const SVD_32 = :svd_32
+const SVD_16 = :svd_16
+const METHODS_DATATYPES = Dict(
+    QR_64 => Float64,
+    QR_32 => Float32,
+    QR_16 => Float16,
+    CHO_64 => Float64,
+    CHO_32 => Float32,
+    CHO_16 => Float16,
+    SVD_64 => Float64,
+    SVD_32 => Float32,
+    SVD_16 => Float16,
+)
 
-const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rocout])
-const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj])
+const ESTIMATOR_LOGIT = :logit
+const ESTIMATOR_OLS = :ols
+const ESTIMATORS_AVAILABLE = Vector{Symbol}([ESTIMATOR_OLS, ESTIMATOR_LOGIT])
+
+const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
+const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
+const OLS_METHODS_AVAILABLE = Vector{Symbol}([QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16])
+const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj, :sse])
+const OLS_METHOD_DEFAULT = QR_32
+
+const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rmseout, :sse])
+const LOGIT_METHODS_AVAILABLE = Vector{Symbol}([CHO_64, CHO_32, CHO_16])
+const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse])
+const LOGIT_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
+const LOGIT_METHOD_DEFAULT = CHO_32
 
 const SUMMARY_VARIABLES = Dict(
     :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),

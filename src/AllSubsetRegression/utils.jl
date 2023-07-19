@@ -44,6 +44,7 @@ result = create_result(data, 10, [:aic, :bic], true, false, true, ttest = true)
 """
 function create_result(
     estimator::Symbol,
+    method::Symbol,
     data::ModelSelectionData,
     outsample::Union{Int64,Vector{Int64},Nothing},
     criteria::Vector{Symbol},
@@ -78,6 +79,7 @@ function create_result(
     return AllSubsetRegressionResult(
         estimator,
         datanames,
+        method,
         modelavg_datanames,
         outsample,
         criteria,
@@ -571,4 +573,42 @@ function validate_dataset(data::ModelSelectionData, outsample::Union{Int64,Vecto
     if data.nobs - outsample_obs < size(fullexpvars, 1)
         throw(ArgumentError(TOO_MANY_COVARIATES))
     end
+end
+
+function validate_estimator(estimator::Symbol)
+    if !(estimator in ESTIMATORS_AVAILABLE)
+        throw(ArgumentError(INVALID_ESTIMATOR))
+    end
+end
+
+function get_datatype(estimator::Symbol, method::Union{Symbol,Nothing} = nothing)
+    if estimator == ESTIMATOR_OLS
+        return get_ols_datatype(method)
+    elseif estimator == ESTIMATOR_LOGIT
+        return get_logit_datatype(method)
+    end
+end
+
+function get_ols_datatype(method::Union{Symbol,Nothing} = nothing)
+    return get_method_datatype(method, OLS_METHOD_DEFAULT, OLS_METHODS_AVAILABLE)
+end
+
+function get_logit_datatype(method::Union{Symbol,Nothing} = nothing)
+    return get_method_datatype(method, LOGIT_METHOD_DEFAULT, LOGIT_METHODS_AVAILABLE)
+end
+
+function get_method_datatype(
+    method::Union{Symbol,Nothing},
+    default::Symbol,
+    available_methods::Vector{Symbol},
+)   
+    if method === nothing
+        method = default
+    end
+    if !(method in available_methods)
+        methods = [string(method) for method in available_methods]
+        error = INVALID_METHOD[1] * string(method) * INVALID_METHOD[2] * join(methods, ", ") * INVALID_METHOD[3]
+        throw(ArgumentError(error))
+    end
+    return METHODS_DATATYPES[method]
 end

@@ -4,7 +4,7 @@ using Distributed, Distributions, LinearAlgebra, SharedArrays, GLM
 
 using ModelSelection
 using ModelSelection:
-    CONS, INVALID_METHOD, ModelSelectionData, ModelSelectionResult
+    CONS, ModelSelectionData, ModelSelectionResult
 
 export to_string, AllSubsetRegressionResult, ALLSUBSETREGRESSION_EXTRAKEY
 export all_subset_regression
