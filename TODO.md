@@ -1,14 +1,11 @@
  - Add panel as a fixed var
- - Add time as a fixed var
  - Panel must have time
+ - Validates that variables must be > 1
  - Add fixed variables in logit
  - Model average in Logit
- - Multiple features for logit
- - Features in Readme and Documentation
- - Validates that variables must be > 1
- - Panel can be string
 
 # TBD
+ - Features in Readme and Documentation
  - A better description of the package in Readme and Documentation
  - Validation in every module
  - Pending documentation in AllSubsetRegression
@@ -21,4 +18,5 @@
  - Panel and time in crossvalidation
  - Preliminary selection with lagit
  - Results array to a Dict
+ - Panel can be string
   
