@@ -807,8 +807,8 @@ function logit_execute_row!(
         
             # calculate simple z-statistic
             z = (nruns - μ) / σ
-            wwtest = ccdf(Normal(), z)
-            result_data[order, datanames_index[:wwtest]] = wwtest
+            bgtest = ccdf(Normal(), z) ## probaremos con un 
+            result_data[order, datanames_index[:bgtest]] = bgtest
         end
     end
 end
