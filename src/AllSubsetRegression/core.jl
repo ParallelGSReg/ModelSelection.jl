@@ -120,7 +120,9 @@ function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
     println(result.estimator)
 
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-    summary_variables = SUMMARY_VARIABLES
+    
+    #MODIFICAMOS SUMMARY VARIABLES SEGUN ESTIMADOR
+    summary_variables = (result.estimator = :logit ? SUMMARY_VARIABLES_LOGIT : SUMMARY_VARIABLES_OLS)
     if :r2adj in result.datanames
         summary_variables[:r2adj] = Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)  # FIXME: Use the dictionary
     end
