@@ -60,6 +60,12 @@ const AVAILABLE_CRITERIA = Dict(
     ),
 )
 
+const SUMMARY_VARIABLES = Dict(
+    :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
+    :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
+    :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
+)
+
 const QR_64 = :qr_64
 const QR_32 = :qr_32
 const QR_16 = :qr_16
@@ -81,24 +87,39 @@ const METHODS_DATATYPES = Dict(
     SVD_16 => Float16,
 )
 
-const ESTIMATOR_LOGIT = :logit
-const ESTIMATOR_OLS = :ols
-const ESTIMATORS_AVAILABLE = Vector{Symbol}([ESTIMATOR_OLS, ESTIMATOR_LOGIT])
+const CRITERIA = :criteria
+const METHOD = :method
+const AVAILABLE = :available
+const DEFAULT = :default
+const GENERAL_INFORMATION = :general_information
 
-const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
-const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const OLS_METHODS_AVAILABLE = Vector{Symbol}([QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16])
-const OLS_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj, :sse])
-const OLS_METHOD_DEFAULT = QR_32
+const LOGIT = :logit
+const OLS = :ols
+const ESTIMATORS_AVAILABLE = Vector{Symbol}([LOGIT, OLS])
 
-const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj, :rmseout, :sse])
-const LOGIT_METHODS_AVAILABLE = Vector{Symbol}([CHO_64, CHO_32, CHO_16])
-const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse])
-const LOGIT_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const LOGIT_METHOD_DEFAULT = CHO_32
-
-const SUMMARY_VARIABLES = Dict(
-    :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
-    :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
-    :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
+const ESTIMATORS = Dict(
+    OLS => Dict(
+        CRITERIA => Dict(
+            AVAILABLE => Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse]),
+            DEFAULT => Vector{Symbol}([:r2adj]),
+        ),
+        METHOD => Dict(
+            AVAILABLE => Vector{Symbol}([QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16]),
+            DEFAULT => QR_32,
+        ),
+        GENERAL_INFORMATION => Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj, :sse]),
+    ),
+    LOGIT => Dict(
+        CRITERIA => Dict(
+            AVAILABLE => Vector{Symbol}([:aic, :aicc, :bic, :r2adj, :rmseout, :sse]),
+            DEFAULT => Vector{Symbol}([:r2adj]),
+        ),
+        METHOD => Dict(
+            AVAILABLE => Vector{Symbol}([CHO_64, CHO_32, CHO_16]),
+            DEFAULT => CHO_32,
+        ),
+        GENERAL_INFORMATION => Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse]),
+    ),
 )
+
+

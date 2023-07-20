@@ -532,6 +532,14 @@ function validate_criteria(criteria::Vector{Symbol}, available_criteria::Vector{
     end
 end
 
+function validate_method(method::Symbol, available_methods::Vector{Symbol})
+    if !(method in available_methods)
+        methods = [string(method) for method in available_methods]
+        error = INVALID_METHOD[1] * string(method) * INVALID_METHOD[2] * join(methods, ", ") * INVALID_METHOD[3]
+        throw(ArgumentError(error))
+    end
+end
+
 """
     validate_test(ttest::Union{Bool, Nothing}, ztest::Union{Bool, Nothing})
 
@@ -576,25 +584,29 @@ function validate_dataset(data::ModelSelectionData, outsample::Union{Int64,Vecto
 end
 
 function validate_estimator(estimator::Symbol)
-    if !(estimator in ESTIMATORS_AVAILABLE)
+    if !(estimator in keys(ESTIMATORS))
         throw(ArgumentError(INVALID_ESTIMATOR))
     end
 end
 
 function get_datatype(estimator::Symbol, method::Union{Symbol,Nothing} = nothing)
-    if estimator == ESTIMATOR_OLS
+    if estimator == OLS
         return get_ols_datatype(method)
-    elseif estimator == ESTIMATOR_LOGIT
+    elseif estimator == LOGIT
         return get_logit_datatype(method)
     end
 end
 
 function get_ols_datatype(method::Union{Symbol,Nothing} = nothing)
-    return get_method_datatype(method, OLS_METHOD_DEFAULT, OLS_METHODS_AVAILABLE)
+    default = ESTIMATORS[OLS][METHOD][DEFAULT]
+    available = ESTIMATORS[OLS][METHOD][AVAILABLE]
+    return get_method_datatype(method, default, available)
 end
 
 function get_logit_datatype(method::Union{Symbol,Nothing} = nothing)
-    return get_method_datatype(method, LOGIT_METHOD_DEFAULT, LOGIT_METHODS_AVAILABLE)
+    default = ESTIMATORS[LOGIT][METHOD][DEFAULT]
+    available = ESTIMATORS[LOGIT][METHOD][AVAILABLE]
+    return get_method_datatype(method, default,available)
 end
 
 function get_method_datatype(
@@ -605,10 +617,6 @@ function get_method_datatype(
     if method === nothing
         method = default
     end
-    if !(method in available_methods)
-        methods = [string(method) for method in available_methods]
-        error = INVALID_METHOD[1] * string(method) * INVALID_METHOD[2] * join(methods, ", ") * INVALID_METHOD[3]
-        throw(ArgumentError(error))
-    end
+    validate_method(method, available_methods)
     return METHODS_DATATYPES[method]
 end
