@@ -792,6 +792,7 @@ function ols_execute_row!(
         wtest = ccdf(Chisq(2), statisticw)
 
         result_data[order, datanames_index[:wtest]] = wtest
+        
         result_data[order, datanames_index[:jbtest]] = jbtest
         if time !== nothing
             e = er
