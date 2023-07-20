@@ -8,3 +8,4 @@ const SUMMARY_VARIABLES = Dict(
     :rmseout =>
         Dict("verbose_title" => "RMSE OUT ", "verbose_show" => true, "order" => 2),
 )
+# It should be named differently
