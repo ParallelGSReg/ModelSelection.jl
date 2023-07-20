@@ -1,8 +1,8 @@
 function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
-    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 0))
+    notification(notify, NOTIFY_MESSAGE, progress=0)
     betas, lambda = lassoselection(data)
-    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 30))
-    
+    notification(notify, NOTIFY_MESSAGE, progress=30)
+
     if isnothing(betas)
         data = addextras!(data, nothing, map(b -> true, data.expvars), nothing, nothing)
         return data
@@ -20,7 +20,7 @@ function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
     data.expvars_data = data.expvars_data[:, vars]
 
     data = addextras!(data, lassonumvars, betas, lambda, vars)
-    ModelSelection.notification(notify, "Performing Preliminary selection", Dict(:progress => 100))
+    notification(notify, NOTIFY_MESSAGE, progress=100)
 
     return data
 end
