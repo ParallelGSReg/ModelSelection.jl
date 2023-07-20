@@ -68,8 +68,13 @@ const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :r2, :r2adj,
 const LOGIT_EQUATION_GENERAL_INFORMATION = Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse])
 const LOGIT_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
 
-const SUMMARY_VARIABLES = Dict(
+# INCORPORAMOS DOS SUMMARY_VARIABLES SEGUN ESTIMADOR
+const SUMMARY_VARIABLES_OLS = Dict(
     :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
     :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
+)
+
+const SUMMARY_VARIABLES_LOGIT = Dict(
+    :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
     :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
 )
