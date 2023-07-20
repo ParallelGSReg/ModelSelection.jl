@@ -115,7 +115,7 @@ function logit!(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
     notify = nothing,
 )
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=0)
     if method === nothing
         method = ESTIMATORS[LOGIT][METHOD][DEFAULT]
     end
@@ -129,7 +129,7 @@ function logit!(
     general_information = ESTIMATORS[LOGIT][GENERAL_INFORMATION]
 
     result = create_result(
-        :logit,
+        LOGIT,
         method,
         data,
         outsample,
@@ -178,7 +178,7 @@ logit_execute!(model_selection_data, all_subset_regression_result)
 ```
 """
 function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult; notify = nothing)
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 5))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=5)
 
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
@@ -212,7 +212,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         fullexpvars_without_outsample_subset =
             hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 15))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=15)
     gum_model = GLM.fit(
         GeneralizedLinearModel,
         fullexpvars_without_outsample_subset,
@@ -223,7 +223,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     )
     start_coef = coeftable(gum_model).cols[1] # FIXME: Convert to datatype
 
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 25))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=25)
     if nprocs() == nworkers()
         for order = 1:num_operations
             logit_execute_row!(
@@ -310,7 +310,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             end
         end
     end
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 75))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=75)
 
     result.data = Array(result_data)
 
@@ -375,7 +375,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     end
 
     result.nobs = result.bestresult_data[datanames_index[:nobs]]
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 100))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=100)
 
     return result
 end

@@ -43,7 +43,7 @@ function kfoldcrossvalidation!(
     progress = 0
     total_step_porcentage = 70
     step = floor(Int64, total_step_porcentage / numfolds)
-    notification(notify, "Performing Cross validation", progress=progress)
+    notification(notify, NOTIFY_MESSAGE, progress=progress)
     asr_result = ModelSelection.getresult(data, ModelSelection.AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY)
 
     bestmodels = []
@@ -101,10 +101,10 @@ function kfoldcrossvalidation!(
             ),
         )
         progress = progress + step
-        notification(notify, "Performing Cross validation", progress=progress)
+        notification(notify, NOTIFY_MESSAGE, progress=progress)
     end
 
-    notification(notify, "Performing Cross validation", progress=progress)
+    notification(notify, NOTIFY_MESSAGE, progress=progress)
 
     datanames = unique(Iterators.flatten(model[:datanames] for model in bestmodels))
     crossvalidation_data = Array{Any,2}(zeros(size(bestmodels, 1), size(datanames, 1)))
@@ -137,7 +137,7 @@ function kfoldcrossvalidation!(
     data = ModelSelection.addresult!(data, result)
     ModelSelection.addresult!(data, CROSSVALIDATION_EXTRAKEY, result)
     addextras!(data, result)
-    notification(notify, "Performing Cross validation", progress=progress)
+    notification(notify, NOTIFY_MESSAGE, progress=progress)
     return data
 end
 

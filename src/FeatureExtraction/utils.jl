@@ -408,11 +408,11 @@ The function modifies the `data` object in-place and returns the modified object
 """
 function addextras!(
     data::ModelSelection.ModelSelectionData,
-    fe_sqr::Union{Vector{Symbol},Nothing} = nothing,
-    fe_log::Union{Vector{Symbol},Nothing} = nothing,
-    fe_inv::Union{Vector{Symbol},Nothing} = nothing,
-    fe_lag::Union{Dict{Symbol,Int64},Nothing} = nothing,
-    interaction::Union{Vector{Tuple{Symbol,Symbol}},Nothing} = nothing,
+    fe_sqr = nothing,
+    fe_log = nothing,
+    fe_inv = nothing,
+    fe_lag = nothing,
+    interaction = nothing,
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
 )
     data.extras[ModelSelection.generate_extra_key(

@@ -52,7 +52,7 @@ function ols!(
     orderresults::Bool = ORDERRESULTS_DEFAULT,
     notify = nothing
 )
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 0))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => OLS), progress=0)
     if method === nothing
         method = ESTIMATORS[OLS][METHOD][DEFAULT]
     end
@@ -120,7 +120,7 @@ ols_execute!(model_selection_data, all_subset_regression_result)
 ```
 """
 function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult; notify = nothing)
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 5))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => OLS), progress=5)
 
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
@@ -147,7 +147,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     end
     result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 25))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => OLS), progress=25)
     
     panel_values = nothing
     if data.panel !== nothing
@@ -281,7 +281,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
                 ) ./ std(result.data[:, datanames_index[criteria]])
             )
     end
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 75))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => OLS), progress=75)
     if result.modelavg
         delta =
             maximum(result.data[:, datanames_index[:order]]) .-
@@ -343,7 +343,7 @@ function ols_execute!(data::ModelSelectionData, result::AllSubsetRegressionResul
     result.bestresult_data[datanames_index[:nobs]] =
         Int64(round(result.bestresult_data[datanames_index[:nobs]]))
     result.nobs = result.bestresult_data[datanames_index[:nobs]]
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 100))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => OLS), progress=100)
     return result
 end
 

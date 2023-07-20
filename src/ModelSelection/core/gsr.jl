@@ -86,7 +86,7 @@ function gsr(
         modelavg = modelavg,
         residualtest = residualtest,
         orderresults = orderresults,
-        notify = notify ,
+        notify = notify,
     )
 
     original_data.extras = data.extras
