@@ -67,7 +67,7 @@ function all_subset_regression!(
         outsample = OUTSAMPLE_DEFAULT
     end
 
-    if estimator == :ols
+    if estimator == OLS
         return AllSubsetRegression.ols!(
             data,
             outsample = outsample,
@@ -78,7 +78,7 @@ function all_subset_regression!(
             orderresults = orderresults,
             notify = notify ,
         )
-    elseif estimator == :logit
+    elseif estimator == LOGIT
         return AllSubsetRegression.logit!(
             data,
             outsample = outsample,
@@ -117,6 +117,8 @@ result_string = to_string(model_selection_data, all_subset_regression_result)
 ```
 """
 function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
+    println(result.estimator)
+
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     summary_variables = SUMMARY_VARIABLES
     if :r2adj in result.datanames

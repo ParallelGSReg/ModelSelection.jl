@@ -43,9 +43,9 @@ updated_data = ols!(model_selection_data)
 """
 function ols!(
     data::ModelSelectionData;
-    method::Union{Symbol,Nothing} = OLS_METHOD_DEFAULT,
+    method::Union{Symbol,Nothing} = nothing,
     outsample::Union{Int64,Vector{Int64},Nothing} = OUTSAMPLE_DEFAULT,
-    criteria::Union{Symbol,Vector{Symbol},Nothing} = OLS_CRITERIA_DEFAULT,
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = nothing,
     ttest::Bool = TTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
@@ -54,10 +54,10 @@ function ols!(
 )
     ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :ols, :progress => 0))
     if method === nothing
-        method = OLS_METHOD_DEFAULT
+        method = ESTIMATORS[OLS][METHOD][DEFAULT]
     end
     if criteria === nothing
-        criteria = OLS_CRITERIA_DEFAULT
+        criteria = ESTIMATORS[OLS][CRITERIA][DEFAULT]
     elseif isa(criteria, Symbol)
         criteria = Vector{Symbol}([criteria])
     end
@@ -65,9 +65,11 @@ function ols!(
     if outsample === nothing
         outsample = OUTSAMPLE_DEFAULT
     end
-    validate_criteria(criteria, OLS_CRITERIA_AVAILABLE)
+    validate_criteria(criteria, ESTIMATORS[OLS][CRITERIA][AVAILABLE])
+    validate_method(method, ESTIMATORS[OLS][METHOD][AVAILABLE])
     validate_dataset(data, outsample)
 
+    general_information = ESTIMATORS[OLS][GENERAL_INFORMATION]
     result = create_result(
         :ols,
         method,
@@ -77,7 +79,7 @@ function ols!(
         modelavg,
         residualtest,
         orderresults,
-        OLS_EQUATION_GENERAL_INFORMATION,
+        general_information,
         ttest = ttest,
     )
     result = ols_execute!(data, result, notify=notify)
