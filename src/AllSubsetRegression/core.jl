@@ -117,12 +117,9 @@ result_string = to_string(model_selection_data, all_subset_regression_result)
 ```
 """
 function to_string(data::ModelSelectionData, result::AllSubsetRegressionResult)
-    println(result.estimator)
-
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
-    #MODIFICAMOS SUMMARY VARIABLES SEGUN ESTIMADOR
-    summary_variables = (data.options[:estimator] = :logit ? SUMMARY_VARIABLES_LOGIT : SUMMARY_VARIABLES_OLS)
+    summary_variables = copy(ESTIMATORS[result.estimator][SUMMARY_VARIABLES])
     if :r2adj in result.datanames
         summary_variables[:r2adj] = Dict("verbose_title" => "Adjusted R²", "verbose_show" => true)  # FIXME: Use the dictionary
     end
@@ -205,8 +202,7 @@ result_string = to_dict(model_selection_data, all_subset_regression_result)
 ```
 """
 function to_dict(data::ModelSelectionData, result::AllSubsetRegressionResult)
-    #summary variables depend on estimator
-    summary_variables = copy((data.options[:estimator] = :logit ? SUMMARY_VARIABLES_LOGIT : SUMMARY_VARIABLES_OLS))
+    summary_variables = copy(ESTIMATOR[result.estimator][SUMMARY_VARIABLES])
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     best_results_expvars = ModelSelection.get_selected_variables_varnames(
         Int64(result.bestresult_data[datanames_index[:index]]),
