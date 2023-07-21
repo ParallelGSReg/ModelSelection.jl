@@ -82,9 +82,11 @@ function kfoldcrossvalidation!(
             ztest = asr_result.ztest
         end
         residualtest = asr_result.residualtest
+        method = asr_result.method
         model_result = ModelSelection.AllSubsetRegression.all_subset_regression!(
             estimator,
             model_data,
+            method = method,
             outsample = testset,
             criteria = criteria,
             ttest = ttest,

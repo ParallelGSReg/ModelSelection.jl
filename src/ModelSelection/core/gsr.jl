@@ -79,6 +79,7 @@ function gsr(
     AllSubsetRegression.all_subset_regression!(
         estimator,
         data,
+        method = method,
         outsample = outsample,
         criteria = criteria,
         ttest = ttest,
