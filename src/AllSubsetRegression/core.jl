@@ -52,6 +52,7 @@ result = all_subset_regression!(:ols, model_selection_data)
 function all_subset_regression!(
     estimator::Symbol,
     data::ModelSelectionData;
+    method::Union{Symbol,Nothing} = nothing,
     outsample::Union{Int,Array,Nothing} = OUTSAMPLE_DEFAULT,
     criteria::Union{Symbol,Vector{Symbol},Nothing} = nothing,
     ttest::Bool = ZTEST_DEFAULT,
@@ -70,6 +71,7 @@ function all_subset_regression!(
     if estimator == OLS
         return AllSubsetRegression.ols!(
             data,
+            method = method,
             outsample = outsample,
             criteria = criteria,
             ttest = ttest,
@@ -81,6 +83,7 @@ function all_subset_regression!(
     elseif estimator == LOGIT
         return AllSubsetRegression.logit!(
             data,
+            method = method,
             outsample = outsample,
             criteria = criteria,
             ztest = ztest,
@@ -202,7 +205,7 @@ result_string = to_dict(model_selection_data, all_subset_regression_result)
 ```
 """
 function to_dict(data::ModelSelectionData, result::AllSubsetRegressionResult)
-    summary_variables = copy(ESTIMATOR[result.estimator][SUMMARY_VARIABLES])
+    summary_variables = copy(ESTIMATORS[result.estimator][SUMMARY_VARIABLES])
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
     best_results_expvars = ModelSelection.get_selected_variables_varnames(
         Int64(result.bestresult_data[datanames_index[:index]]),

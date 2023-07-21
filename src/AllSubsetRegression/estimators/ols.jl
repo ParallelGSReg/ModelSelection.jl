@@ -82,6 +82,7 @@ function ols!(
         general_information,
         ttest = ttest,
     )
+    
     result = ols_execute!(data, result, notify=notify)
     ModelSelection.addresult!(data, result)
     ModelSelection.addresult!(
@@ -625,11 +626,11 @@ function ols_execute_row!(
     if method in [QR_64, QR_32, QR_16] 
 		fact = qr(fullexpvars_subset)
 		denominator = depvar_subset
-	elseif method in [CHO_64, CHO_32, CHO_16] 
+	elseif method in [CHO_64, CHO_32, CHO_16]
 		fact = cholesky(fullexpvars_subset'fullexpvars_subset)
 		denominator = fullexpvars_subset'depvar_subset
 	elseif method in [SVD_64, SVD_32, SVD_16] 
-		fact = svd(fullexpvars_subset)
+        fact = svd(fullexpvars_subset)
 		denominator = depvar_subset
 	else
 		error(INVALID_METHOD_BASIC)
