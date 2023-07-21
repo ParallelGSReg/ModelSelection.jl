@@ -65,6 +65,7 @@ function create_result(
     criteria = unique(criteria)
     datanames = create_datanames(
         data,
+        estimator,
         criteria,
         modelavg,
         residualtest,
@@ -132,6 +133,7 @@ datanames = create_datanames(data, [:aic, :bic], false, true, ttest=true)
 """
 function create_datanames(
     data::ModelSelectionData,
+    estimator::Symbol,
     criteria::Vector{Symbol},
     modelavg::Bool,
     residualtest::Bool,
@@ -179,9 +181,15 @@ function create_datanames(
             push!(datanames, Symbol(string(CONS, test_suffix)))
         end
     end
-    testfields =
-        (residualtest !== nothing && residualtest) ?
-        ((data.time !== nothing) ? RESIDUAL_TESTS_TIME : RESIDUAL_TESTS_CROSS) : []
+
+    testfields = []
+    if (residualtest !== nothing && residualtest)
+        if (data.time !== nothing)
+            testfields = ESTIMATORS[estimator][RESIDUAL_TESTS_TIME]
+        else
+            testfields = ESTIMATORS[estimator][RESIDUAL_TESTS_CROSS]
+        end
+    end
 
     general_information_criteria = unique([equation_general_information; criteria; testfields])
 

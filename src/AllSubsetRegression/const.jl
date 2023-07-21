@@ -11,8 +11,6 @@ const ZTEST_DEFAULT = false
 
 const INDEX = :index
 const ORDER = :order
-const RESIDUAL_TESTS_CROSS = [:jbtest, :wtest]
-const RESIDUAL_TESTS_TIME = [:jbtest, :wtest, :bgtest]
 const WEIGHT = :weight
 
 const AVAILABLE_CRITERIA = Dict(
@@ -87,6 +85,8 @@ const AVAILABLE = :available
 const DEFAULT = :default
 const GENERAL_INFORMATION = :general_information
 const SUMMARY_VARIABLES = :summary_variables
+const RESIDUAL_TESTS_TIME = :residual_tests_time
+const RESIDUAL_TESTS_CROSS = :residual_tests_cross
 
 const LOGIT = :logit
 const OLS = :ols
@@ -107,6 +107,9 @@ const ESTIMATORS = Dict(
             :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
             :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
         ),
+        RESIDUAL_TESTS_TIME => Vector{Symbol}([:jbtest, :wtest, :bgtest]),
+        RESIDUAL_TESTS_CROSS => Vector{Symbol}([:jbtest, :wtest])
+
     ),
     LOGIT => Dict(
         CRITERIA => Dict(
@@ -122,6 +125,8 @@ const ESTIMATORS = Dict(
             :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
             :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
         ),
+        RESIDUAL_TESTS_TIME => Vector{Symbol}([:jbtest, :wtest, :wwtest]),
+        RESIDUAL_TESTS_CROSS => Vector{Symbol}([:jbtest, :wtest]),
     ),
 )
 
