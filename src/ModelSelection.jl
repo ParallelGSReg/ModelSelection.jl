@@ -29,6 +29,5 @@ export getresult, addresult!
 export notification
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
 export CONS, AVAILABLE_METHODS, METHODS_DATATYPES, QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16
-export INVALID_METHOD
 
 end

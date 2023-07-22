@@ -11,4 +11,5 @@ data = CSV.read("test/data/test_time_database.csv", DataFrame)
     time=:time,
     residualtest=true,
 )
-
+ModelSelection.save_csv("result.csv", model)
+println(model)

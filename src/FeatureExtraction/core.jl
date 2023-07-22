@@ -134,7 +134,6 @@ function execute!(
     notify = nothing,
 )
     notification(notify, NOTIFY_MESSAGE, progress=0)
-
     if data.intercept
         ModelSelection.remove_intercept!(data)
     end
@@ -196,7 +195,6 @@ function execute!(
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
     data = ModelSelection.convert_data!(data)
-
     notification(notify, NOTIFY_MESSAGE, progress=100)
     return data
 end

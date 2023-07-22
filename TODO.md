@@ -1,6 +1,5 @@
 
- - Add panel as a fixed var
- - Panel must have time
+ - Add panel as a fixed var - Panel must have time
  - Validates that variables must be > 1
  - Logit change name residual test
  - Add fixed variables in logit
@@ -22,3 +21,4 @@
  - Preliminary selection with lagit
  - Results array to a Dict
  - Panel can be string
+

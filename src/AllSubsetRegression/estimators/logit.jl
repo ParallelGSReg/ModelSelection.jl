@@ -127,6 +127,7 @@ function logit!(
     validate_criteria(criteria, ESTIMATORS[LOGIT][CRITERIA][AVAILABLE])
     validate_method(method, ESTIMATORS[LOGIT][METHOD][AVAILABLE])
     general_information = ESTIMATORS[LOGIT][GENERAL_INFORMATION]
+
     result = create_result(
         LOGIT,
         method,
