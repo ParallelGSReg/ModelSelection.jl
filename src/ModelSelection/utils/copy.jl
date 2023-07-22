@@ -21,7 +21,7 @@ function copy_modelselectiondata(data::ModelSelectionData)
         data.removemissings,
         data.nobs,
     )
-    new_data.extras = data.extras
+    new_data.extras = copy(data.extras)
     new_data.options = copy(data.options)
     new_data.results = copy(data.results) # TODO: Copy results objects
     if data.original_data !== nothing

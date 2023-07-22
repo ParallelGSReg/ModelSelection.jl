@@ -4,8 +4,7 @@ function lasso!(data::ModelSelection.ModelSelectionData; notify = nothing)
     notification(notify, NOTIFY_MESSAGE, progress=30)
 
     if isnothing(betas)
-        data = addextras!(data, nothing, map(b -> true, data.expvars), nothing, nothing)
-        return data
+        return addextras!(data, nothing, map(b -> true, data.expvars), nothing, nothing)
     end
 
     vars = map(b -> b != 0, betas)
