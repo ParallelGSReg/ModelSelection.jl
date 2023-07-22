@@ -2,15 +2,17 @@ function gsr(
     estimator::Symbol,
     equation::Union{String,Array{String},Array{Symbol}},
     data::Union{
-        Array{Float32},
         Array{Float64},
-        Array{Union{Float32,Missing}},
+        Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
     datanames::Union{Array{Symbol},Nothing} = nothing,
-    method::Symbol = Preprocessing.METHOD_DEFAULT,
+    method::Union{Symbol,Nothing} = nothing,
     intercept::Bool = Preprocessing.INTERCEPT_DEFAULT,
     panel::Union{Symbol,Nothing} = Preprocessing.PANEL_DEFAULT,
     time::Union{Symbol,Nothing} = Preprocessing.TIME_DEFAULT,
@@ -32,16 +34,17 @@ function gsr(
     orderresults::Bool = AllSubsetRegression.ORDERRESULTS_DEFAULT,
     kfoldcrossvalidation::Bool = CrossValidation.KFOLDCROSSVALIDATION_DEFAULT,
     numfolds::Int64 = CrossValidation.NUMFOLDS_DEFAULT,
-    testsetshare::Union{Float32,Float64} = CrossValidation.TESTSETSHARE_DEFAULT,
     notify = nothing,
 )
-    removemissings = fe_lag === nothing
+    AllSubsetRegression.validate_estimator(estimator)
+    datatype = AllSubsetRegression.get_datatype(estimator, method)
 
+    removemissings = fe_lag === nothing
     data = Preprocessing.input(
         equation,
         data,
         datanames = datanames,
-        method = method,
+        datatype = datatype,
         intercept = intercept,
         fixedvariables = fixedvariables,
         panel = panel,
@@ -68,6 +71,7 @@ function gsr(
     original_data = copy_modelselectiondata(data)
 
     if preliminaryselection_enabled(preliminaryselection)
+        PreliminarySelection.validate_estimator(estimator)
         data = PreliminarySelection.preliminary_selection!(preliminaryselection, data, notify = notify)
         original_data.extras = data.extras
     end
@@ -75,6 +79,7 @@ function gsr(
     AllSubsetRegression.all_subset_regression!(
         estimator,
         data,
+        method = method,
         outsample = outsample,
         criteria = criteria,
         ttest = ttest,
@@ -82,13 +87,13 @@ function gsr(
         modelavg = modelavg,
         residualtest = residualtest,
         orderresults = orderresults,
-        notify = notify ,
+        notify = notify,
     )
 
     original_data.extras = data.extras
 
     if crossvalidation_enabled(kfoldcrossvalidation)
-        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, testsetshare, notify = notify)
+        CrossValidation.kfoldcrossvalidation!(data, original_data, numfolds, notify = notify)
     end
 
     data.original_data = original_data
@@ -118,7 +123,6 @@ function gsr(
     data.options[:orderresults] = orderresults
     data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
     data.options[:numfolds] = numfolds
-    data.options[:testsetshare] = testsetshare
 
     return data
 end

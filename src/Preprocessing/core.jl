@@ -1,114 +1,18 @@
-"""
-    input(
-        equation::String,
-        data::Union{
-            Array{Float64},
-            Array{Float32},
-            Array{Union{Float64,Missing}},
-            Array{Union{Float32,Missing}},
-            Tuple,
-            DataFrame,
-        };
-        datanames::Union{Array{Symbol},Nothing} = nothing,
-        method::Symbol = METHOD_DEFAULT,
-        intercept::Bool = INTERCEPT_DEFAULT,
-        fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
-        panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
-        time::Union{Symbol,Nothing} = TIME_DEFAULT,
-        seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
-        removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
-        removemissings::Bool = REMOVEMISSINGS_DEFAULT,
-        notify = NOTIFY_DEFAULT,
-    )
 
-Parse an string equation to an array of strings and call other functions to perform data preprocessing.
-
-# Parameters
-- `equation::String`: The equation in string format.
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}`: The input data.
-- `datanames::Union{Array{Symbol},Nothing}`: (optional) Names of the variables in the data.
-- `method::Symbol`: (optional) The method to use for format the data. Default is `METHOD_DEFAULT`.
-- `intercept::Bool`: (optional) Whether to include an intercept in the model. Default is `INTERCEPT_DEFAULT`.
-- `fixedvariables::Union{Symbol,Array{Symbol},Nothing}`: (optional) Fixed variables to include in the model. Default is `FIXED_VARIABLES_DEFAULT`.
-- `panel::Union{Symbol,Nothing}`: (optional) Panel variable for panel data. Default is `PANEL_DEFAULT`.
-- `time::Union{Symbol,Nothing}`: (optional) Time variable for time series data. Default is `TIME_DEFAULT`.
-- `seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}`: (optional) Seasonal adjustment parameters. Default is `SEASONALADJUSTMENT_DEFAULT`.
-- `removeoutliers::Bool`: (optional) Whether to remove outliers from the data. Default is `REMOVEOUTLIERS_DEFAULT`.
-- `removemissings::Bool`: (optional) Whether to remove missing values from the data. Default is `REMOVEMISSINGS_DEFAULT`.
-- `notify`: (optional) Notification method. Default is `NOTIFY_DEFAULT`.
-
-## Equation format
-The `equation` parameter can be in the following formats:
-```
-# Stata-like string
-equation = "y x1 x2 x3"
-
-# R-like string
-equation = "y ~ x1 + x2 + x3"
-
-# Strings separated with comma
-equation = "y,x1,x2,x3"
-
-# Using wildcards
-equation = "y *"
-equation = "y x*"
-equation = "y x1 z*"
-equation = "y ~ x*"
-equation = "y ~ ."
-```
-
-# Returns
-- `modelselection_data`: The resulting model selection data.
-
-# Example
-!!! warning
-    TODO: seasonaladjustment parameter missing.
-```julia
-equation = "y x1 x2"
-data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
-datanames = [:panel, :time, :y, :x1, :x2, :x3]
-job_notify(message::String, data::Union{Any,Nothing} = nothing) = println(message, data)
-
-model = input(
-    equation,
-    data,
-    datanames = datanames,
-    method = :fast,
-    intercept = true,
-    fixedvariables = :x3,
-    panel = :panel,
-    time = :time,
-    removeoutliers = true,
-    removemissings = true,
-    notify = job_notify,
-)
-# model: ModelSelectionData(
-    equation=[:y, :x1, :x2],
-    depvar=:y,
-    expvars=[:x1, :x2, :_cons],
-    fixedvariables=[:x3],
-    panel=:panel,
-    time=:time,
-    intercept=true,
-    datatype=Float32,
-    method=:fast,
-    nobs=3,
-    # ...
-)
-```
-"""
 function input(
     equation::String,
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
     datanames::Union{Array{Symbol},Nothing} = nothing,
-    method::Symbol = METHOD_DEFAULT,
+    datatype::DataType = DATATYPE_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
     fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
@@ -122,7 +26,7 @@ function input(
         equation_str_to_strarr(equation),
         data,
         datanames = datanames,
-        method = method,
+        datatype = datatype,
         intercept = intercept,
         fixedvariables = fixedvariables,
         panel = panel,
@@ -146,7 +50,6 @@ end
             DataFrame,
         };
         datanames::Union{Array{Symbol},Nothing} = nothing,
-        method::Symbol = METHOD_DEFAULT,
         intercept::Bool = INTERCEPT_DEFAULT,
         fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
         panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
@@ -163,7 +66,6 @@ Converts the equation as vector of strings to a vector of symbols, parsing the w
 - `equation::Array{String}`: The equation in string format.
 - `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}`: The input data.
 - `datanames::Union{Array{Symbol},Nothing}`: (optional) Names of the variables in the data.
-- `method::Symbol`: (optional) The method to use for format the data. Default is `METHOD_DEFAULT`.
 - `intercept::Bool`: (optional) Whether to include an intercept in the model. Default is `INTERCEPT_DEFAULT`.
 - `fixedvariables::Union{Symbol,Array{Symbol},Nothing}`: (optional) Fixed variables to include in the model. Default is `FIXED_VARIABLES_DEFAULT`.
 - `panel::Union{Symbol,Nothing}`: (optional) Panel variable for panel data. Default is `PANEL_DEFAULT`.
@@ -234,13 +136,15 @@ function input(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
     datanames::Union{Array{Symbol},Nothing} = nothing,
-    method::Symbol = METHOD_DEFAULT,
+    datatype::DataType = DATATYPE_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
     fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
@@ -263,7 +167,7 @@ function input(
         equation,
         data,
         datanames = datanames,
-        method = method,
+        datatype = datatype,
         intercept = intercept,
         fixedvariables = fixedvariables,
         panel = panel,
@@ -369,13 +273,15 @@ function input(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
         Tuple,
         DataFrame,
     };
     datanames::Union{Array{Symbol},Nothing} = nothing,
-    method::Symbol = METHOD_DEFAULT,
+    datatype::DataType = DATATYPE_DEFAULT,
     intercept::Bool = INTERCEPT_DEFAULT,
     fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
@@ -385,25 +291,17 @@ function input(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
     notify = NOTIFY_DEFAULT,
 )
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 10))
+    notification(notify, NOTIFY_MESSAGE, progress=10)
 
     datanames = get_datanames(data, datanames = datanames)
     if datanames === nothing
         throw(ArgumentError(DATANAMES_REQUIRED))
     end
 
-    datatype = get_datatype(method)
-    if datatype === nothing
-        throw(ArgumentError(INVALID_METHOD))
-    end
     data = get_rawdata_from_data(data)
 
-    if !ModelSelection.in_vector(equation, datanames)
-        msg = string(
-            SELECTED_VARIABLES_DOES_NOT_EXISTS,
-            ": ",
-            equation[(!in).(equation, Ref(datanames))],
-        )
+    if !in_vector(equation, datanames)
+        msg = string(SELECTED_VARIABLES_DOES_NOT_EXISTS, ": ", equation[(!in).(equation, Ref(datanames))])
         throw(ArgumentError(msg))
     end
 
@@ -412,20 +310,12 @@ function input(
             fixedvariables = Vector([fixedvariables])
         end
         fixedvariables = Vector{Symbol}(fixedvariables)
-        if !ModelSelection.in_vector(fixedvariables, datanames)
-            msg = string(
-                SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS,
-                ": ",
-                fixedvariables[(!in).(fixedvariables, Ref(datanames))],
-            )
+        if !in_vector(fixedvariables, datanames)
+            msg = string(SELECTED_FIXED_VARIABLES_DOES_NOT_EXISTS, ": ", fixedvariables[(!in).(fixedvariables, Ref(datanames))])
             throw(ArgumentError(msg))
         end
-        if ModelSelection.in_vector(fixedvariables, equation)
-            msg = string(
-                SELECTED_FIXED_VARIABLES_IN_EQUATION,
-                ": ",
-                fixedvariables[(in).(fixedvariables, Ref(equation))],
-            )
+        if in_vector(fixedvariables, equation)
+            msg = string(SELECTED_FIXED_VARIABLES_IN_EQUATION, ": ", fixedvariables[(in).(fixedvariables, Ref(equation))])
             throw(ArgumentError(msg))
         end
     end
@@ -435,25 +325,24 @@ function input(
     end
 
     if time !== nothing
-        if ModelSelection.get_column_index(time, datanames) === nothing
+        if get_column_index(time, datanames) === nothing
             msg = string(TIME_VARIABLE_INEXISTENT, ": ", time)
             throw(ArgumentError(msg))
         end
     end
 
     if panel !== nothing
-        if ModelSelection.get_column_index(panel, datanames) === nothing
+        if get_column_index(panel, datanames) === nothing
             msg = string(PANEL_VARIABLE_INEXISTENT, ": ", panel)
             throw(ArgumentError(msg))
         end
     end
-    modelselection_data, method, seasonaladjustment, removeoutliers = execute(
+    modelselection_data, seasonaladjustment, removeoutliers = execute(
         equation,
         data,
         datanames,
-        method,
-        intercept,
         datatype,
+        intercept,
         fixedvariables = fixedvariables,
         panel = panel,
         time = time,
@@ -462,9 +351,8 @@ function input(
         removemissings = removemissings,
         notify = notify,
     )
-    modelselection_data =
-        addextras!(modelselection_data, method, seasonaladjustment, removeoutliers)
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 100))
+    modelselection_data = addextras!(modelselection_data, seasonaladjustment, removeoutliers)
+    notification(notify, NOTIFY_MESSAGE, progress=100)
     return modelselection_data
 end
 
@@ -564,13 +452,14 @@ function execute(
     data::Union{
         Array{Float64},
         Array{Float32},
+        Array{Float16},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
+        Array{Union{Float16,Missing}},
     },
     datanames::Vector{Symbol},
-    method::Symbol,
-    intercept::Bool,
-    datatype::DataType;
+    datatype::DataType,
+    intercept::Bool;
     fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
     panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
     time::Union{Symbol,Nothing} = TIME_DEFAULT,
@@ -579,23 +468,22 @@ function execute(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
     notify = NOTIFY_DEFAULT,
 )
-    ModelSelection.notification(notify, NOTIFY_MESSAGE, Dict(PROGRESS => 20))
+    notification(notify, NOTIFY_MESSAGE, progress=20)
 
     temp_equation = equation
     if fixedvariables !== nothing
         for fixedvariable in fixedvariables
-            if ModelSelection.get_column_index(fixedvariable, temp_equation) === nothing
+            if get_column_index(fixedvariable, temp_equation) === nothing
                 temp_equation = vcat(temp_equation, fixedvariable)
             end
         end
     end
 
-    if panel !== nothing &&
-       ModelSelection.get_column_index(panel, temp_equation) === nothing
+    if panel !== nothing && get_column_index(panel, temp_equation) === nothing
         temp_equation = vcat(temp_equation, panel)
     end
 
-    if time !== nothing && ModelSelection.get_column_index(time, temp_equation) === nothing
+    if time !== nothing && get_column_index(time, temp_equation) === nothing
         temp_equation = vcat(temp_equation, time)
     end
 
@@ -605,7 +493,7 @@ function execute(
     panel_data = nothing
     if panel !== nothing
         if validate_panel(data, datanames, panel)
-            panel_data = data[:, ModelSelection.get_column_index(panel, datanames)]
+            panel_data = data[:, get_column_index(panel, datanames)]
         else
             throw(ArgumentError(PANEL_ERROR))
         end
@@ -614,7 +502,7 @@ function execute(
     time_data = nothing
     if time !== nothing
         if validate_time(data, datanames, time, panel = panel)
-            time_data = data[:, ModelSelection.get_column_index(time, datanames)]
+            time_data = data[:, get_column_index(time, datanames)]
         else
             throw(ArgumentError(TIME_ERROR))
         end
@@ -630,7 +518,7 @@ function execute(
     if fixedvariables !== nothing
         cols = []
         for fixedvariable in fixedvariables
-            push!(cols, ModelSelection.get_column_index(fixedvariable, datanames))
+            push!(cols, get_column_index(fixedvariable, datanames))
         end
         fixedvariables_data = data[:, cols]
     end
@@ -657,7 +545,7 @@ function execute(
 
     if removemissings
         depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
-            ModelSelection.filter_raw_data_by_empty_values(
+            filter_raw_data_by_empty_values(
                 datatype,
                 depvar_data,
                 expvars_data,
@@ -668,7 +556,7 @@ function execute(
     end
 
     depvar_data, expvars_data, fixedvariables_data, time_data, panel_data =
-        ModelSelection.convert_raw_data(
+        convert_raw_data(
             datatype,
             depvar_data,
             expvars_data,
@@ -678,7 +566,7 @@ function execute(
         )
 
     nobs = size(depvar_data, 1)
-    modelselection_data = ModelSelection.ModelSelectionData(
+    modelselection_data = ModelSelectionData(
         equation,
         depvar,
         expvars,
@@ -692,10 +580,9 @@ function execute(
         panel_data,
         intercept,
         datatype,
-        method,
         removemissings,
         nobs,
     )
 
-    return modelselection_data, method, seasonaladjustment, removeoutliers
+    return modelselection_data, seasonaladjustment, removeoutliers
 end

@@ -9,11 +9,8 @@ const RESIDUALTEST_DEFAULT = false
 const TTEST_DEFAULT = false
 const ZTEST_DEFAULT = false
 
-const EQUATION_GENERAL_INFORMATION = [:nobs, :ncoef, :sse, :r2, :F, :rmse, :r2adj]
 const INDEX = :index
 const ORDER = :order
-const RESIDUAL_TESTS_CROSS = [:jbtest, :wtest]
-const RESIDUAL_TESTS_TIME = [:jbtest, :wtest, :bgtest]
 const WEIGHT = :weight
 
 const AVAILABLE_CRITERIA = Dict(
@@ -41,12 +38,6 @@ const AVAILABLE_CRITERIA = Dict(
         "index" => -,
         "order" => 4,
     ),
-    :loglikelihood => Dict(
-        "verbose_title" => "Log Likelihood",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 5,
-    ),
     :r2adj => Dict(
         "verbose_title" => "Adjusted R²",
         "verbose_show" => false,
@@ -65,26 +56,76 @@ const AVAILABLE_CRITERIA = Dict(
         "index" => -1,
         "order" => 8,
     ),
-    :roc => Dict(
-        "verbose_title" => "ROC",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 9,
-    ),
-    :sse => Dict(
-        "verbose_title" => "SSE",
-        "verbose_show" => true,
-        "index" => -1,
-        "order" => 10,
-    ),
 )
 
-const OLS_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse])
-const OLS_CRITERIA_DEFAULT = Vector{Symbol}([:r2adj])
-const LOGIT_CRITERIA_AVAILABLE = Vector{Symbol}([:aic, :aicc, :bic, :cp, :loglikelihood, :roc])
+const QR_64 = :qr_64
+const QR_32 = :qr_32
+const QR_16 = :qr_16
+const CHO_64 = :cho_64
+const CHO_32 = :cho_32
+const CHO_16 = :cho_16
+const SVD_64 = :svd_64
+const SVD_32 = :svd_32
+const SVD_16 = :svd_16
+const METHODS_DATATYPES = Dict(
+    QR_64 => Float64,
+    QR_32 => Float32,
+    QR_16 => Float16,
+    CHO_64 => Float64,
+    CHO_32 => Float32,
+    CHO_16 => Float16,
+    SVD_64 => Float64,
+    SVD_32 => Float32,
+    SVD_16 => Float16,
+)
 
-const SUMMARY_VARIABLES = Dict(
-    :nobs =>
-        Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
-    :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
+const CRITERIA = :criteria
+const METHOD = :method
+const AVAILABLE = :available
+const DEFAULT = :default
+const GENERAL_INFORMATION = :general_information
+const SUMMARY_VARIABLES = :summary_variables
+const RESIDUAL_TESTS_TIME = :residual_tests_time
+const RESIDUAL_TESTS_CROSS = :residual_tests_cross
+
+const LOGIT = :logit
+const OLS = :ols
+const ESTIMATORS_AVAILABLE = Vector{Symbol}([LOGIT, OLS])
+
+const ESTIMATORS = Dict(
+    OLS => Dict(
+        CRITERIA => Dict(
+            AVAILABLE => Vector{Symbol}([:aic, :aicc, :bic, :cp, :r2adj, :rmse, :rmseout, :sse]),
+            DEFAULT => Vector{Symbol}([:r2adj]),
+        ),
+        METHOD => Dict(
+            AVAILABLE => Vector{Symbol}([QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16]),
+            DEFAULT => QR_32,
+        ),
+        GENERAL_INFORMATION => Vector{Symbol}([:nobs, :ncoef, :r2, :F, :rmse, :r2adj, :sse]),
+        SUMMARY_VARIABLES => Dict( # FIXME: Move to a general structure
+            :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
+            :F => Dict("verbose_title" => "F-statistic", "verbose_show" => true, "order" => 2),
+        ),
+        RESIDUAL_TESTS_TIME => Vector{Symbol}([:jbtest, :wtest, :bgtest]),
+        RESIDUAL_TESTS_CROSS => Vector{Symbol}([:jbtest, :wtest])
+
+    ),
+    LOGIT => Dict(
+        CRITERIA => Dict(
+            AVAILABLE => Vector{Symbol}([:aic, :aicc, :bic, :r2adj, :rmseout, :sse]),
+            DEFAULT => Vector{Symbol}([:r2adj]),
+        ),
+        METHOD => Dict(
+            AVAILABLE => Vector{Symbol}([CHO_64, CHO_32, CHO_16]),
+            DEFAULT => CHO_32,
+        ),
+        GENERAL_INFORMATION => Vector{Symbol}([:nobs, :ncoef, :r2, :LR, :rmse, :r2adj, :sse]),
+        SUMMARY_VARIABLES => Dict( # FIXME: Move to a general structure
+            :nobs => Dict("verbose_title" => "Observations", "verbose_show" => true, "order" => 1),
+            :LR => Dict("verbose_title" => "Likelihood ratio test", "verbose_show" => true, "order" => 2),
+        ),
+        RESIDUAL_TESTS_TIME => Vector{Symbol}([:jbtest, :wtest, :wwtest]),
+        RESIDUAL_TESTS_CROSS => Vector{Symbol}([:jbtest, :wtest]),
+    ),
 )

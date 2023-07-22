@@ -24,9 +24,10 @@ using ..CrossValidation
 
 export ModelSelectionData, ModelSelectionResult
 export gsr, save, load, save_csv, to_dict, to_string
-export create_datanames_index, get_column_index, get_selected_variables
+export create_datanames_index, get_column_index, get_selected_variables, convert_raw_data, in_vector, filter_raw_data_by_empty_values, generate_extra_key
+export getresult, addresult!
+export notification
 export Preprocessing, FeatureExtraction, PreliminarySelection, CrossValidation
-export CONS, FAST, PRECISE, AVAILABLE_METHODS
-export INVALID_METHOD
+export CONS, AVAILABLE_METHODS, METHODS_DATATYPES, QR_64, QR_32, QR_16, CHO_64, CHO_32, CHO_16, SVD_64, SVD_32, SVD_16
 
 end
