@@ -1,5 +1,8 @@
 
  - Add panel as a fixed var
+ - Panel must have time
+ - Validates that variables must be > 1
+ - Logit change name residual test
  - Add fixed variables in logit
  - Model average in Logit
  - Multiple features for logit
@@ -15,3 +18,7 @@
  - CONS variable name should be random
  - Feature extraction with fixed variables
  - Think about variables collisions
+ - Panel and time in crossvalidation
+ - Preliminary selection with lagit
+ - Results array to a Dict
+ - Panel can be string

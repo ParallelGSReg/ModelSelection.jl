@@ -106,29 +106,48 @@ result = logit!(model_selection_data)
 """
 function logit!(
     data::ModelSelectionData;
+    method::Union{Symbol,Nothing} = nothing,
     outsample::Union{Nothing,Int,Array} = OUTSAMPLE_DEFAULT,
-    criteria::Vector{Symbol} = CRITERIA_DEFAULT,
+    criteria::Union{Symbol,Vector{Symbol},Nothing} = nothing,
     ztest::Bool = ZTEST_DEFAULT,
     modelavg::Bool = MODELAVG_DEFAULT,
     residualtest::Bool = RESIDUALTEST_DEFAULT,
     orderresults::Bool = ORDERRESULTS_DEFAULT,
     notify = nothing,
 )
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 0))
-    validate_criteria(criteria, LOGIT_CRITERIA_AVAILABLE)
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=0)
+    if method === nothing
+        method = ESTIMATORS[LOGIT][METHOD][DEFAULT]
+    end
+    if criteria === nothing
+        criteria = ESTIMATORS[LOGIT][CRITERIA][DEFAULT]
+    elseif isa(criteria, Symbol)
+        criteria = Vector{Symbol}([criteria])
+    end
+    validate_criteria(criteria, ESTIMATORS[LOGIT][CRITERIA][AVAILABLE])
+    validate_method(method, ESTIMATORS[LOGIT][METHOD][AVAILABLE])
+    general_information = ESTIMATORS[LOGIT][GENERAL_INFORMATION]
     result = create_result(
+        LOGIT,
+        method,
         data,
         outsample,
         criteria,
         modelavg,
         residualtest,
         orderresults,
+        general_information,
         ztest = ztest,
     )
-    logit_execute!(data, result, notify = notify )
+    result = logit_execute!(data, result, notify = notify )
     ModelSelection.addresult!(data, result)
+    ModelSelection.addresult!(
+        data,
+        AllSubsetRegression.ALLSUBSETREGRESSION_EXTRAKEY,
+        result,
+    )
     data = addextras!(data, result)
-    return data
+    return result
 end
 
 """
@@ -158,7 +177,7 @@ logit_execute!(model_selection_data, all_subset_regression_result)
 ```
 """
 function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionResult; notify = nothing)
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 5))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=5)
 
     if !data.removemissings
         data = ModelSelection.filter_data_by_empty_values!(data)
@@ -180,23 +199,19 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
 
-    ncoef_gum = size(expvars_data, 2)
-    depvar_without_outsample_subset,
-    expvars_without_outsample_subset,
-    fixedvariables_without_outsample_subset = get_insample_subset(
+    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
         result.outsample,
-        collect(1:ncoef_gum),
+        collect(1:size(expvars_data, 2)),
     )
     fullexpvars_without_outsample_subset = expvars_without_outsample_subset
     if fixedvariables_without_outsample_subset !== nothing
         fullexpvars_without_outsample_subset =
             hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
     end
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 15))
-
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=15)
     gum_model = GLM.fit(
         GeneralizedLinearModel,
         fullexpvars_without_outsample_subset,
@@ -205,12 +220,11 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
         LogitLink(),
         start = zeros(size(fullexpvars_without_outsample_subset, 2)),
     )
-    start_coef = coeftable(gum_model).cols[1]
+    start_coef = coeftable(gum_model).cols[1] # FIXME: Convert to datatype
 
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 25))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=25)
     if nprocs() == nworkers()
         for order = 1:num_operations
-            # TODO: Split in multiple lines
             logit_execute_row!(
                 order,
                 data.depvar,
@@ -295,7 +309,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             end
         end
     end
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 75))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=75)
 
     result.data = Array(result_data)
 
@@ -312,7 +326,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
             )
     end
 
-    # FIXME
+    # FIXME: modelavg
     # if result.modelavg
     # 	delta = maximum(result.data[:, datanames_index[:order]]) .- result.data[:, datanames_index[:order]]
     # 	w1 = exp.(-delta / 2)
@@ -360,7 +374,7 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     end
 
     result.nobs = result.bestresult_data[datanames_index[:nobs]]
-    ModelSelection.notification(notify, "Performing All Subset Regression", Dict(:estimator => :logit, :progress => 100))
+    notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=100)
 
     return result
 end
@@ -460,10 +474,10 @@ function logit_execute_job!(
     fixedvariables::Union{Vector{Symbol},Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     intercept::Bool,
     time::Union{Symbol,Nothing},
     datatype::DataType,
@@ -595,10 +609,10 @@ function logit_execute_row!(
     fixedvariables::Union{Vector{Symbol},Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
-    depvar_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    expvars_data::Union{SharedArray{Float32},SharedArray{Float64}},
-    fixedvariables_data::Union{SharedArray{Float32},SharedArray{Float64},Nothing},
-    result_data::Union{SharedArray{Float32},SharedArray{Float64}},
+    depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     intercept::Bool,
     time::Union{Symbol,Nothing},
     datatype::DataType,
@@ -646,30 +660,54 @@ function logit_execute_row!(
         start = start_coef_subset,
     )
     b = coef(model)
-    ŷ = predict(model)
-    er2 = model.rr.devresid      # squared errors
-    sse = sum(er2)                        # residual sum of squares
-    df_e = nobs - ncoef                   # degrees of freedom	
-    rmse = sqrt(sse / nobs)               # root mean squared error
-
+    #ŷ = predict(model)
+    er2 = model.rr.devresid                  # model.rr.devresid #squared errors
+    er=er2 .^ (0.5)
+    sse = sum(er2)                           # deviance residual sum of squares
+    df_e = nobs - ncoef                     # degrees of freedom	
+    rmse = sqrt(sse / nobs)                  # root mean squared error using deviance residuals
+    null_dev = nulldeviance(model)
+    r2 = 1 - (sse/null_dev)                  # model Pseudo R-squared
+    r2adj = 1-(1-r2)*((nobs-1)/(df_e)) # adjusted R-squared
     ll = GLM.loglikelihood(model)
+    lln= GLM.nullloglikelihood(model)
+    LR = 2*(ll-lln)                      # Likelihood ratio test
+
 
     if ztest
         bstd = stderror(model)
     end
+    
+    if outsample_enabled > 0
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
+            get_outsample_subset(
+                depvar_data,
+                expvars_data,
+                fixedvariables_data,
+                outsample,
+                selected_variables_index,
+            )
+        fullexpvars_outsample_subset = expvars_outsample_subset
+        if fixedvariables_outsample_subset !== nothing
+            fullexpvars_outsample_subset =
+                hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+        end
 
-    # FIXME
-    # if outsample_enabled > 0
-    # 	depvar_outsample_subset, expvars_outsample_subset = get_outsample_subset(depvar_data, expvars_data, outsample, selected_variables_index)
-    # 	erout = depvar_outsample_subset - expvars_outsample_subset * b  # out-of-sample residuals
-    # 	sseout = sum(erout .^ 2)                                        # residual sum of squares
-    # 	outsample_count = outsample
-    # 	if (isa(outsample, Array))
-    # 		outsample_count = size(outsample, 1)
-    # 	end
-    # 	rmseout = sqrt(sseout / outsample_count)                        # root mean squared error
-    # 	result_data[order, datanames_index[:rmseout]] = rmseout
-    # end
+        # out-of-sample residuals
+        prob = exp.(fullexpvars_outsample_subset * model.pp.beta0) ./ (1 .+ exp.(fullexpvars_outsample_subset * model.pp.beta0))
+        erout = (sign.(-0.5 .+ depvar_outsample_subset)) .* sqrt.(-2 .* (depvar_outsample_subset .* log.(prob) .+ (1 .- depvar_outsample_subset) .* log.(1 .- prob)))
+        
+        # residual sum of squares
+        sseout = sum(erout .^ 2)
+        outsample_count = outsample
+        if (isa(outsample, Array))
+            outsample_count = size(outsample, 1)
+        end
+        # root mean squared error
+        rmseout = sqrt(sseout / outsample_count)
+        result_data[order, datanames_index[:rmseout]] = rmseout
+    end
+
 
     result_data[order, datanames_index[:index]] = order
     for (index, selected_variable_index) in enumerate(selected_variables_index)
@@ -698,13 +736,14 @@ function logit_execute_row!(
         end
     end
 
-    result_data[order, datanames_index[:nobs]] = Int64(round(nobs))
-    result_data[order, datanames_index[:ncoef]] = ncoef
-    result_data[order, datanames_index[:sse]] = datatype(sse)
-    result_data[order, datanames_index[:rmse]] = datatype(rmse)
-    result_data[order, datanames_index[:order]] = 0
-
-    # result_data[order, datanames_index[:loglikelihood]] = datatype(loglikelihood)
+    result_data[order, datanames_index[:nobs]] = Int64(round(nobs)) 
+    result_data[order, datanames_index[:ncoef]] = ncoef  
+    result_data[order, datanames_index[:sse]] = datatype(sse) 
+    result_data[order, datanames_index[:r2]] = datatype(r2) 
+    result_data[order, datanames_index[:rmse]] = datatype(rmse) 
+    result_data[order, datanames_index[:order]] = 0 #chequear
+    result_data[order, datanames_index[:r2adj]] = datatype(r2adj) 
+    result_data[order, datanames_index[:LR]] = datatype(LR) 
 
     if :aic in criteria || :aicc in criteria
         aic = GLM.aic(model)  # FIXME: Sort by AIC
@@ -722,54 +761,61 @@ function logit_execute_row!(
         result_data[order, datanames_index[:bic]] = GLM.bic(model)
     end
 
-    # FIXME:
-    # result_data[order, datanames_index[:F]] =
-    #	(result_data[order, datanames_index[:r2]] / (result_data[order, datanames_index[:ncoef]] - 1)) / ((1 - result_data[order, datanames_index[:r2]]) / (result_data[order, datanames_index[:nobs]] - result_data[order, datanames_index[:ncoef]]))
+    if residualtest
+        x = er
+        n = length(x)
+        m1 = sum(x) / n
+        m2 = sum((x .- m1) .^ 2) / n
+        m3 = sum((x .- m1) .^ 3) / n
+        m4 = sum((x .- m1) .^ 4) / n
+        b1 = (m3 / m2^(3 / 2))^2
+        b2 = (m4 / m2^2)
+        statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
+        d = Chisq(2.0)
+        jbtest = 1 .- cdf(d, statistic)
+        # there is controversy about the normality assumption for nonlinear models.
 
-    # FIXME
-    # if residualtest
-    # 	x = er
-    # 	n = length(x)
-    # 	m1 = sum(x) / n
-    # 	m2 = sum((x .- m1) .^ 2) / n
-    # 	m3 = sum((x .- m1) .^ 3) / n
-    # 	m4 = sum((x .- m1) .^ 4) / n
-    # 	b1 = (m3 / m2^(3 / 2))^2
-    # 	b2 = (m4 / m2^2)
-    # 	statistic = n * b1 / 6 + n * (b2 - 3)^2 / 24
-    # 	d = Chisq(2.0)
-    # 	jbtest = 1 .- cdf(d, statistic)
-    # 
-    # 	regmatw = hcat((ŷ .^ 2), ŷ, ones(size(ŷ, 1)))
-    # 	qrfw = qr(regmatw)
-    # 	regcoeffw = qrfw \ er2
-    # 	residw = er2 - regmatw * regcoeffw
-    # 	rsqw = 1 - dot(residw, residw) / dot(er2, er2) # uncentered R^2
-    # 	statisticw = n * rsqw
-    # 	wtest = ccdf(Chisq(2), statisticw)
-    # 
-    # 	result_data[order, datanames_index[:wtest]] = wtest
-    # 	result_data[order, datanames_index[:jbtest]] = jbtest
-    # 	if time !== nothing
-    # 		e = er
-    # 		lag = 1
-    # 		xmat = expvars_subset
-    # 
-    # 		n = size(e, 1)
-    # 		elag = zeros(Float64, n, lag)
-    # 		for ii in 1:lag
-    # 			elag[ii+1:end, ii] = e[1:end-ii]
-    # 		end
-    # 
-    # 		offset = lag
-    # 		regmatbg = [xmat[offset+1:end, :] elag[offset+1:end, :]]
-    # 		qrfbg = qr(regmatbg)
-    # 		regcoeffbg = qrfbg \ e[offset+1:end]
-    # 		residbg = e[offset+1:end] .- regmatbg * regcoeffbg
-    # 		rsqbg = 1 - dot(residbg, residbg) / dot(e[offset+1:end], e[offset+1:end]) # uncentered R^2
-    # 		statisticbg = (n - offset) * rsqbg
-    # 		bgtest = ccdf(Chisq(lag), statisticbg)
-    # 		result_data[order, datanames_index[:bgtest]] = bgtest
-    # 	end
-    # end
+        xb_predict = model.rr.eta
+        interactions = xb_predict .* fullexpvars_subset
+        fullexpvars_with_interactions = hcat(fullexpvars_subset, interactions)
+        model_het = GLM.fit(
+            GeneralizedLinearModel,
+            fullexpvars_with_interactions,
+            depvar_subset,
+            Binomial(),
+            LogitLink(),
+        )
+        ll2= GLM.loglikelihood(model_het)
+        statisticw = 2*(ll2-ll)
+        wtest = ccdf(Chisq(ncoef), statisticw)    
+        # we use a LR test  for heteroskedasticity as a variation of the Wooldridge (2010) LM test.       
+        
+        result_data[order, datanames_index[:wtest]] = wtest
+        result_data[order, datanames_index[:jbtest]] = jbtest
+
+        if time !== nothing
+            er_mean = mean(er)
+            x = [i < er_mean ? 0 : 1 for i in er]
+            n = length(x)
+            nabove = sum(x)
+            nbelow = n - nabove
+            
+            # Get the expected value and standard deviation
+            μ = 1 + 2 * nabove * (nbelow / n)
+            σ = sqrt((μ - 1) * (μ - 2) / (n - 1))
+        
+            # Get the number of runs
+            nruns = 1
+            for k in 1:(n - 1)
+                @inbounds if x[k] != x[k + 1]
+                    nruns += 1
+                end
+            end
+        
+            # calculate simple z-statistic
+            z = (nruns - μ) / σ
+            wwtest = ccdf(Normal(), z) ## probaremos con un 
+            result_data[order, datanames_index[:wwtest]] = wwtest
+        end
+    end
 end

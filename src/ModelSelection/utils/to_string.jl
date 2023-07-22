@@ -39,7 +39,7 @@ end
 
 
 function sprintf_center(
-    text::Union{String,Symbol,Int32,Int64,Float32,Float64};
+    text::Union{String,Symbol,Int64,Int32,Int16,Float64,Float32,Float16};
     len::Int = LINE_LENGTH,
     new_line::Bool = false,
 )
@@ -91,7 +91,7 @@ function sprintf_variable(value::Symbol; left_padding::Int = 0, right_padding::I
 end
 
 function sprintf_variable(
-    value::Union{Float32,Float64};
+    value::Union{Float64,Float32,Float16};
     left_padding::Int = 0,
     right_padding::Int = 0,
 )
@@ -103,7 +103,7 @@ function sprintf_variable(
 end
 
 function sprintf_variable(
-    value::Union{Int32,Int64};
+    value::Union{Int64,Int32,Int16};
     left_padding::Int = 0,
     right_padding::Int = 0,
 )
@@ -121,10 +121,12 @@ function sprintf_label_values(
         Array{String},
         Int,
         Array{Int},
-        Float32,
-        Array{Float32},
         Float64,
         Array{Float64},
+        Float32,
+        Array{Float32},
+        Float16,
+        Array{Float16},
     };
     len::Int = HALF_LINE_LENGTH,
     new_line::Bool = false,
@@ -169,8 +171,11 @@ end
 
 function sprintf_covvar_header(covvars_title, result; len = LINE_LENGTH)
     values = ["Coef."]
-    if result.ttest
+    if result.ttest !== nothing && result.ttest # FIXME: make a better solution that does not require this check
         values = vcat(values, ["Std.", "t-test"])
+    end
+    if result.ztest !== nothing && result.ztest # FIXME: make a better solution that does not require this check
+        values = vcat(values, ["Std.", "z-test"])
     end
     out = sprintf_label_values(covvars_title, values, new_line = true)
     out *= sprintf_simpleline(len = len, new_line = true)
@@ -180,12 +185,20 @@ end
 
 function sprintf_covvar(varname, datanames_index, result, result_data)
     values = [result_data[datanames_index[Symbol(string(varname, "_b"))]]]
-    if result.ttest
+    if result.ttest !== nothing && result.ttest
+        values = vcat(values,
+            [
+                result_data[datanames_index[Symbol(string(varname, "_bstd"))]],
+                result_data[datanames_index[Symbol(string(varname, "_t"))]],
+            ],
+        )
+    end
+    if result.ztest !== nothing && result.ztest
         values = vcat(
             values,
             [
                 result_data[datanames_index[Symbol(string(varname, "_bstd"))]],
-                result_data[datanames_index[Symbol(string(varname, "_t"))]],
+                result_data[datanames_index[Symbol(string(varname, "_z"))]],
             ],
         )
     end
@@ -212,6 +225,10 @@ function sprintf_covvars_block(
     end
     for varname in expvars
         if varname === CONS
+            continue
+        end
+        pos = datanames_index[Symbol(string(varname, "_b"))]
+        if result_data[pos] == 0
             continue
         end
         out *= sprintf_covvar(varname, datanames_index, result, result_data)
@@ -242,7 +259,7 @@ function sprintf_summary_block(
         end
         sort!(variables, lt = (x, y) -> isless(x["order"], y["order"]))
         for variable in variables
-            if !(variable["verbose_show"]) || (variable["varname"] in current_variables)
+            if !(variable["verbose_show"]) || (variable["varname"] in current_variables) || !(variable["varname"] in keys(datanames_index))
                 continue
             end
             out *= ModelSelection.sprintf_label_values(

@@ -8,6 +8,7 @@ include("strings.jl")
 include("utils.jl")
 include("core.jl")
 
-export preliminary_selection!
+export preliminary_selection!, validate_estimator
+export PRELIMINARYSELECTION_EXTRAKEY
 
 end

@@ -30,7 +30,7 @@ Manifest.toml
 *.json
 *.jld
 *.jld2
-docs/swagger/*.json
+!docs/swagger/*.json
 !test/*.csv
 docs/dev/
 docs/build/

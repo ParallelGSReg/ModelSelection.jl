@@ -53,17 +53,21 @@ result = AllSubsetRegressionResult(
 ```
 """
 mutable struct AllSubsetRegressionResult <: ModelSelectionResult
+    estimator::Symbol
     datanames::Vector{Symbol}
+    method::Symbol
     modelavg_datanames::Union{Vector{Symbol},Nothing}
     data::Union{
+       Array{Float64},
         Array{Float32},
-        Array{Float64},
+         Array{Float16},
+         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
-        Array{Union{Float64,Missing}},
+         Array{Union{Float16,Missing}},
         Nothing,
     }
-    bestresult_data::Union{Vector{Union{Int32,Int64,Float32,Float64,Missing}},Nothing}
-    modelavg_data::Union{Vector{Union{Int32,Int64,Float32,Float64,Missing}},Nothing}
+    bestresult_data::Union{Vector{Union{Int64,Int32,Int16,Float64,Float32,Float16,Missing}},Nothing}
+    modelavg_data::Union{Vector{Union{Int64,Int32,Int16,Float64,Float32,Float16,Missing}},Nothing}
     outsample::Union{Int64,Vector{Int64},Nothing}
     criteria::Vector{Symbol}
     modelavg::Bool
@@ -74,7 +78,9 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     nobs::Int64
 
     function AllSubsetRegressionResult(
+        estimator::Symbol,
         datanames::Vector{Symbol},
+        method::Symbol,
         modelavg_datanames::Union{Vector{Symbol},Nothing},
         outsample::Union{Int64,Vector{Int64},Nothing},
         criteria::Vector{Symbol},
@@ -86,7 +92,9 @@ mutable struct AllSubsetRegressionResult <: ModelSelectionResult
     )
         validate_test(ttest = ttest, ztest = ztest)
         new(
+            estimator,
             datanames,
+            method,
             modelavg_datanames,
             nothing,
             nothing,

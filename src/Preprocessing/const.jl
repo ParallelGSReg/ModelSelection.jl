@@ -41,13 +41,6 @@ Constant representing the default value for intercept, which is true.
 const INTERCEPT_DEFAULT = true
 
 """
-    METHOD_DEFAULT
-
-Constant representing the default estimation method, which is FAST.
-"""
-const METHOD_DEFAULT = :fast
-
-"""
     PANEL_DEFAULT
 
 Constant representing the default panel value, which is nothing.
@@ -102,3 +95,5 @@ const PROGRESS = :progress
 Constant representing the default value for the notify parameter, which is nothing.
 """
 const NOTIFY_DEFAULT = nothing
+
+const DATATYPE_DEFAULT = Float32

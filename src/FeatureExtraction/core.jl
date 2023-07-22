@@ -133,11 +133,8 @@ function execute!(
     removemissings::Bool = REMOVEMISSINGS_DEFAULT,
     notify = nothing,
 )
-    ModelSelection.notification(
-        notify,
-        NOTIFY_MESSAGE,
-        Dict(PROGRESS => 0),
-    )
+    notification(notify, NOTIFY_MESSAGE, progress=0)
+
     if data.intercept
         ModelSelection.remove_intercept!(data)
     end
@@ -199,10 +196,7 @@ function execute!(
         data = ModelSelection.filter_data_by_empty_values!(data)
     end
     data = ModelSelection.convert_data!(data)
-    ModelSelection.notification(
-        notify,
-        NOTIFY_MESSAGE,
-        Dict(PROGRESS => 100),
-    )
+
+    notification(notify, NOTIFY_MESSAGE, progress=100)
     return data
 end
