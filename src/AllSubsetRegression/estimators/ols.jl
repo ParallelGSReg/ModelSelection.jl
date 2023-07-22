@@ -636,7 +636,7 @@ function ols_execute_row!(
 		error(INVALID_METHOD_BASIC)
 	end
 
-    b = fact \ denominator                 # estimate
+    b = fact \ denominator                # estimate
     ŷ = fullexpvars_subset * b            # predicted values
     er = depvar_subset - ŷ                # in-sample residuals
     er2 = er .^ 2                         # squared errors
@@ -646,16 +646,6 @@ function ols_execute_row!(
     r2 = 1 - var(er) / var(depvar_subset) # model R-squared
     r2adj = 1-(1-r2)*((nobs-1)/df_e)      # adjusted R-squared
     F= (r2/(ncoef-1))/((1-r2)/df_e)        # F-statistic
-
-   
-    #if ttest
-    #    if method == PRECISE
-    #        uptriang = UpperTriangular(fact.R)
-    #    elseif method == FAST
-    #        uptriang = UpperTriangular(fact.U)
-    #    end
-    #    bstd = sqrt.(sum((uptriang \ Matrix(1.0LinearAlgebra.I, ncoef, ncoef)) .^ 2, dims = 2) * (sse / df_e)) # std deviation of coefficients
-    #end
 
     if ttest
         if method in [QR_64, QR_32, QR_16] 

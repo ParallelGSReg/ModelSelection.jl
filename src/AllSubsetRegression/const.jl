@@ -129,5 +129,3 @@ const ESTIMATORS = Dict(
         RESIDUAL_TESTS_CROSS => Vector{Symbol}([:jbtest, :wtest]),
     ),
 )
-
-

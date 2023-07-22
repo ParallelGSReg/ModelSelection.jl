@@ -259,7 +259,7 @@ function sprintf_summary_block(
         end
         sort!(variables, lt = (x, y) -> isless(x["order"], y["order"]))
         for variable in variables
-            if !(variable["verbose_show"]) || (variable["varname"] in current_variables)
+            if !(variable["verbose_show"]) || (variable["varname"] in current_variables) || !(variable["varname"] in keys(datanames_index))
                 continue
             end
             out *= ModelSelection.sprintf_label_values(
