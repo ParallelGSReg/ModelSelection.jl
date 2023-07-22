@@ -180,9 +180,9 @@ equation = [:x, :z]
 """
 function filter_data_by_selected_columns(
     data::Union{
-        Array{Float64},
         Array{Float32},
         Array{Float16},
+        Array{Float64},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
         Array{Union{Float16,Missing}},
@@ -310,44 +310,40 @@ function get_datanames_from_data(
     return datanames
 end
 
-"""
-    get_rawdata_from_data(
-        data::Union{
-            Array{Float64},
-            Array{Float32},
-            Array{Union{Float64,Missing}},
-            Array{Union{Float32,Missing}},
-            Tuple,
-            DataFrame,
-        },
-    )
 
-Extracts the raw data from the given `data` object and converts to an array
+"""
+    get_datatype(method::Symbol)
+            
+Get the datatype based on the specified method.
 
 # Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, Tuple, DataFrame}`: The input data object of type.
+- `method::Symbol`: The method for which to determine the datatype.
 
 # Returns
-- `Array{Union{Float64,Missing}}}: The raw data as an array`.
+- `Symbol`: The datatype corresponding to the specified method.
+- `Nothing`: If the specified method is invalid.
 
 # Example
 ```julia
-data_array = [1.0, 2.0, missing, 4.0]
-raw_data_array = get_rawdata_from_data(data_array)
-# raw_data_array: [1.0, 2.0, missing, 4.0]
+datatype = get_datatype(:precise)
+# datatype: Float64
 ```
 ```julia
-using DataFrames
-data_df = DataFrame(x = [1.0, 2.0, missing, 4.0])
-raw_data_array = get_rawdata_from_data(data_df)
-# raw_data_array: [1.0, 2.0, missing, 4.0]
+datatype = get_datatype(:fast)
+# datatype: Float32
 ```
 ```julia
-data_tuple = ([1.0, 2.0, missing, 4.0],)
-raw_data_array = get_rawdata_from_data(data_tuple)
-# raw_data_array: [1.0, 2.0, missing, 4.0]
+datatype = get_datatype(:invalid)
+# datatype: nothing
 ```
 """
+function get_datatype(method::Symbol)
+    if !(method in ModelSelection.AVAILABLE_METHODS)
+        return nothing
+    end
+    return method == PRECISE ? Float64 : Float32
+end
+
 function get_rawdata_from_data(
     data::Union{
         Array{Float64},
@@ -368,29 +364,6 @@ function get_rawdata_from_data(
     return data
 end
 
-"""
-    remove_outliers!(
-        data::Union{
-            Array{Float64},
-            Array{Float32},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-    )
-
-Remove outliers from the given data.
-This function calls the `remove_outliers!` function for each column of the data matrix/array, removing outliers individually.
-
-# Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The input data.
-
-# Returns
-- `Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The original data with removed outliers.
-
-# Example
-!!! warning
-    TODO: Pending example.
-"""
 function remove_outliers!(
     data::Union{
         Array{Float64},
@@ -406,27 +379,6 @@ function remove_outliers!(
     end
 end
 
-"""
-    remove_outliers!(
-        data::Union{
-            Array{Float64},
-            Array{Float32},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        column::Int64,
-    )
-
-Remove outliers from a specific column of the given data.
-The function uses the z-score method to identify outliers in the specified column and replaces them with `missing` values. Outliers are defined as data points that have a z-score greater than a threshold of 3.
-
-# Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The input data.
-- `column::Int64`: The column index to remove outliers from.
-
-# Returns
-- `Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The original data with removed outliers for the given column.
-"""
 function remove_outliers!(
     data::Union{
         Array{Float64},
@@ -463,33 +415,6 @@ function remove_outliers!(
     return data
 end
 
-"""
-    seasonal_adjustment!(
-        data::Union{
-            Array{Float32},
-            Array{Float64},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        datanames::Vector{Symbol},
-        variables::Dict{Symbol,Int64},
-    )
-
-Perform seasonal adjustment on multiple variables in the data.
-This function iterates over each variable specified in the variables dictionary and applies the seasonal adjustment using the seasonal_adjustment function.
-
-# Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The input data to be seasonally adjusted.
-- `datanames::Vector{Symbol}`: The datanames corresponding to the data columns.
-- `variables::Dict{Symbol,Int64}: A dictionary where the keys are symbols representing the variable names to be seasonally adjusted, and the values are integers representing the factors for seasonal adjustment.
-
-# Returns
-- `Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The original data seasonal adjusted.
-
-# Example
-!!! warning
-    TODO: Pending example.
-"""
 function seasonal_adjustment!(
     data::Union{
         Array{Float64},
@@ -508,35 +433,6 @@ function seasonal_adjustment!(
     return data
 end
 
-"""
-    seasonal_adjustment!(
-        data::Union{
-            Array{Float64},
-            Array{Float32},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        datanames::Vector{Symbol},
-        name::Symbol,
-        factor::Int64,
-    )
-
-Perform seasonal adjustment on a specific variable in the data.
-This function applies seasonal adjustment to the specified variable in the data. It calculates the seasonal component using the `analyze` function and subtracts it from the variable to obtain the seasonally adjusted series. The `analyze` function analyzes the data using a window length determined by the factor, and returns the trend component (`yt`) and seasonal component (`ys`). The seasonal component is summed along the rows to obtain the total seasonal component. The function modifies the `data` array in-place and returns the modified data.
-
-# Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The input data to be seasonally adjusted.
-- `datanames::Vector{Symbol}`: The datanames corresponding to the data columns.
-- `name::Symbol`: The symbol representing the name of the variable to be seasonally adjusted.
-- `factor::Int64`: An integer representing the factor for seasonal adjustment.
-
-# Returns
-- `Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`: The original data seasonal adjusted.
-
-# Example
-!!! warning
-    TODO: Pending example.
-"""
 function seasonal_adjustment!(
     data::Union{
         Array{Float64},
@@ -560,59 +456,11 @@ function seasonal_adjustment!(
     return data
 end
 
-"""
-    sort_data(
-        data::Union{
-            Array{Float32},
-            Array{Float64},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        datanames::Vector{Symbol};
-        time::Union{Symbol,Nothing} = nothing,
-        panel::Union{Symbol,Nothing} = nothing,
-    )
-
-Sorts the data based on the specified time and panel variables.
-
-# Parameters
-- `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float64,Missing}}, Array{Union{Float32,Missing}}}`:: The input data, which can be an Array of Floats or an Array of Floats with Missing values.
-- `datanames::Vector{Symbol}`: The datanames corresponding to the data columns.
-- `time::Union{Symbol,Nothing}`: The variable representing time, specified as a Symbol. Defaults to `nothing`.
-- `panel::Union{Symbol,Nothing}`: The variable representing panel data, specified as a Symbol. Defaults to `nothing`.
-
-# Returns
-- `Union{Array{Float64}, Array{Float32}, Array{Union{Float64,Missing}}, Array{Union{Float32,Missing}}}`: The sorted data, with rows rearranged based on the specified time and panel variables.
-
-# Example
-```julia
-data = [2.0 30 40; 1.0 10 20; 3.0 50 60]
-datanames = [:time, :y, :z]
-time_var = :time
-sorted_data = sort_data(data, datanames, time = time_var)
-# sorted_data: [1.0 10 20; 2.0 30 40; 3.0 50 60]
-```
-```julia
-data = [2.0 30 40; 1.0 10 20; 3.0 50 60]
-datanames = [:panel, :y, :z]
-panel_var = :panel
-sorted_data = sort_data(data, datanames, panel = panel_var)
-# sorted_data: [1.0 10 20; 2.0 30 40; 3.0 50 60]
-```
-```julia
-data = [1 2.0 30 40; 2 1.0 70 80; 2 2.0 90 100; 1 1.0 10 20; 1 3.0 50 60]
-datanames = [:panel, :time, :y, :z]
-time_var = :time
-panel_var = :panel
-sorted_data = sort_data(data, datanames, panel = panel_var, time = time_var)
-# sorted_data: [1.0 1.0 10 20; 1.0 2.0 30 40; 1.0 3.0 50 60; 2.0 1.0 70 80; 2.0 2.0 90 100]
-```
-"""
 function sort_data(
     data::Union{
         Array{Float64},
         Array{Float32},
-        Array{Float16},
+        Array{Float64},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
         Array{Union{Float16,Missing}},
@@ -634,45 +482,6 @@ function sort_data(
     return data
 end
 
-"""
-    validate_panel(
-        data::Union{
-            Array{Float32},
-            Array{Float64},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        datanames::Vector{Symbol},
-        panel::Symbol,
-    )
-
-Check if the panel variable in the data is valid, i.e., if it does not contain any missing values.
-
-# Parameters
-- `data::Union{Array{Float64}, Array{Float32}, Array{Union{Float64,Missing}}, Array{Union{Float32,Missing}}}`:: The input data, which can be an Array of Floats or an Array of Floats with Missing values.
-- `datanames::Vector{Symbol}`: The datanames corresponding to the data columns.
-- `panel::Symbol`: The variable representing panel data, specified as a Symbol.
-
-# Returns
-- `Bool`:
-    - `true`: if the panel variable is valid (no missing values).
-    - `false` if the panel variable contains missing values.
-
-# Example
-```julia
-data = [1.0 2.0 3.0; 4.0 missing 6.0; 7.0 8.0 9.0]
-datanames = [:panel, :y, :z]
-panel_var = :panel
-valid_panel = validate_panel(data, datanames, panel_var)
-# valid_panel: true
-```julia
-data = [1.0 2.0 3.0; missing 5.0 6.0; 7.0 8.0 9.0]
-datanames = [:panel, :y, :z]
-panel_var = :panel
-valid_panel = validate_panel(data, datanames, panel_var)
-# valid_panel: false
-```
-"""
 function validate_panel(
     data::Union{
         Array{Float64},
@@ -688,84 +497,11 @@ function validate_panel(
     return !any(ismissing, data[:, get_column_index(panel, datanames)])
 end
 
-"""
-    validate_time(
-        data::Union{
-            Array{Float32},
-            Array{Float64},
-            Array{Union{Float32,Missing}},
-            Array{Union{Float64,Missing}},
-        },
-        datanames::Vector{Symbol},
-        time::Union{Symbol};
-        panel::Union{Symbol,Nothing} = nothing,
-    )
-
-Check if the time variable in the data is valid, i.e., if it represents a continuous sequence of values.
-
-# Parameters
-- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}}`:: The input data, which can be an Array of Floats or an Array of Floats with Missing values.
-- `datanames::Vector{Symbol}`: The datanames corresponding to the data columns.
-- `time::Symbol`: The variable representing time data, specified as a Symbol.
-- `panel::Union{Symbol,Nothong}`: The variable representing panel data, specified as a Symbol. Defaults to `nothing`.
-
-# Returns
-- `Bool`:
-    - `true`: if the time variable is valid (represents a continuous sequence), or if no panel variable is specified.
-    - `false` if the time variable does not represent a continuous sequence.
-
-# Example
-```julia
-data = [1.0 10 20; 2.0 30 40; 3.0 50 60]
-datanames = [:time, :x, :y, :z]
-time_var = :time
-valid_time = validate_time(data, datanames, time_var)
-# valid_time: true
-```
-```julia
-data = [1.0 10 20; 3.0 30 40; 4.0 50 60]
-datanames = [:time, :x, :y]
-time_var = :time
-valid_time = validate_time(data, datanames, time_var)
-# valid_time: false
-```
-```julia
-data = [1.0 10 20; missing 30 40; 3.0 50 60]
-datanames = [:time, :x, :y]
-time_var = :time
-valid_time = validate_time(data, datanames, time_var)
-# valid_time: false
-```
-```julia
-data = [1.0 1.0 10 20; 1.0 2.0 30 40; 2.0 1.0 50 60]
-datanames = [:panel, :time, :x, :y]
-time_var = :time
-panel_var = :panel
-valid_time = validate_time(data, datanames, time_var, panel = panel_var)
-# valid_time: true
-```
-```julia
-data = [1.0 1.0 10 20; 1.0 3.0 30 40; 2.0 1.0 50 60]
-datanames = [:panel, :time, :x, :y]
-time_var = :time
-panel_var = :panel
-valid_time = validate_time(data, datanames, time_var, panel = panel_var)
-# valid_time: false
-```
-```julia
-data = [1.0 1.0 10 20; 1.0 missing 30 40; 2.0 1.0 50 60]
-datanames = [:panel, :time, :x, :y]
-time_var = :time
-panel_var = :panel
-valid_time = validate_time(data, datanames, time_var, panel = panel_var)
-# valid_time: false
-```
-"""
 function validate_time(
     data::Union{
-        Array{Float64},
-        Array{Float32},
         Array{Float16},
+        Array{Float32},
+        Array{Float64},
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
         Array{Union{Float16,Missing}},

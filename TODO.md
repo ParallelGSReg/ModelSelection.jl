@@ -1,16 +1,14 @@
- - A better description of the package in Readme and Documentation
- - Features in Readme and Documentation
- - Add fixed variables in logit
+
  - Add panel as a fixed var
  - Panel must have time
  - Validates that variables must be > 1
  - Logit change name residual test
-
  - Add fixed variables in logit
  - Model average in Logit
-
-# TBD
+ - Multiple features for logit
  - Features in Readme and Documentation
+ 
+# TBD
  - A better description of the package in Readme and Documentation
  - Validation in every module
  - Pending documentation in AllSubsetRegression
@@ -24,4 +22,3 @@
  - Preliminary selection with lagit
  - Results array to a Dict
  - Panel can be string
-  

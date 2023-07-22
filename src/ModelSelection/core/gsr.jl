@@ -38,7 +38,6 @@ function gsr(
 )
     AllSubsetRegression.validate_estimator(estimator)
     datatype = AllSubsetRegression.get_datatype(estimator, method)
-
     removemissings = fe_lag === nothing
     data = Preprocessing.input(
         equation,

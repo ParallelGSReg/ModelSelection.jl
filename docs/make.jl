@@ -1,4 +1,5 @@
 using Documenter, DocumenterTools
+using DataFrames
 using ModelSelection
 using ModelSelection: Preprocessing, FeatureExtraction
 

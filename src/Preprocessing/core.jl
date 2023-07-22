@@ -1,4 +1,3 @@
-
 function input(
     equation::String,
     data::Union{
@@ -66,6 +65,138 @@ Converts the equation as vector of strings to a vector of symbols, parsing the w
 - `equation::Array{String}`: The equation in string format.
 - `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}`: The input data.
 - `datanames::Union{Array{Symbol},Nothing}`: (optional) Names of the variables in the data.
+- `intercept::Bool`: (optional) Whether to include an intercept in the model. Default is `INTERCEPT_DEFAULT`.
+- `fixedvariables::Union{Symbol,Array{Symbol},Nothing}`: (optional) Fixed variables to include in the model. Default is `FIXED_VARIABLES_DEFAULT`.
+- `panel::Union{Symbol,Nothing}`: (optional) Panel variable for panel data. Default is `PANEL_DEFAULT`.
+- `time::Union{Symbol,Nothing}`: (optional) Time variable for time series data. Default is `TIME_DEFAULT`.
+- `seasonaladjustment::Union{Dict{Symbol,Int64},Nothing}`: (optional) Seasonal adjustment parameters. Default is `SEASONALADJUSTMENT_DEFAULT`.
+- `removeoutliers::Bool`: (optional) Whether to remove outliers from the data. Default is `REMOVEOUTLIERS_DEFAULT`.
+- `removemissings::Bool`: (optional) Whether to remove missing values from the data. Default is `REMOVEMISSINGS_DEFAULT`.
+- `notify`: (optional) Notification method. Default is `NOTIFY_DEFAULT`.
+
+## Equation format
+The `equation` parameter can be in the following formats:
+```
+# Vector of strings
+equation = ["y", "x1", "x2" "x3"]
+
+# Using wildcards
+equation = ["y", "*"]
+equation = ["y", "x*"]
+equation = ["y", "x1", "z*"]
+```
+
+# Returns
+- `modelselection_data`: The resulting model selection data.
+
+# Errors
+- `ArgumentError(DATANAMES_REQUIRED)`: When `datanames` is not provided.
+- `ArgumentError(VARIABLES_NOT_DEFINED)`: When `equation` contains undefined variables.
+
+# Example
+!!! warning
+    TODO: seasonaladjustment parameter missing.
+```julia
+equation = ["y", "x1", "x2"]
+data = [1.0 1.0 23 1.0 2.0 3.0; 1.0 2.0 33 4.0 5.0 6.0; 2.0 1.0 44 7.0 8.0 9.0]
+datanames = [:panel, :time, :y, :x1, :x2, :x3]
+job_notify(message::String, data::Union{Any,Nothing} = nothing) = println(message, data)
+
+model = input(
+    equation,
+    data,
+    datanames = datanames,
+    method = :fast,
+    intercept = true,
+    fixedvariables = :x3,
+    panel = :panel,
+    time = :time,
+    removeoutliers = true,
+    removemissings = true,
+    notify = job_notify,
+)
+# model: ModelSelectionData(
+    equation=[:y, :x1, :x2],
+    depvar=:y,
+    expvars=[:x1, :x2, :_cons],
+    fixedvariables=[:x3],
+    panel=:panel,
+    time=:time,
+    intercept=true,
+    datatype=Float32,
+    method=:fast,
+    nobs=3,
+    # ...
+)
+```
+"""
+function input(
+    equation::String,
+    data::Union{
+        Array{Float64},
+        Array{Float32},
+        Array{Union{Float64,Missing}},
+        Array{Union{Float32,Missing}},
+        Tuple,
+        DataFrame,
+    };
+    datanames::Union{Array{Symbol},Nothing} = nothing,
+    method::Symbol = METHOD_DEFAULT,
+    intercept::Bool = INTERCEPT_DEFAULT,
+    fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+    panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+    time::Union{Symbol,Nothing} = TIME_DEFAULT,
+    seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+    removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+    removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+    notify = NOTIFY_DEFAULT,
+)
+    return input(
+        equation_str_to_strarr(equation),
+        data,
+        datanames = datanames,
+        method = method,
+        intercept = intercept,
+        fixedvariables = fixedvariables,
+        panel = panel,
+        time = time,
+        seasonaladjustment = seasonaladjustment,
+        removeoutliers = removeoutliers,
+        removemissings = removemissings,
+        notify = notify,
+    )
+end
+
+"""
+    input(
+        equation::Vector{String},
+        data::Union{
+            Array{Float64},
+            Array{Float32},
+            Array{Union{Float64,Missing}},
+            Array{Union{Float32,Missing}},
+            Tuple,
+            DataFrame,
+        };
+        datanames::Union{Array{Symbol},Nothing} = nothing,
+        method::Symbol = METHOD_DEFAULT,
+        intercept::Bool = INTERCEPT_DEFAULT,
+        fixedvariables::Union{Symbol,Array{Symbol},Nothing} = FIXED_VARIABLES_DEFAULT,
+        panel::Union{Symbol,Nothing} = PANEL_DEFAULT,
+        time::Union{Symbol,Nothing} = TIME_DEFAULT,
+        seasonaladjustment::Union{Dict{Symbol,Int64},Nothing} = SEASONALADJUSTMENT_DEFAULT,
+        removeoutliers::Bool = REMOVEOUTLIERS_DEFAULT,
+        removemissings::Bool = REMOVEMISSINGS_DEFAULT,
+        notify = NOTIFY_DEFAULT,
+    )
+
+Converts the equation as vector of strings to a vector of symbols, parsing the wildcards and call other functions to perform data preprocessing.
+
+# Parameters
+- `equation::Array{String}`: The equation in string format.
+- `data::Union{Array{Float32}, Array{Float64}, Array{Union{Float32,Missing}}, Array{Union{Float64,Missing}}, DataFrame, Tuple}`: The input data.
+- `datanames::Union{Array{Symbol},Nothing}`: (optional) Names of the variables in the data.
+- `method::Symbol`: (optional) The method to use for format the data. Default is `METHOD_DEFAULT`.
 - `intercept::Bool`: (optional) Whether to include an intercept in the model. Default is `INTERCEPT_DEFAULT`.
 - `fixedvariables::Union{Symbol,Array{Symbol},Nothing}`: (optional) Fixed variables to include in the model. Default is `FIXED_VARIABLES_DEFAULT`.
 - `panel::Union{Symbol,Nothing}`: (optional) Panel variable for panel data. Default is `PANEL_DEFAULT`.
