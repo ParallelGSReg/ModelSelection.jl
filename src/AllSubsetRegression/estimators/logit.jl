@@ -196,21 +196,39 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
     if data.fixedvariables_data !== nothing
         fixedvariables_data = convert(SharedArray, data.fixedvariables_data)
     end
-    result_data =
-        fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
+    panel_data = nothing
+    if data.panel_data !== nothing
+        panel_data = convert(SharedArray, data.panel_data)
+    end
+    time_data = nothing
+    if data.time_data !== nothing
+        time_data = convert(SharedArray, data.time_data)
+    end
+    result_data = fill!(SharedArray{data.datatype}(num_operations, size(result.datanames, 1)), NaN)
     datanames_index = ModelSelection.create_datanames_index(result.datanames)
-
-    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset = get_insample_subset(
+    
+    panel_values = nothing
+    if data.panel !== nothing
+        panel_values = unique(data.panel_data)
+    end
+    depvar_without_outsample_subset, expvars_without_outsample_subset, fixedvariables_without_outsample_subset, panel_without_outsample_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
+        panel_data,
         result.outsample,
         collect(1:size(expvars_data, 2)),
     )
     fullexpvars_without_outsample_subset = expvars_without_outsample_subset
     if fixedvariables_without_outsample_subset !== nothing
-        fullexpvars_without_outsample_subset =
-            hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
+        fullexpvars_without_outsample_subset = hcat(expvars_without_outsample_subset, fixedvariables_without_outsample_subset)
+    end
+    if panel_values !== nothing && panel_without_outsample_subset !== nothing
+        panel_subset_vars = Matrix{Int64}(zeros(size(panel_without_outsample_subset, 1), size(panel_values, 1)))
+        for (i, value) in enumerate(panel_values)
+            panel_subset_vars[:, i] = panel_without_outsample_subset[:] .== value
+        end
+        fullexpvars_without_outsample_subset = hcat(fullexpvars_without_outsample_subset, panel_subset_vars)
     end
     notification(notify, NOTIFY_MESSAGE, Dict{Symbol,Any}(:estimator => LOGIT), progress=15)
     gum_model = GLM.fit(
@@ -231,14 +249,18 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
                 data.depvar,
                 data.expvars,
                 data.fixedvariables,
+                data.panel,
+                data.time,
                 start_coef,
                 datanames_index,
                 depvar_data,
                 expvars_data,
                 fixedvariables_data,
+                panel_data,
+                time_data,
                 result_data,
+                panel_values,
                 data.intercept,
-                data.time,
                 data.datatype,
                 result.outsample,
                 result.criteria,
@@ -264,14 +286,18 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
                     data.depvar,
                     data.expvars,
                     data.fixedvariables,
+                    data.panel,
+                    data.time,
                     start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
                     fixedvariables_data,
+                    panel_data,
+                    time_data,
                     result_data,
+                    panel_values,
                     data.intercept,
-                    data.time,
                     data.datatype,
                     result.outsample,
                     result.criteria,
@@ -293,14 +319,18 @@ function logit_execute!(data::ModelSelectionData, result::AllSubsetRegressionRes
                     data.depvar,
                     data.expvars,
                     data.fixedvariables,
+                    data.panel,
+                    data.time,
                     start_coef,
                     datanames_index,
                     depvar_data,
                     expvars_data,
                     fixedvariables_data,
+                    panel_data,
+                    time_data,
                     result_data,
+                    panel_values,
                     data.intercept,
-                    data.time,
                     data.datatype,
                     result.outsample,
                     result.criteria,
@@ -473,14 +503,18 @@ function logit_execute_job!(
     depvar::Symbol,
     expvars::Vector{Symbol},
     fixedvariables::Union{Vector{Symbol},Nothing},
+    panel::Union{Symbol,Nothing},
+    time::Union{Symbol,Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
     depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
+    time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
     result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    panel_values::Union{Vector{Int64},Vector{Int32},Vector{Int16},Nothing},
     intercept::Bool,
-    time::Union{Symbol,Nothing},
     datatype::DataType,
     outsample::Union{Int64,Vector{Int64},Nothing},
     criteria::Vector{Symbol},
@@ -494,14 +528,18 @@ function logit_execute_job!(
             depvar,
             expvars,
             fixedvariables,
+            panel,
+            time,
             start_coef,
             datanames_index,
             depvar_data,
             expvars_data,
             fixedvariables_data,
+            panel_data,
+            time_data,
             result_data,
+            panel_values,
             intercept,
-            time,
             datatype,
             outsample,
             criteria,
@@ -608,14 +646,18 @@ function logit_execute_row!(
     depvar::Symbol,
     expvars::Vector{Symbol},
     fixedvariables::Union{Vector{Symbol},Nothing},
+    panel::Union{Symbol,Nothing},
+    time::Union{Symbol,Nothing},
     start_coef::Vector{Float64},
     datanames_index::Dict{Symbol,Int64},
     depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
+    time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
     result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
+    panel_values::Union{Vector{Int64},Vector{Int32},Vector{Int16},Nothing},
     intercept::Bool,
-    time::Union{Symbol,Nothing},
     datatype::DataType,
     outsample::Union{Int64,Vector{Int64},Nothing},
     criteria::Vector{Symbol},
@@ -625,12 +667,12 @@ function logit_execute_row!(
     num_job::Union{Int64,Nothing} = nothing,
     iteration_num::Union{Int64,Nothing} = nothing,
 )
-    selected_variables_index =
-        ModelSelection.get_selected_variables(order, expvars, intercept)
-    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
+    selected_variables_index = ModelSelection.get_selected_variables(order, expvars, intercept)
+    depvar_subset, expvars_subset, fixedvariables_subset, panel_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
+        panel_data,
         outsample,
         selected_variables_index,
     )
@@ -646,10 +688,21 @@ function logit_execute_row!(
         end
     end
 
+    if panel_values !== nothing && panel_subset !== nothing
+        panel_subset_vars = Matrix{Int64}(zeros(size(panel_subset, 1), size(panel_values, 1)))
+        for (i, value) in enumerate(panel_values)
+            panel_subset_vars[:, i] = panel_subset[:] .== value
+        end
+        fullexpvars_subset = hcat(fullexpvars_subset, panel_subset_vars)
+        panel_subset_vars_size = size(panel_subset_vars, 2)
+        for (index, panel_value) in enumerate(panel_values)
+            append!(coef_index, panel_subset_vars_size + index)
+        end
+    end
+
     nobs = size(depvar_subset, 1)
     ncoef = size(fullexpvars_subset, 2)
 
-    start_coef_subset = start_coef[selected_variables_index]
     start_coef_subset = start_coef[coef_index]
 
     model = GLM.fit(
@@ -680,18 +733,25 @@ function logit_execute_row!(
     end
     
     if outsample_enabled > 0
-        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset, panel_outsample_subset =
             get_outsample_subset(
                 depvar_data,
                 expvars_data,
                 fixedvariables_data,
+                panel_data,
                 outsample,
                 selected_variables_index,
             )
         fullexpvars_outsample_subset = expvars_outsample_subset
         if fixedvariables_outsample_subset !== nothing
-            fullexpvars_outsample_subset =
-                hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+        end
+        if panel_outsample_subset !== nothing
+            panel_subset_vars = Matrix{Int64}(zeros(size(panel_outsample_subset, 1), size(panel_values, 1)))
+            for (i, value) in enumerate(panel_values)
+                panel_subset_vars[:, i] = panel_outsample_subset[:] .== value
+            end
+            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, panel_subset_vars)
         end
 
         # out-of-sample residuals

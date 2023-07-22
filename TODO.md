@@ -1,13 +1,9 @@
+ - Model average in Logit
 
+# TBD
+ - Features in Readme and Documentation
  - Add panel as a fixed var - Panel must have time
  - Validates that variables must be > 1
- - Logit change name residual test
- - Add fixed variables in logit
- - Model average in Logit
- - Multiple features for logit
- - Features in Readme and Documentation
- 
-# TBD
  - A better description of the package in Readme and Documentation
  - Validation in every module
  - Pending documentation in AllSubsetRegression

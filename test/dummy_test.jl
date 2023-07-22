@@ -3,10 +3,10 @@ Pkg.activate(".")
 using CSV, DataFrames, Distributions
 using ModelSelection
 
-data = CSV.read("test/data/test_time_database.csv", DataFrame)
+data = CSV.read("test/data/test_panel_database.csv", DataFrame)
 @time model = ModelSelection.gsr(
-    :logit,
-    "y x1 x2",
+    :ols,
+    "y x1 x2 x2",
     data,
     time=:time,
     residualtest=true,

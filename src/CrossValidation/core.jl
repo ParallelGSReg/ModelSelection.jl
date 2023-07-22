@@ -66,7 +66,6 @@ function kfoldcrossvalidation!(
             preliminary_selection = data.extras[ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY]
             ModelSelection.PreliminarySelection.preliminary_selection!(preliminary_selection[:preliminaryselection], reduced)
             reduced_preliminary_selection = reduced.extras[ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY]
-            println(reduced_preliminary_selection[:vars])
 
             vars = reduced.extras[ModelSelection.PreliminarySelection.PRELIMINARYSELECTION_EXTRAKEY][:vars]
             if vars !== nothing

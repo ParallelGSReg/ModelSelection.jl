@@ -447,10 +447,10 @@ function ols_execute_job!(
     depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
-    panel_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
     time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
     result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
-    panel_values::Union{Vector{Float64},Vector{Float32},Vector{Float16},Nothing},
+    panel_values::Union{Vector{Int64},Vector{Int32},Vector{Int16},Nothing},
     intercept::Bool,
     datatype::DataType,
     method::Symbol,
@@ -591,10 +591,10 @@ function ols_execute_row!(
     depvar_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     expvars_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
     fixedvariables_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
-    panel_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
     time_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16},Nothing},
     result_data::Union{SharedArray{Float64},SharedArray{Float32},SharedArray{Float16}},
-    panel_values::Union{Vector{Float64},Vector{Float32},Vector{Float16},Nothing},
+    panel_values::Union{Vector{Int64},Vector{Int32},Vector{Int16},Nothing},
     intercept::Bool,
     datatype::DataType,
     method::Symbol,
@@ -607,10 +607,11 @@ function ols_execute_row!(
     iteration_num::Union{Int64,Nothing} = nothing,
 )
     selected_variables_index = ModelSelection.get_selected_variables(order, expvars, intercept)
-    depvar_subset, expvars_subset, fixedvariables_subset = get_insample_subset(
+    depvar_subset, expvars_subset, fixedvariables_subset, panel_subset = get_insample_subset(
         depvar_data,
         expvars_data,
         fixedvariables_data,
+        panel_data,
         outsample,
         selected_variables_index,
     )
@@ -618,6 +619,14 @@ function ols_execute_row!(
     fullexpvars_subset = expvars_subset
     if fixedvariables_subset !== nothing
         fullexpvars_subset = hcat(fullexpvars_subset, fixedvariables_subset)
+    end
+
+    if panel_values !== nothing && panel_subset !== nothing
+        panel_subset_vars = Matrix{Int64}(zeros(size(panel_subset, 1), size(panel_values, 1)))
+        for (i, value) in enumerate(panel_values)
+            panel_subset_vars[:, i] = panel_subset[:] .== value
+        end
+        fullexpvars_subset = hcat(fullexpvars_subset, panel_subset_vars)
     end
 
     nobs = size(depvar_subset, 1)
@@ -661,17 +670,26 @@ function ols_execute_row!(
 	end
 
     if outsample_enabled > 0
-        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset =
+        depvar_outsample_subset, expvars_outsample_subset, fixedvariables_outsample_subset, panel_outsample_subset =
             get_outsample_subset(
                 depvar_data,
                 expvars_data,
                 fixedvariables_data,
+                panel_data,
                 outsample,
                 selected_variables_index,
             )
         fullexpvars_outsample_subset = expvars_outsample_subset
         if fixedvariables_outsample_subset !== nothing
             fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, fixedvariables_outsample_subset)
+        end
+
+        if panel_values !== nothing && panel_outsample_subset !== nothing
+            panel_subset_vars = Matrix{Int64}(zeros(size(panel_outsample_subset, 1), size(panel_values, 1)))
+            for (i, value) in enumerate(panel_values)
+                panel_subset_vars[:, i] = panel_outsample_subset[:] .== value
+            end
+            fullexpvars_outsample_subset = hcat(fullexpvars_outsample_subset, panel_subset_vars)
         end
 
         # out-of-sample residuals

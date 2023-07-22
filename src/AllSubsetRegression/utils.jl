@@ -265,12 +265,14 @@ function get_insample_subset(
         SharedArrays.SharedArray{Union{Float16,Nothing}},
         Nothing,
     },
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
     outsample::Union{Int64,Vector{Int64}},
     selected_variables_index::Vector{Int64},
 )
     depvar_view = nothing
     expvars_view = nothing
     fixedvariables_view = nothing
+    panel_view = nothing
     if isa(outsample, Array)
         insample = setdiff(1:size(depvar_data, 1), outsample)
         depvar_view = depvar_data[insample, 1]
@@ -278,14 +280,20 @@ function get_insample_subset(
         if fixedvariables_data !== nothing
             fixedvariables_view = fixedvariables_data[insample, :]
         end
+        if panel_data !== nothing
+            panel_view = panel_data[insample, :]
+        end
     else
         depvar_view = depvar_data[1:end-outsample, 1]
         expvars_view = expvars_data[1:end-outsample, selected_variables_index]
         if fixedvariables_data !== nothing
             fixedvariables_view = fixedvariables_data[1:end-outsample, :]
         end
+        if panel_data !== nothing
+            panel_view = panel_data[1:end-outsample, :]
+        end
     end
-    return depvar_view, expvars_view, fixedvariables_view
+    return depvar_view, expvars_view, fixedvariables_view, panel_view
 end
 
 """
@@ -352,17 +360,22 @@ function get_outsample_subset(
         SharedArrays.SharedArray{Union{Float16,Nothing}},
         Nothing,
     },
+    panel_data::Union{SharedArray{Int64},SharedArray{Int32},SharedArray{Int16},Nothing},
     outsample::Union{Int64,Vector{Int64}},
     selected_variables_index::Vector{Int64},
 )
     depvar_view = nothing
     expvars_view = nothing
     fixedvariables_view = nothing
+    panel_view = nothing
     if isa(outsample, Array)
         depvar_view = depvar_data[outsample, 1]
         expvars_view = expvars_data[outsample, selected_variables_index]
         if fixedvariables_data !== nothing
             fixedvariables_view = fixedvariables_data[outsample, :]
+        end
+        if panel_data !== nothing
+            panel_view = panel_view[outsample, :]
         end
     else
         depvar_view = depvar_data[end-outsample+1:end, 1]
@@ -370,8 +383,11 @@ function get_outsample_subset(
         if fixedvariables_data !== nothing
             fixedvariables_view = fixedvariables_data[end-outsample+1:end, :]
         end
+        if panel_data !== nothing
+            panel_view = panel_data[end-outsample+1:end, :]
+        end
     end
-    return depvar_view, expvars_view, fixedvariables_view
+    return depvar_view, expvars_view, fixedvariables_view, panel_view
 end
 
 """
