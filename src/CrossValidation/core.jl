@@ -142,7 +142,7 @@ function kfoldcrossvalidation!(
     data = ModelSelection.addresult!(data, result)
     ModelSelection.addresult!(data, CROSSVALIDATION_EXTRAKEY, result)
     addextras!(data, result)
-    notification(notify, NOTIFY_MESSAGE, progress=progress)
+    notification(notify, NOTIFY_MESSAGE, progress=100)
     return data
 end
 

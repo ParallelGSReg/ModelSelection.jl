@@ -110,7 +110,6 @@ function export_csv(
     header = vcat(header, others)
 
     rows = vcat(permutedims(header), data)
-    replace!(rows, NaN => "")
     if filename !== nothing
         file = open(filename, "w")
         writedlm(file, rows, ',')

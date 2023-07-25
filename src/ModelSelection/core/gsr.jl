@@ -36,6 +36,8 @@ function gsr(
     numfolds::Int64 = CrossValidation.NUMFOLDS_DEFAULT,
     notify = nothing,
 )
+    notification(notify, NOTIFY_MESSAGE, progress=0)
+
     AllSubsetRegression.validate_estimator(estimator)
     datatype = AllSubsetRegression.get_datatype(estimator, method)
 
@@ -124,5 +126,6 @@ function gsr(
     data.options[:kfoldcrossvalidation] = kfoldcrossvalidation
     data.options[:numfolds] = numfolds
 
+    notification(notify, NOTIFY_MESSAGE, progress=100)
     return data
 end
