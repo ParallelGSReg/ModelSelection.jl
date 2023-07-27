@@ -1,6 +1,6 @@
 # ModelSelection
 
-[![][documentation-main-img]][documentation-main-url] [![][build-main-img]][build-main-url] [![][test-main-img]][test-main-url] [![][codecov-img]][codecov-url]
+[![][documentation-main-img]][documentation-main-url] [![][build-main-img]][build-main-url]
 
 *Model Selection for Julia.*
 
