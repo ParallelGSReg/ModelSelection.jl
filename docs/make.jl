@@ -26,22 +26,22 @@ makedocs(
         "Home" => "index.md",
         "Getting Started" => "start.md",
         "Usage" => "usage.md",
-        "Modules" => Any[
-            "Preprocessing" => Any[
-                "Module" => "modules/Preprocessing/index.md",
-                "modules/Preprocessing/core.md",
-                "modules/Preprocessing/utils.md",
-                "modules/Preprocessing/strings.md",
-                "modules/Preprocessing/const.md"
-            ],
-            "FeatureExtraction" => Any[
-                "Module" => "modules/FeatureExtraction/index.md",
-                "modules/FeatureExtraction/core.md",
-                "modules/FeatureExtraction/utils.md",
-                "modules/FeatureExtraction/strings.md",
-                "modules/FeatureExtraction/const.md"
-            ],
-        ],
+        # "Modules" => Any[
+        #     "Preprocessing" => Any[
+        #         "Module" => "modules/Preprocessing/index.md",
+        #         "modules/Preprocessing/core.md",
+        #         "modules/Preprocessing/utils.md",
+        #         "modules/Preprocessing/strings.md",
+        #         "modules/Preprocessing/const.md"
+        #     ],
+        #     "FeatureExtraction" => Any[
+        #         "Module" => "modules/FeatureExtraction/index.md",
+        #         "modules/FeatureExtraction/core.md",
+        #         "modules/FeatureExtraction/utils.md",
+        #         "modules/FeatureExtraction/strings.md",
+        #         "modules/FeatureExtraction/const.md"
+        #     ],
+        # ],
         "Contributing" => "contributing.md",
         "News" => "news.md",
         "Todo" => "todo.md",
