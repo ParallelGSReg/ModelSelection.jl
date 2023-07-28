@@ -13,6 +13,12 @@ function convert_variables_data(
         Array{Union{Float64,Missing}},
         Array{Union{Float32,Missing}},
         Array{Union{Float16,Missing}},
+        Vector{Int64},
+        Vector{Int32},
+        Vector{Int16},
+        Vector{Union{Int64,Missing}},
+        Vector{Union{Int32,Missing}},
+        Vector{Union{Int16,Missing}},
         Nothing,
     } = nothing,
 )
@@ -72,28 +78,28 @@ function convert_raw_data(
         Nothing,
     } = nothing,
     time_data::Union{
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Float16},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
-        Vector{Union{Float16,Missing}},
+        Vector{Int64},
+        Vector{Int32},
+        Vector{Int16},
+        Vector{Union{Int64,Missing}},
+        Vector{Union{Int32,Missing}},
+        Vector{Union{Int16,Missing}},
         Nothing,
     } = nothing,
     panel_data::Union{
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Float16},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
-        Vector{Union{Float16,Missing}},
+        Vector{Int64},
+        Vector{Int32},
+        Vector{Int16},
+        Vector{Union{Int64,Missing}},
+        Vector{Union{Int32,Missing}},
+        Vector{Union{Int16,Missing}},
         Nothing,
     } = nothing,
 )
     depvar_data = convert_variables_data(datatype, depvar_data)
     expvars_data = convert_variables_data(datatype, expvars_data)
     fixedvariables_data = convert_variables_data(datatype, fixedvariables_data)
-    time_data = convert_variables_data(datatype, time_data)
+    time_data = convert_variables_data(datatype == Float64 ? Int64 : Int32, time_data)
     panel_data = convert_variables_data(datatype == Float64 ? Int64 : Int32, panel_data)
     return depvar_data, expvars_data, fixedvariables_data, time_data, panel_data
 end
@@ -105,15 +111,17 @@ Converts ModelSelectionData data to the appropriate data type.
 - `data::ModelSelectionData`: the data to be converted.
 """
 function convert_data!(data::ModelSelectionData)
-    depvar_data, expvars_data, time_data, panel_data = convert_raw_data(
+    depvar_data, expvars_data, fixedvariables_data, time_data, panel_data = convert_raw_data(
         data.datatype,
         data.depvar_data,
         data.expvars_data,
+        data.fixedvariables_data,
         data.time_data,
         data.panel_data,
     )
     data.depvar_data = depvar_data
     data.expvars_data = expvars_data
+    data.fixedvariables_data = fixedvariables_data
     data.panel_data = panel_data
     data.time_data = time_data
     return data

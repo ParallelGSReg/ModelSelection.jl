@@ -31,22 +31,22 @@ mutable struct ModelSelectionData
         Array{Union{Float16,Missing}},
     }
     time_data::Union{
-        Nothing,
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Float16},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
-        Vector{Union{Float16,Missing}},
-    }
-    panel_data::Union{
-        Nothing,
         Vector{Int64},
         Vector{Int32},
         Vector{Int16},
         Vector{Union{Int64,Missing}},
         Vector{Union{Int32,Missing}},
         Vector{Union{Int16,Missing}},
+        Nothing,
+    }
+    panel_data::Union{
+        Vector{Int64},
+        Vector{Int32},
+        Vector{Int16},
+        Vector{Union{Int64,Missing}},
+        Vector{Union{Int32,Missing}},
+        Vector{Union{Int16,Missing}},
+        Nothing,
     }
     intercept::Bool
     datatype::DataType
@@ -91,22 +91,22 @@ mutable struct ModelSelectionData
             Array{Union{Float16,Missing}},
         },
         time_data::Union{
-            Nothing,
-            Vector{Float64},
-            Vector{Float32},
-            Vector{Float16},
-            Vector{Union{Float64,Missing}},
-            Vector{Union{Float32,Missing}},
-            Vector{Union{Float16,Missing}},
-        },
-        panel_data::Union{
-            Nothing,
             Vector{Int64},
             Vector{Int32},
             Vector{Int16},
             Vector{Union{Int64,Missing}},
             Vector{Union{Int32,Missing}},
             Vector{Union{Int16,Missing}},
+            Nothing,
+        },
+        panel_data::Union{
+            Vector{Int64},
+            Vector{Int32},
+            Vector{Int16},
+            Vector{Union{Int64,Missing}},
+            Vector{Union{Int32,Missing}},
+            Vector{Union{Int16,Missing}},
+            Nothing,
         },
         intercept::Bool,
         datatype::DataType,

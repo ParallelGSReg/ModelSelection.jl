@@ -493,7 +493,7 @@ function execute(
     panel_data = nothing
     if panel !== nothing
         if validate_panel(data, datanames, panel)
-            panel_data = data[:, get_column_index(panel, datanames)]
+            panel_data = convert(Vector{Int64}, data[:, get_column_index(panel, datanames)])
         else
             throw(ArgumentError(PANEL_ERROR))
         end
@@ -502,7 +502,7 @@ function execute(
     time_data = nothing
     if time !== nothing
         if validate_time(data, datanames, time, panel = panel)
-            time_data = data[:, get_column_index(time, datanames)]
+            time_data = convert(Vector{Int64}, data[:, get_column_index(time, datanames)])
         else
             throw(ArgumentError(TIME_ERROR))
         end

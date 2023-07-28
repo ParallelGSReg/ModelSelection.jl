@@ -36,12 +36,6 @@ function filter_raw_data_by_empty_values(
         Nothing,
     } = nothing,
     time_data::Union{
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Float16},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
-        Vector{Union{Float16,Missing}},
         Vector{Int64},
         Vector{Int32},
         Vector{Int16},
@@ -51,12 +45,6 @@ function filter_raw_data_by_empty_values(
         Nothing,
     } = nothing,
     panel_data::Union{
-        Vector{Float64},
-        Vector{Float32},
-        Vector{Float16},
-        Vector{Union{Float64,Missing}},
-        Vector{Union{Float32,Missing}},
-        Vector{Union{Float16,Missing}},
         Vector{Int64},
         Vector{Int32},
         Vector{Int16},
@@ -84,8 +72,8 @@ function filter_raw_data_by_empty_values(
     if fixedvariables_data !== nothing
         fixedvariables_data = convert(Array{datatype}, fixedvariables_data[keep_rows, :])
     end
-    time_data = time_data !== nothing ? time_data = time_data[keep_rows, 1] : time_data
-    panel_data = panel_data !== nothing ? panel_data = panel_data[keep_rows, 1] : panel_data
+    time_data = time_data !== nothing ? convert(Vector{Int64}, time_data[keep_rows, 1]) : time_data
+    panel_data = panel_data !== nothing ? convert(Vector{Int64}, panel_data[keep_rows, 1]) : panel_data
 
     return depvar_data, expvars_data, fixedvariables_data, time_data, panel_data
 end
