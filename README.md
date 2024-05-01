@@ -51,7 +51,7 @@ This package is licensed under the [MIT License](LICENSE).
 
 ## Credits
 
-The ModelSelection module, was written primarily by [Demian Panigo](https://github.com/dpanigo/), [Adán Mauri Ungaro](https://github.com/adanmauri/), [Nicolás Monzón](https://github.com/nicomzn) and [Valentín Mari](https://github.com/vmari/). The ModelSelection.jl module was inpired by GSReg for Stata, written by Pablo Gluzmann and [Demian Panigo](https://github.com/dpanigo/).
+The ModelSelection module, was written primarily by [Demian Panigo](https://github.com/dpanigo/), [Adán Mauri Ungaro](https://github.com/adanmauri/), [Nicolás Monzón](https://github.com/nicomzn), [Valentín Mari](https://github.com/vmari/) and Pablo Gluzman. The ModelSelection.jl module was inpired by GSReg for Stata, written by Pablo Gluzmann and [Demian Panigo](https://github.com/dpanigo/).
 
 [build-main-img]: https://github.com/ParallelGSReg/ModelSelection.jl/actions/workflows/build.yaml/badge.svg?branch=main
 [build-main-url]: https://github.com/ParallelGSReg/ModelSelection.jl/actions/workflows/build.yaml
